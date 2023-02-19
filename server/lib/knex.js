@@ -6,7 +6,7 @@ const path = require('path');
 const knexConstructor = require('knex');
 
 const knex = require('knex')({
-    client: 'mysql',
+    client: 'mysql2',
     connection: {
         ...config.mysql,
 

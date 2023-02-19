@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql:
-    image: mariadb:10.4
+    image: mysql:latest
     environment:
     - MYSQL_ROOT_PASSWORD=mailtrain
     - MYSQL_DATABASE=mailtrain
@@ -10,6 +10,11 @@ services:
     - MYSQL_PASSWORD=mailtrain
     volumes:
     - mysql-data:/var/lib/mysql
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "500M"
 
   redis:
     image: redis:7
@@ -32,7 +37,8 @@ services:
             memory: "1G"
 
   mailtrain:
-    image: mailtrain/mailtrain:latest
+    #image: mailtrain/mailtrain:latest
+    build: .
     ports:
     - "3000:3000"
     - "3003:3003"
