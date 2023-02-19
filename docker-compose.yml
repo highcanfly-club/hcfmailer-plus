@@ -12,14 +12,24 @@ services:
     - mysql-data:/var/lib/mysql
 
   redis:
-    image: redis:5
+    image: redis:7
     volumes:
     - redis-data:/data
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "1G"
 
   mongo:
-    image: mongo:4-xenial
+    image: mongo:6
     volumes:
     - mongo-data:/data/db
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "1G"
 
   mailtrain:
     image: mailtrain/mailtrain:latest
@@ -37,6 +47,11 @@ services:
       - DEFAULT_LANGUAGE=$DEFAULT_LANGUAGE
       - ENABLED_LANGUAGE=$ENABLED_LANGUAGE
       - WWW_PROXY=$WWW_PROXY
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "1G"
 
 volumes:
   mysql-data:
