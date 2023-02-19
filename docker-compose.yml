@@ -29,6 +29,14 @@ services:
     - "3004:3004"
     volumes:
     - mailtrain-files:/app/server/files
+    environment:
+      - URL_BASE_TRUSTED=$URL_BASE_TRUSTED
+      - URL_BASE_SANDBOX=$URL_BASE_SANDBOX
+      - URL_BASE_PUBLIC=$URL_BASE_PUBLIC
+      - ADMIN_PASSWORD=$ADMIN_PASSWORD
+      - DEFAULT_LANGUAGE=$DEFAULT_LANGUAGE
+      - ENABLED_LANGUAGE=$ENABLED_LANGUAGE
+      - WWW_PROXY=$WWW_PROXY
 
 volumes:
   mysql-data:
