@@ -1,10 +1,10 @@
 # Mutistaged Node.js Build
-FROM node:10-alpine as builder
+FROM node:14-alpine as builder
 
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    make gcc g++ git python
+    make gcc g++ git python3
 
 # Copy package.json dependencies
 COPY server/package.json /app/server/package.json
@@ -32,7 +32,7 @@ RUN set -ex; \
    rm -rf node_modules
 
 # Final Image
-FROM node:10-alpine
+FROM node:14-alpine
 
 WORKDIR /app/
 

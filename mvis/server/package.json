@@ -14,10 +14,10 @@
   "dependencies": {
     "axios": "^0.18.0",
     "js-yaml": "^3.12.0",
-    "knex": "^0.16.3",
+    "knex": "^2.4.2",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.27",
-    "mysql": "^2.16.0",
+    "mysql2": "^3.1.2",
     "npmlog": "^4.0.2"
   }
 }
