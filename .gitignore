@@ -7,3 +7,5 @@ npm-debug.log
 .DS_Store
 dump.rdb
 
+zone-mta/dkim.rsa
+server/config/dev.yaml
