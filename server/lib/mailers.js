@@ -4,7 +4,9 @@ const log = require('./log');
 const config = require('./config');
 
 const nodemailer = require('nodemailer');
-const aws = require('aws-sdk');
+const {
+    SES
+} = require("@aws-sdk/client-ses");
 const openpgpEncrypt = require('nodemailer-openpgp').openpgpEncrypt;
 const sendConfigurations = require('../models/send-configurations');
 const { ZoneMTAType, MailerType } = require('../../shared/send-configurations');
@@ -36,7 +38,7 @@ async function getOrCreateMailer(sendConfigurationId) {
         sendConfiguration = await sendConfigurations.getById(contextHelpers.getAdminContext(), sendConfigurationId, false, true);
     }
 
-    const transport = transports.get(sendConfiguration.id) || await _createTransport(sendConfiguration);
+    const transport = transports.get(sendConfiguration.id) || (await _createTransport(sendConfiguration));
     return transport.mailer;
 }
 
@@ -235,7 +237,7 @@ async function _createTransport(sendConfiguration) {
         const sendingRate = mailerSettings.throttling / 3600;  // convert to messages/second
 
         transportOptions = {
-            SES: new aws.SES({
+            SES: new SES({
                 apiVersion: '2010-12-01',
                 accessKeyId: mailerSettings.key,
                 secretAccessKey: mailerSettings.secret,

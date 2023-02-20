@@ -4,7 +4,7 @@ services:
   mysql:
     image: mysql:latest
     environment:
-    - MYSQL_ROOT_PASSWORD=mailtrain
+    - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
     - MYSQL_DATABASE=mailtrain
     - MYSQL_USER=mailtrain
     - MYSQL_PASSWORD=mailtrain
@@ -19,7 +19,7 @@ services:
   redis:
     image: redis:7
     volumes:
-    - redis-data:/data
+    - kv-data:/data
     deploy:
       resources:
           limits:
@@ -29,7 +29,7 @@ services:
   mongo:
     image: mongo:6
     volumes:
-    - mongo-data:/data/db
+    - kv-data:/data/db
     deploy:
       resources:
           limits:
@@ -53,15 +53,17 @@ services:
       - DEFAULT_LANGUAGE=$DEFAULT_LANGUAGE
       - ENABLED_LANGUAGE=$ENABLED_LANGUAGE
       - WWW_PROXY=$WWW_PROXY
+      - REDIS_HOST=$REDIS_HOST
     deploy:
       resources:
           limits:
-            cpus: "0.5"
-            memory: "1G"
+            cpus: "1"
+            memory: "4G"
 
 volumes:
   mysql-data:
-  redis-data:
-  mongo-data:
+  #redis-data:
+  #mongo-data:
+  kv-data:
   mailtrain-files:
 
