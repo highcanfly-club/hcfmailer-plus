@@ -9,3 +9,4 @@ dump.rdb
 
 zone-mta/dkim.rsa
 server/config/dev.yaml
+k8s/okteto-kube-admb.config
