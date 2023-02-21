@@ -1,0 +1,491 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql
+  namespace: $OKTETO_NS
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: mysql
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+  MYSQL_PASSWORD: $MYSQL_PASSWORD
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mailtrain
+  namespace: $OKTETO_NS
+  labels:
+    app.kubernetes.io/name: mailtrain
+    app.kubernetes.io/instance: mailtrain
+type: Opaque
+stringData:
+  ADMIN_PASSWORD: $ADMIN_PASSWORD
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mailtrain-files
+  name: mailtrain-files
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+status: {}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mailtrain-mysql
+  name: mailtrain-mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+status: {}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mailtrain-kvdata
+  name: mailtrain-kvdata
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mysql
+  name: mysql
+spec:
+  type: ClusterIP
+  ports:
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+  selector:
+    io.kompose.service: mysql
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mysql
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mysql
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: mysql
+    spec:
+      containers:
+        - env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: mailtrain
+            - name: MYSQL_USER
+              value: mailtrain
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_PASSWORD
+          image: mysql:latest
+          name: mysql
+          ports:
+            - containerPort: 3306
+          resources:
+            limits:
+              cpu: 500m
+              memory: "536870912"
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mailtrain-mysql
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-mysql
+          persistentVolumeClaim:
+            claimName: mailtrain-mysql
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: redis
+  name: redis
+spec:
+  type: ClusterIP
+  ports:
+    - name: "$REDIS_PORT"
+      port: $REDIS_PORT
+      targetPort: $REDIS_PORT
+  selector:
+    io.kompose.service: redis
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redis
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: redis
+    spec:
+      containers:
+        - image: redis:latest
+          name: redis
+          ports:
+            - containerPort: $REDIS_PORT
+          resources:
+            limits:
+              cpu: 1
+              memory: "1Gi"
+          volumeMounts:
+            - mountPath: /data
+              name: mailtrain-kvdata
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-kvdata
+          persistentVolumeClaim:
+            claimName: mailtrain-kvdata
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongo
+  name: mongo
+spec:
+  type: ClusterIP
+  ports:
+    - name: "27017"
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: mongo
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongo
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mongo
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: mongo
+    spec:
+      containers:
+        - image: mongo:latest
+          name: mongo
+          ports:
+            - containerPort: 27019
+          resources:
+            limits:
+              cpu: 1
+              memory: "1Gi"
+          volumeMounts:
+            - mountPath: /data
+              name: mailtrain-kvdata
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-kvdata
+          persistentVolumeClaim:
+            claimName: mailtrain-kvdata
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mailtrain
+  name: mailtrain
+spec:
+  type: ClusterIP
+  ports:
+    - name: "3000"
+      port: 3000
+      targetPort: 3000
+    - name: "3003"
+      port: 3003
+      targetPort: 3003
+    - name: "3004"
+      port: 3004
+      targetPort: 3004
+  selector:
+    io.kompose.service: mailtrain
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mailtrain
+  name: mailtrain
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mailtrain
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: mailtrain
+    spec:
+      containers:
+        - env:
+            - name: URL_BASE_TRUSTED
+              value: $URL_BASE_TRUSTED
+            - name: URL_BASE_SANDBOX
+              value: $URL_BASE_SANDBOX
+            - name: URL_BASE_PUBLIC
+              value: $URL_BASE_PUBLIC
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: ADMIN_PASSWORD
+            - name: DEFAULT_LANGUAGE
+              value: $DEFAULT_LANGUAGE
+            - name: ENABLED_LANGUAGE
+              value: "$ENABLED_LANGUAGE"
+            - name: WWW_PROXY
+              value: "$WWW_PROXY"
+            - name: MYSQL_HOST
+              value: $MYSQL_HOST
+            - name: MYSQL_PORT
+              value: "$MYSQL_PORT"
+            - name: REDIS_HOST
+              value: $REDIS_HOST
+            - name: REDIS_PORT
+              value: "$REDIS_PORT"
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: mailtrain
+            - name: MYSQL_USER
+              value: mailtrain
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_PASSWORD
+          image: highcanfly/mailtrain:latest
+          name: mailtrain
+          ports:
+            - containerPort: 3000
+            - containerPort: 3003
+            - containerPort: 3004
+          resources:
+            limits:
+              cpu: 1
+              memory: "3Gi"
+          volumeMounts:
+            - mountPath: /app/server/files
+              name: mailtrain-files
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-files
+          persistentVolumeClaim:
+            claimName: mailtrain-files
+status: {}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mailtrain
+  namespace: $OKTETO_NS
+  annotations:
+    # dev.okteto.com/generate-host: "true"
+spec:
+  rules:
+  - host: $HOST_BASE_TRUSTED
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: mailtrain      
+              port: 
+                number: 3000
+  - host: $HOST_BASE_SANDBOX
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: mailtrain      
+              port: 
+                number: 3003
+  - host: $HOST_BASE_PUBLIC
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: mailtrain      
+              port: 
+                number: 3004
+  - host: admin-$OKTETO_NS.cloud.okteto.net
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: phpmyadmin      
+              port: 
+                number: 80
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: phpmyadmin
+  name: phpmyadmin
+spec:
+  type: ClusterIP
+  ports:
+    - name: "80"
+      port: 80
+      targetPort: 80
+  selector:
+    io.kompose.service: phpmyadmin
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: phpmyadmin
+  name: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: phpmyadmin
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: phpmyadmin
+    spec:
+      containers:
+        - env:
+            - name: PMA_HOST
+              value: "mysql"
+          image: phpmyadmin:latest
+          name: phpmyadmin
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "0.25"
+              memory: "512M"
+      restartPolicy: Always
+status: {}
