@@ -39,7 +39,7 @@
     "url-pattern": "^1.0.3"
   },
   "optionalDependencies": {
-    "posix": "^4.1.2"
+    "posix": "^4.2.0"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.272.0",
@@ -102,7 +102,7 @@
     "openpgp": "^4.7.2",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
-    "redis":"^4.6.4",
+    "redis": "^4.6.4",
     "request": "^2.88.0",
     "request-promise": "^4.2.5",
     "serve-favicon": "^2.5.0",
