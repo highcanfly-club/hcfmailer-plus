@@ -37,8 +37,8 @@ services:
             memory: "1G"
 
   mailtrain:
-    #image: mailtrain/mailtrain:latest
-    build: .
+    image: mailtrain:latest
+    #build: .
     ports:
     - "3000:3000"
     - "3003:3003"
@@ -54,6 +54,9 @@ services:
       - ENABLED_LANGUAGE=$ENABLED_LANGUAGE
       - WWW_PROXY=$WWW_PROXY
       - REDIS_HOST=$REDIS_HOST
+      - CLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY
+      - CLOUDFLARE_ZONE_ID=$CLOUDFLARE_ZONE_ID
+      - CLOUDFLARE_DNS_RECORDS=$CLOUDFLARE_DNS_RECORDS
     deploy:
       resources:
           limits:

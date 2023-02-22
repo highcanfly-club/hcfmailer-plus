@@ -33,13 +33,21 @@ RUN set -ex; \
 
 # Final Image
 FROM node:18-alpine
-
+LABEL maintainer="Ronan Le Meillat <ronan@parapente.cf>"
 WORKDIR /app/
 
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    pwgen netcat-openbsd bash imagemagick
+    pwgen netcat-openbsd bash imagemagick curl acme.sh &&\
+    echo "*/10     *       *       *       *       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/crontabs/root &&\
+    echo "0        0       *       *       0       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/crontabs/root 
+COPY scripts/init-cloudflare.sh /app/
+COPY scripts/init-letsencrypt.sh /app/
+COPY scripts/update-cloudflare-dns.sh /
+RUN chmod ugo+x /app/init-cloudflare.sh &&\
+    chmod ugo+x /app/init-letsencrypt.sh &&\
+    chmod ugo+x /update-cloudflare-dns.sh
 
 COPY --from=builder /app/ /app/
 
