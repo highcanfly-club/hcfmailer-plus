@@ -337,6 +337,21 @@ spec:
                 secretKeyRef:
                   name: mailtrain
                   key: ADMIN_PASSWORD
+            - name: CLOUDFLARE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: CLOUDFLARE_API_KEY
+            - name: CLOUDFLARE_ZONE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: CLOUDFLARE_ZONE_ID
+            - name: CLOUDFLARE_DNS_RECORDS
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: CLOUDFLARE_DNS_RECORDS
             - name: DEFAULT_LANGUAGE
               value: $DEFAULT_LANGUAGE
             - name: ENABLED_LANGUAGE
