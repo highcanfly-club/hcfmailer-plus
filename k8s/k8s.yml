@@ -24,6 +24,9 @@ metadata:
 type: Opaque
 stringData:
   ADMIN_PASSWORD: $ADMIN_PASSWORD
+  CLOUDFLARE_API_KEY: $CLOUDFLARE_API_KEY
+  CLOUDFLARE_ZONE_ID: $CLOUDFLARE_ZONE_ID
+  CLOUDFLARE_DNS_RECORDS: $CLOUDFLARE_DNS_RECORDS
 
 ---
 apiVersion: v1
@@ -139,8 +142,8 @@ spec:
             - containerPort: 3306
           resources:
             limits:
-              cpu: 500m
-              memory: "536870912"
+              cpu: "1"
+              memory: "2Gi"
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: mailtrain-mysql
