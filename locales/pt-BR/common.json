@@ -1400,5 +1400,6 @@
   "thePasswordMustContainAtLeastOne": "A senha deve conter pelo menos uma letra minúscula",
   "thePasswordMustContainAtLeastOne-1": "A senha deve conter pelo menos uma letra maiúscula",
   "thePasswordMustContainAtLeastOneNumber": "A senha deve conter pelo menos um número",
-  "thePasswordMustContainAtLeastOneSpecial": "A senha deve conter pelo menos um caractere especial"
+  "thePasswordMustContainAtLeastOneSpecial": "A senha deve conter pelo menos um caractere especial",
+  "updatePreferences":"Update Your Preferences"
 }

@@ -1180,5 +1180,6 @@
   "enableSenderOnDayWed":"Sending emails on  Wednesday",
   "enableSenderOnDayThu":"Sending emails on Thursday",
   "enableSenderOnDayFri":"Sending emails on Friday",
-  "enableSenderOnDaySat":"Sending emails on Saturday"
+  "enableSenderOnDaySat":"Sending emails on Saturday",
+  "updatePreferences":"Update Your Preferences"
 }
