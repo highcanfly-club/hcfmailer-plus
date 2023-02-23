@@ -187,7 +187,7 @@ function renderFrameWithContent(t, panelInFullScreen, showSidebar, primaryMenu, 
                         </button>
                         }
 
-                        <Link className="navbar-brand" to="/"><div><Icon icon="envelope"/> Mailtrain</div></Link>
+                        <Link className="navbar-brand" to="/"><div><Icon icon="envelope"/> HCF Mailer</div></Link>
 
                         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#mtMainNavbar" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
                             <span className="navbar-toggler-icon"/>
@@ -211,7 +211,7 @@ function renderFrameWithContent(t, panelInFullScreen, showSidebar, primaryMenu, 
                 </div>
 
                 <footer key="appFooter" className="app-footer">
-                    <div className="text-muted">&copy; 2020 <a href="https://mailtrain.org">Mailtrain.org</a>, <a href="mailto:info@mailtrain.org">info@mailtrain.org</a>. <a href="https://github.com/Mailtrain-org/mailtrain">{t('sourceOnGitHub')}</a></div>
+                    <div className="text-muted">&copy; 2023 <a href="https://sctg.eu.org">SCTG.eu.org</a>. <a href="https://github.com/highcanfly-club/mailtrain/tree/hcf">{t('sourceOnGitHub')}</a></div>
                 </footer>
             </div>
         );

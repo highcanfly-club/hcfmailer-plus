@@ -4,7 +4,7 @@
   "description": "Self hosted email newsletter app - shared lib",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Mailtrain-org/mailtrain.git"
+    "url": "https://github.com/highcanfly-club/mailtrain.git"
   },
   "license": "GPL-3.0",
   "homepage": "https://mailtrain.org/",

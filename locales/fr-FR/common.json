@@ -1,5 +1,5 @@
 {
-  "mailtrain2": "Mailtrain 2",
+  "mailtrain2": "HCF Mailer",
   "build": "version",
   "personalAccessToken": "Jeton d'accès personnel",
   "accessTokenNotYetGenerated": "Jeton d'accès non encore généré",
