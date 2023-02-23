@@ -3,7 +3,7 @@
 import './lib/public-path';
 
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {TranslationRoot, withTranslation} from './lib/i18n';
 import account from './account/root';
 import login from './login/root';
@@ -142,7 +142,8 @@ class Root extends Component {
 }
 
 export default function() {
-    ReactDOM.render(<TranslationRoot><Root/></TranslationRoot>,document.getElementById('root'));
+    const ReactDOM = createRoot(document.getElementById('root'))
+    ReactDOM.render(<TranslationRoot><Root/></TranslationRoot>);
 };
 
 

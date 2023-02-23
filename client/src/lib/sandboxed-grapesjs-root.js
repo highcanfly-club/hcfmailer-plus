@@ -3,7 +3,7 @@
 import './public-path';
 
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {TranslationRoot, withTranslation} from './i18n';
 import {parentRPC, UntrustedContentRoot} from './untrusted';
 import PropTypes from "prop-types";
@@ -624,12 +624,11 @@ export class GrapesJSSandbox extends Component {
 
 export default function() {
     parentRPC.init();
-
+    const ReactDOM = createRoot(document.getElementById('root'))
     ReactDOM.render(
         <TranslationRoot>
             <UntrustedContentRoot render={props => <GrapesJSSandbox {...props} />} />
-        </TranslationRoot>,
-        document.getElementById('root')
+        </TranslationRoot>
     );
 };
 
