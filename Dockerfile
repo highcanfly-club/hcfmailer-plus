@@ -17,7 +17,7 @@ COPY zone-mta/package.json /app/zone-mta/package.json
 COPY zone-mta/package-lock.json /app/zone-mta/package-lock.json
 
 # Install dependencies in each directory
-RUN cd /app/client && npm install
+RUN cd /app/client && npm install --legacy-peer-deps 
 RUN cd /app/shared && npm install --production
 RUN cd /app/server && npm install --production
 RUN cd /app/zone-mta && npm install --production
