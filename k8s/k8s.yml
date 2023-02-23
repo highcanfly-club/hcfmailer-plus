@@ -352,6 +352,11 @@ spec:
                 secretKeyRef:
                   name: mailtrain
                   key: CLOUDFLARE_DNS_RECORDS
+            - name: POOL_NAME
+              valueFrom:
+                  secretKeyRef:
+                    name: mailtrain
+                    key: CLOUDFLARE_DNS_RECORDS
             - name: DEFAULT_LANGUAGE
               value: $DEFAULT_LANGUAGE
             - name: ENABLED_LANGUAGE
