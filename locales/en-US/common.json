@@ -1181,5 +1181,6 @@
   "enableSenderOnDayThu":"Sending emails on Thursday",
   "enableSenderOnDayFri":"Sending emails on Friday",
   "enableSenderOnDaySat":"Sending emails on Saturday",
-  "updatePreferences":"Update Your Preferences"
+  "updatePreferences":"Update Your Preferences",
+  "updateYourEmail":"Update Your Email Address"
 }
