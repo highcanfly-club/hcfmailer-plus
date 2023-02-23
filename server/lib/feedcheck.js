@@ -48,7 +48,7 @@ async function fetch(url) {
     const httpOptions = {
         uri: url,
         headers: {
-            'user-agent': 'Mailtrain',
+            'user-agent': 'HCF Mailer',
             'accept': 'text/html,application/xhtml+xml'
         }
     };
