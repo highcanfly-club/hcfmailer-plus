@@ -1166,5 +1166,7 @@
   "thePasswordMustContainAtLeastOne": "Пароль должен содержать хотя бы одну строчную букву",
   "thePasswordMustContainAtLeastOne-1": "Пароль должен содержать хотя бы одну заглавную букву",
   "thePasswordMustContainAtLeastOneNumber": "Пароль должен содержать хотя бы одно число",
-  "thePasswordMustContainAtLeastOneSpecial": "Пароль должен содержать хотя бы один специальный символ"
+  "thePasswordMustContainAtLeastOneSpecial": "Пароль должен содержать хотя бы один специальный символ",
+  "updatePreferences":"Update Your Preferences",
+  "updateYourEmail":"Update Your Email Address"
 }

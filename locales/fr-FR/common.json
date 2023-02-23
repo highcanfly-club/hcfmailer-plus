@@ -1167,5 +1167,6 @@
   "thePasswordMustContainAtLeastOne-1": "Le mot de passe doit contenir au moins une lettre majuscule",
   "thePasswordMustContainAtLeastOneNumber": "Le mot de passe doit contenir au moins un chiffre",
   "thePasswordMustContainAtLeastOneSpecial": "Le mot de passe doit contenir au moins un caractère spécial",
-  "updatePreferences" : "Mettre à jour vos préférences"
+  "updatePreferences" : "Mettre à jour vos préférences",
+  "updateYourEmail":"Mettre à jour votre email"
 }

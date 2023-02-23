@@ -1,3 +1,4 @@
+
 {
   "mailtrain2": "Mailtrain 2",
   "mailtrain2 - TODO: update line above and then delete this line to mark that the translation has been fixed": "Mailtrain 2",
@@ -1223,5 +1224,7 @@
   "yesUnsubscribeMe": "Ja, bitte abmelden.",
   "youAreNowUnsubscribed": "Abmeldung erfolgreich",
   "youHaveBeenRemovedFrom": "Ihre E-Mail-Adresse wurde von folgender Liste entfernt:",
-  "yourSubscriptionToOurListHasBeen": "Die Eintragung in unsere Liste war erfolgreich."
+  "yourSubscriptionToOurListHasBeen": "Die Eintragung in unsere Liste war erfolgreich.",
+  "updatePreferences":"Update Your Preferences",
+  "updateYourEmail":"Update Your Email Address"
 }
