@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql:
-    image: mariadb:10.4
+    image: mysql:latest
     environment:
     - MYSQL_ROOT_PASSWORD=mailtrain
     - MYSQL_DATABASE=mailtrain
@@ -10,25 +10,65 @@ services:
     - MYSQL_PASSWORD=mailtrain
     volumes:
     - mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "500M"
 
   redis:
-    image: redis:5
+    image: redis:7
     volumes:
     - redis-data:/data
+    ports:
+      - 6379:6379
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "1G"
 
   mongo:
-    image: mongo:4-xenial
+    image: mongo:6
     volumes:
     - mongo-data:/data/db
-
+    ports:
+      - 27017:27017
+    deploy:
+      resources:
+          limits:
+            cpus: "0.5"
+            memory: "1G"
+            
   mailtrain:
-    build: .
+    image: mailtrain:dev
+    #build: .
     ports:
     - "3000:3000"
     - "3003:3003"
     - "3004:3004"
     volumes:
     - mailtrain-files:/app/server/files
+    environment:
+      - URL_BASE_TRUSTED=$URL_BASE_TRUSTED
+      - URL_BASE_SANDBOX=$URL_BASE_SANDBOX
+      - URL_BASE_PUBLIC=$URL_BASE_PUBLIC
+      - ADMIN_PASSWORD=$ADMIN_PASSWORD
+      - DEFAULT_LANGUAGE=$DEFAULT_LANGUAGE
+      - ENABLED_LANGUAGE=$ENABLED_LANGUAGE
+      - WWW_PROXY=$WWW_PROXY
+      - REDIS_HOST=$REDIS_HOST
+      - CLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY
+      - CLOUDFLARE_ZONE_ID=$CLOUDFLARE_ZONE_ID
+      - CLOUDFLARE_DNS_RECORDS=$CLOUDFLARE_DNS_RECORDS
+    deploy:
+      resources:
+          limits:
+            cpus: "1"
+            memory: "4G"
+
 
 volumes:
   mysql-data:
