@@ -40,7 +40,7 @@ module.exports = {
                             ],
                             plugins: [
                                 ["@babel/plugin-proposal-decorators", { "legacy": true }],
-                                ["@babel/plugin-proposal-class-properties", { "loose" : true }],
+                                ["@babel/plugin-proposal-class-properties", { "loose": true }],
                                 "@babel/plugin-proposal-function-bind"
                             ]
                         }
@@ -60,14 +60,14 @@ module.exports = {
             },
             {
                 test: /\.(png|jpg|gif)$/,
-                use: [ 
+                use: [
                     {
                         loader: 'url-loader',
                         options: {
                             limit: 8192 // inline base64 URLs for <=8k images, direct URLs for the rest
                         }
                     }
-                ] 
+                ]
             },
             {
                 test: /\.scss$/,
@@ -98,16 +98,24 @@ module.exports = {
         mailtrainConfig: 'mailtrainConfig'
     },
     plugins: [
-      new CopyPlugin([
-        { from: './node_modules/jquery/dist/jquery.min.js', to: path.resolve(__dirname, 'dist') },
-        { from: './node_modules/popper.js/dist/umd/popper.min.js', to: path.resolve(__dirname, 'dist') },
-        { from: './node_modules/bootstrap/dist/js/bootstrap.min.js', to: path.resolve(__dirname, 'dist') },
-        { from: './node_modules/@coreui/coreui/dist/js/coreui.min.js', to: path.resolve(__dirname, 'dist') },
-        { from: './node_modules/@fortawesome/fontawesome-free/webfonts/', to: path.resolve(__dirname, 'dist', 'webfonts'), toType: 'dir'}
-      ]),
+        new CopyPlugin(
+            {
+                patterns: [
+                    { from: './node_modules/jquery/dist/jquery.min.js', to: path.resolve(__dirname, 'dist') },
+                    { from: './node_modules/popper.js/dist/umd/popper.min.js', to: path.resolve(__dirname, 'dist') },
+                    { from: './node_modules/bootstrap/dist/js/bootstrap.min.js', to: path.resolve(__dirname, 'dist') },
+                    { from: './node_modules/@coreui/coreui/dist/js/coreui.min.js', to: path.resolve(__dirname, 'dist') },
+                    { from: './node_modules/@fortawesome/fontawesome-free/webfonts/', to: path.resolve(__dirname, 'dist', 'webfonts'), toType: 'dir' }
+                ]
+            }),
     ],
     watchOptions: {
         ignored: 'node_modules/',
         poll: 2000
+    },
+    resolve: {
+        fallback: {
+            "buffer": false
+        }
     }
 };

@@ -248,8 +248,8 @@ async function getRouter(appType) {
 
 
         router.getAsync('/img', await fileCache('mosaico-images', config.mosaico.fileCache.images, imgCacheFileName), async (req, res) => {
-            const method = req.query.method;
-            const params = req.query.params;
+            const method = typeof req.query.method === 'undefined' ? req.query["amp;method"] : req.query.method;
+            const params = typeof req.query.params=== 'undefined' ? req.query["amp;params"] : req.query.params;
             let [width, height] = params.split(',');
             let image;
 
