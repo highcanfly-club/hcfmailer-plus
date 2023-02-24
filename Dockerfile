@@ -18,7 +18,7 @@ COPY zone-mta/package-lock.json /app/zone-mta/package-lock.json
 
 # Install dependencies in each directory
 RUN cd /app/client && npm install --legacy-peer-deps 
-RUN cd /app/shared && npm install --production
+RUN cd /app/shared && npm install  --legacy-peer-deps --production
 RUN cd /app/server && npm install --production
 RUN cd /app/zone-mta && npm install --production
 
@@ -28,9 +28,11 @@ COPY . /app
 
 RUN set -ex; \
    cd /app/client && \
-   NODE_OPTIONS=--openssl-legacy-provider npm run build && \
+   npm run setdate &&\
+   NODE_OPTIONS=--openssl-legacy-provider npm run build 
+RUN set -ex; \
+   cd /app/client && \
    rm -rf node_modules
-
 # Final Image
 FROM node:18-alpine
 LABEL maintainer="Ronan Le Meillat <ronan@parapente.cf>"
