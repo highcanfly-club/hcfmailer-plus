@@ -1,6 +1,6 @@
 # Mailtrain v2
 
-Mailtrain is a self hosted newsletter application built on Node.js (v14+) and MySQL (v8+) or MariaDB (v10+).
+Mailtrain is a self hosted newsletter application built on Node.js (v18+), Redis (v7+), MongoDB (v6+) and MySQL (v8+).
 
 This is version 2 of Mailtrain. It mostly implements all features of v1 and add some more. It is a complete rewrite, so you will have to install it from scratch.
 
@@ -19,6 +19,7 @@ If you are upgrading from Mailtrain v1, backup the DB and use it for Mailtrain v
 * Multiple users with granular user permissions and flexible sharing
 * Hierarchical namespaces for enterprise-level situations
 * Builtin Zone-MTA (https://github.com/zone-eu/zone-mta) for close-to-zero setup of mail delivery
+* Automatic Dynamic DNS record (CLOUDFLARE_DNS_RECORDS) with Cloudflare API
 
 ## Recommended minimal hardware Requirements
 * 2 vCPU
@@ -169,7 +170,7 @@ All endpoints (trusted, sandbox, public) will provide only HTTP as follows:
 
 ### Deployment with Docker and Docker compose
 
-This setup starts a stack composed of Mailtrain, MongoDB, Redis, and MariaDB. It will setup a locally accessible Mailtrain instance with HTTP endpoints as follows.
+This setup starts a stack composed of Mailtrain, MongoDB 6 , Redis 7, and Mysql 8. It will setup a locally accessible Mailtrain instance with HTTP endpoints as follows.
 - http://localhost:3000 - trusted endpoint
 - http://localhost:3003 - sandbox endpoint
 - http://localhost:3004 - public endpoint
@@ -254,7 +255,7 @@ variables (e.g. `URL_BASE_TRUSTED=https://mailtrain.domain.com (and more env-var
 | WWW_PROXY        | use if Mailtrain is behind an http reverse proxy (default: false)     |
 | WWW_SECRET       | sets the secret for the express session (default: `$(pwgen -1)`)      |
 | MONGO_HOST       | sets mongo host (default: mongo)                                      |
-| WITH_REDIS       | enables or disables redis (default: true)                             |
+| WITH_REDIS       | enables or disables redis 7 (default: true)                             |
 | REDIS_HOST       | sets redis host (default: redis)                                      |
 | REDIS_PORT       | sets redis host (default: 6379)                                       |
 | MYSQL_HOST       | sets mysql host (default: mysql)                                      |
@@ -284,6 +285,13 @@ variables (e.g. `URL_BASE_TRUSTED=https://mailtrain.domain.com (and more env-var
 | WITH_POSTFIXBOUNCE | enables PostfixBounce TCP listener (default: false) |
 | POSTFIXBOUNCE_PORT | sets PostfixBounce Listening TCP-Port (default: 5699) |
 | POSTFIXBOUNCE_HOST | sets PostfixBounce Listening Host (default: 127.0.0.1) |
+| OKTETO_NS          | lesailesdumontblanc-com|
+| HOST_BASE_TRUSTED  | mailtrain.example.net|
+| HOST_BASE_SANDBOX  | sandbox.example.net|
+| HOST_BASE_PUBLIC   | list.example.net|
+| CLOUDFLARE_API_KEY | vaelau8lahhoo4xaimahGhai5poozaite9eewah1|
+| CLOUDFLARE_ZONE_ID | fb2ad6d518020383dbdda216c0815699|
+| CLOUDFLARE_DNS_RECORDS | smtpd-mailtrain.example.net|
 
 If you don't want to modify the original `docker-compose.yml`, you can put your overrides to another file (e.g. `docker-compose.override.yml`) -- like the one below.
 
