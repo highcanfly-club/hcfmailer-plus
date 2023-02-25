@@ -75,9 +75,9 @@ Thus, by running this script below, you agree with the Let's Encrypt's Terms of 
 3. Download Mailtrain using git to the `/opt/mailtrain` directory
     ```
     cd /opt
-    git clone https://github.com/Mailtrain-org/mailtrain.git
+    git clone https://github.com/highcanfly-club/mailtrain
     cd mailtrain
-    git checkout v2
+    git checkout hcf
     ```
 
 4. Run the installation script. Replace the urls and your email address with the correct values. **NOTE** that running this script you agree
