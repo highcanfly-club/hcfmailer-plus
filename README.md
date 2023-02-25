@@ -190,19 +190,35 @@ These are the steps to start Mailtrain via docker-compose:
 
 1. Download Mailtrain's docker-compose build file
     ```
-    curl -O https://raw.githubusercontent.com/Mailtrain-org/mailtrain/v2/docker-compose.yml
+    curl -O https://raw.githubusercontent.com/highcanfly-club/mailtrain/hcf/docker-compose.yml
+    ```
+2. Define at least these environment variable:  
+    ```
+        "ADMIN_PASSWORD": "test",
+        "MYSQL_ROOT_PASSWORD": "mailtrain",
+        "MYSQL_PASSWORD": "mailtrain",
+        "MYSQL_HOST": "mysql",
+        "MYSQL_PORT": "3306",
+        "DEFAULT_LANGUAGE": "en-US",
+        "ENABLED_LANGUAGE": "fr-FR, en-US",
+        "WWW_PROXY": "true",
+        "REDIS_HOST": "redis",
+        "REDIS_PORT": "6379",
+        "CLOUDFLARE_API_KEY":"vaelau8lahhoo4xaimahGhai5poozaite9eewah1",
+        "CLOUDFLARE_ZONE_ID":"fb2ad6d518020383dbdda216c0815699",
+        "CLOUDFLARE_DNS_RECORDS":"your.realhost.com",
     ```
 
-2. Deploy Mailtrain via docker-compose (in the directory to which you downloaded the `docker-compose.yml` file). This will take quite some time when run for the first time. Subsequent executions will be fast.
+3. Deploy Mailtrain via docker-compose (in the directory to which you downloaded the `docker-compose.yml` file). This will take quite some time when run for the first time. Subsequent executions will be fast.
     ```
     docker-compose up
     ```
 
-3. Open the trusted endpoint http://localhost:3000
+4. Open the trusted endpoint http://localhost:3000
 
-4. Authenticate as `admin`:`test`
+5. Authenticate as `admin`:`test`
 
-The instructions above use an automatically built Docker image on DockerHub (https://hub.docker.com/r/mailtrain/mailtrain). If you want to build the Docker image yourself (e.g. when doing development), use the `docker-compose-local.yml` located in the project's root directory.
+The instructions above use an automatically built Docker image on DockerHub (https://hub.docker.com/repository/docker/highcanfly/mailtrain). If you want to build the Docker image yourself (e.g. when doing development), use the `docker-compose-local.yml` located in the project's hcf directory.
 
 
 ### Deployment with Docker and Docker compose (for development)

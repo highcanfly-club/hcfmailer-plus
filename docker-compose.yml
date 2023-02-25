@@ -4,12 +4,14 @@ services:
   mysql:
     image: mysql:latest
     environment:
-    - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+    - MYSQL_ROOT_PASSWORD=mailtrain
     - MYSQL_DATABASE=mailtrain
     - MYSQL_USER=mailtrain
     - MYSQL_PASSWORD=mailtrain
     volumes:
     - mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
     deploy:
       resources:
           limits:
@@ -19,7 +21,9 @@ services:
   redis:
     image: redis:7
     volumes:
-    - kv-data:/data
+    - redis-data:/data
+    ports:
+      - 6379:6379
     deploy:
       resources:
           limits:
@@ -29,15 +33,17 @@ services:
   mongo:
     image: mongo:6
     volumes:
-    - kv-data:/data/db
+    - mongo-data:/data/db
+    ports:
+      - 27017:27017
     deploy:
       resources:
           limits:
             cpus: "0.5"
             memory: "1G"
-
+            
   mailtrain:
-    image: mailtrain:latest
+    image: highcanfly/mailtrain:latest
     #build: .
     ports:
     - "3000:3000"
@@ -63,10 +69,10 @@ services:
             cpus: "1"
             memory: "4G"
 
+
 volumes:
   mysql-data:
-  #redis-data:
-  #mongo-data:
-  kv-data:
+  redis-data:
+  mongo-data:
   mailtrain-files:
 
