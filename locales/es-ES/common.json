@@ -1289,5 +1289,6 @@
   "thePasswordMustContainAtLeastOneNumber": "La contraseña debe tener al menos un número",
   "thePasswordMustContainAtLeastOneSpecial": "La contraseña debe tener al menos un caracter especial",
   "updatePreferences":"Actualice sus preferencias",
-  "updateYourEmail":"Actualiza su dirección de correo electrónico"
+  "updateYourEmail":"Actualiza su dirección de correo electrónico",
+  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?"
 }

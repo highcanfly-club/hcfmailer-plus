@@ -1168,5 +1168,6 @@
   "thePasswordMustContainAtLeastOneNumber": "Пароль должен содержать хотя бы одно число",
   "thePasswordMustContainAtLeastOneSpecial": "Пароль должен содержать хотя бы один специальный символ",
   "updatePreferences":"Update Your Preferences",
-  "updateYourEmail":"Update Your Email Address"
+  "updateYourEmail":"Update Your Email Address",
+  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?"
 }
