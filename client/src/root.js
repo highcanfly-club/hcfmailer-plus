@@ -2,9 +2,9 @@
 
 import './lib/public-path';
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { createRoot } from 'react-dom/client';
-import {TranslationRoot, withTranslation} from './lib/i18n';
+import { TranslationRoot, withTranslation } from './lib/i18n';
 import account from './account/root';
 import login from './login/root';
 import blacklist from './blacklist/root';
@@ -18,14 +18,15 @@ import users from './users/root';
 import sendConfigurations from './send-configurations/root';
 import settings from './settings/root';
 
-import {DropdownLink, getLanguageChooser, NavDropdown, NavLink, Section} from "./lib/page";
-
+//import { DropdownLink, getLanguageChooser, NavDropdown, NavLink, Section } from "./lib/page";
+import { DropdownLink, getLanguageChooser, NavLink, Section } from "./lib/page";
+import NavDropdown from 'react-bootstrap/NavDropdown';
 import mailtrainConfig from 'mailtrainConfig';
 import Home from "./Home";
-import {DropdownActionLink, Icon} from "./lib/bootstrap-components";
+import { DropdownActionLink, Icon } from "./lib/bootstrap-components";
 import axios from './lib/axios';
-import {getUrl} from "./lib/urls";
-import {withComponentMixins} from "./lib/decorator-helpers";
+import { getUrl } from "./lib/urls";
+import { withComponentMixins } from "./lib/decorator-helpers";
 import Update from "./settings/Update";
 
 const topLevelMenuKeys = ['lists', 'channels', 'templates', 'campaigns'];
@@ -83,7 +84,7 @@ class Root extends Component {
                         <>
                             <ul className="navbar-nav mt-navbar-nav-left">
                                 {topLevelMenu}
-                                <NavDropdown label={t('administration')}>
+                                <NavDropdown title={t('administration')}>
                                     {mailtrainConfig.globalPermissions.displayManageUsers && <DropdownLink to="/users">{t('users')}</DropdownLink>}
                                     <DropdownLink to="/namespaces">{t('namespaces')}</DropdownLink>
                                     {mailtrainConfig.globalPermissions.manageSettings && <DropdownLink to="/settings">{t('globalSettings')}</DropdownLink>}
@@ -94,12 +95,12 @@ class Root extends Component {
                             </ul>
                             <ul className="navbar-nav mt-navbar-nav-right">
                                 {getLanguageChooser(t)}
-                                <NavDropdown menuClassName="dropdown-menu-right" label={mailtrainConfig.user.username} icon="user">
-                                    <DropdownLink to="/account"><Icon icon='user'/> {t('account')}</DropdownLink>
-                                    {mailtrainConfig.authMethod == 'cas' && <DropdownLink to="/cas/logout" forceReload><Icon icon="sign-out-alt"/> {t('logOut')}</DropdownLink>}
-                                    {mailtrainConfig.authMethod != 'cas' && <DropdownActionLink onClickAsync={::this.logout}><Icon icon='sign-out-alt'/> {t('logOut')}</DropdownActionLink>}
+                                <NavDropdown menuclassname="dropdown-menu-right" title={mailtrainConfig.user.username} icon="user">
+                                    <DropdownLink to="/account"><Icon icon='user' /> {t('account')}</DropdownLink>
+                                    {mailtrainConfig.authMethod == 'cas' && <DropdownLink to="/cas/logout" forceReload><Icon icon="sign-out-alt" /> {t('logOut')}</DropdownLink>}
+                                    {mailtrainConfig.authMethod != 'cas' && <DropdownActionLink onClickAsync={::this.logout}><Icon icon='sign-out-alt' /> {t('logOut')}</DropdownActionLink>}
                                 </NavDropdown>
-                            </ul>
+                        </ul>
                         </>
                     );
                 } else {
@@ -136,14 +137,14 @@ class Root extends Component {
         };
 
         return (
-            <Section root='/' structure={structure}/>
+            <Section root='/' structure={structure} />
         );
     }
 }
 
-export default function() {
+export default function () {
     const ReactDOM = createRoot(document.getElementById('root'))
-    ReactDOM.render(<TranslationRoot><Root/></TranslationRoot>);
+    ReactDOM.render(<TranslationRoot><Root /></TranslationRoot>);
 };
 
 

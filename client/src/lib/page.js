@@ -14,6 +14,7 @@ import {getRoutes, renderRoute, Resolver, SectionContentContext, withPageHelpers
 import {getBaseDir, getUrl} from "./urls";
 import {createComponentMixin, withComponentMixins} from "./decorator-helpers";
 import {getLang} from "../../../shared/langs";
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
 export { withPageHelpers }
 
@@ -672,38 +673,38 @@ export class NavActionLink extends Component {
     }
 }
 
-export class NavDropdown extends Component {
-    static propTypes = {
-        label: PropTypes.string,
-        icon: PropTypes.string,
-        className: PropTypes.string,
-        menuClassName: PropTypes.string
-    }
+// export class NavDropdown extends Component {
+//     static propTypes = {
+//         label: PropTypes.string,
+//         icon: PropTypes.string,
+//         className: PropTypes.string,
+//         menuClassName: PropTypes.string
+//     }
 
-    render() {
-        const props = this.props;
+//     render() {
+//         const props = this.props;
 
-        const className = 'nav-item dropdown' + (props.className ? ' ' + props.className : '');
-        const menuClassName = 'dropdown-menu' + (props.menuClassName ? ' ' + props.menuClassName : '');
+//         const className = 'nav-item dropdown' + (props.className ? ' ' + props.className : '');
+//         const menuClassName = 'dropdown-menu' + (props.menuClassName ? ' ' + props.menuClassName : '');
 
-        return (
-            <li className={className}>
-                {props.icon ?
-                    <a href="#" className="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        <Icon icon={props.icon}/>{' '}{props.label}
-                    </a>
-                    :
-                    <a href="#" className="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                        {props.label}
-                    </a>
-                }
-                <ul className={menuClassName}>
-                    {props.children}
-                </ul>
-            </li>
-        );
-    }
-}
+//         return (
+//             <li className={className}>
+//                 {props.icon ?
+//                     <a href="#" className="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+//                         <Icon icon={props.icon}/>{' '}{props.label}
+//                     </a>
+//                     :
+//                     <a href="#" className="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+//                         {props.label}
+//                     </a>
+//                 }
+//                 <ul className={menuClassName}>
+//                     {props.children}
+//                 </ul>
+//             </li>
+//         );
+//     }
+// }
 
 
 export const requiresAuthenticatedUser = createComponentMixin({
@@ -740,7 +741,7 @@ export function getLanguageChooser(t) {
     const currentLngCode = getLang(i18n.language).getShortLabel(t);
 
     const languageChooser = (
-        <NavDropdown menuClassName="dropdown-menu-right" label={currentLngCode}>
+        <NavDropdown menuclassname="dropdown-menu-right" title={currentLngCode}>
             {languageOptions}
         </NavDropdown>
     );
