@@ -55,7 +55,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dnd-touch-backend": "^16.0.1",
     "react-dom": "^18.2.0",
-    "react-dropzone": "^10.2.2",
+    "react-dropzone": "^14.2.3",
     "react-google-charts": "^3.0.15",
     "react-i18next": "^12.1.5",
     "react-router-dom": "^5.2.0",
