@@ -188,7 +188,7 @@ function renderFrameWithContent(t, panelInFullScreen, showSidebar, primaryMenu, 
                         </button>
                         }
 
-                        <Link className="navbar-brand" to="/"><div><Icon icon="envelope"/> HCF Mailer</div></Link>
+                        <Link className="navbar-brand" to="/"><div><Icon icon="envelope"/> HCFMailer+</div></Link>
 
                         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#mtMainNavbar" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
                             <span className="navbar-toggler-icon"/>

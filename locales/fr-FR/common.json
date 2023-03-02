@@ -1,5 +1,5 @@
 {
-  "mailtrain2": "HCF Mailer",
+  "mailtrain2": "HCFMailer+",
   "build": "version",
   "personalAccessToken": "Jeton d'accès personnel",
   "accessTokenNotYetGenerated": "Jeton d'accès non encore généré",
@@ -1169,5 +1169,8 @@
   "thePasswordMustContainAtLeastOneSpecial": "Le mot de passe doit contenir au moins un caractère spécial",
   "updatePreferences" : "Mettre à jour vos préférences",
   "updateYourEmail":"Mettre à jour votre email",
-  "alertQuitPage":"Les modifications que vous avez apportées peuvent ne pas être enregistrées. Voulez-vous vraiment quitter cette page ?"
+  "alertQuitPage":"Les modifications que vous avez apportées peuvent ne pas être enregistrées. Voulez-vous vraiment quitter cette page ?",
+  "clickPerSubscriber":"Ouvrir et nombre de clics par abonné actuellement abonné",
+  "statsInfo":"Ci-dessous, vous pouvez télécharger des rapports prédéfinis liés à cette campagne. Chaque lien génère un fichier CSV qui peut être visualisé dans un éditeur de tableur. Les rapports personnalisés et les rapports qui couvrent plusieurs campagnes peuvent être créés via",
+  "functionnalityOfProduct":"fonctionnalité de HCFMailer+"
 }

@@ -1,5 +1,5 @@
 {
-  "mailtrain2": "HCF Mailer",
+  "mailtrain2": "HCFMailer+",
   "mailtrain2 - TODO: update line above and then delete this line to mark that the translation has been fixed": "Mailtrain 2",
   "build": "Build",
   "build - TODO: update line above and then delete this line to mark that the translation has been fixed": "Build",
@@ -256,8 +256,8 @@
   "clicked": "Clicado",
   "quickReports": "Quick Reports",
   "quickReports - TODO: update line above and then delete this line to mark that the translation has been fixed": "Quick Reports",
-  "belowYouCanDownloadPremadeReportsRelated": "Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through <1>Reports</1> functionality of Mailtrain.",
-  "belowYouCanDownloadPremadeReportsRelated - TODO: update line above and then delete this line to mark that the translation has been fixed": "Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through <1>Reports</1> functionality of Mailtrain.",
+  "belowYouCanDownloadPremadeReportsRelated": "Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through <1>Reports</1> functionality of HCFMailer+.",
+  "belowYouCanDownloadPremadeReportsRelated - TODO: update line above and then delete this line to mark that the translation has been fixed": "Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through <1>Reports</1> functionality of HCFMailer+.",
   "uniqueVisitors": "visitantes únicos",
   "totalClicks": "Cliques totais",
   "campaignLinks": "links da campanha",

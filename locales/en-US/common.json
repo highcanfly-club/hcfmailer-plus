@@ -1,5 +1,5 @@
 {
-  "mailtrain2": "HCF Mailer",
+  "mailtrain2": "HCFMailer+",
   "build": "Build",
   "personalAccessToken": "Personal access token",
   "accessTokenNotYetGenerated": "Access token not yet generated",
@@ -219,7 +219,7 @@
   "opened": "Opened",
   "clicked": "Clicked",
   "quickReports": "Quick Reports",
-  "belowYouCanDownloadPremadeReportsRelated": "Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through <1>Reports</1> functionality of Mailtrain.",
+  "belowYouCanDownloadPremadeReportsRelated": "Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through <1>Reports</1> functionality of HCFMailer+.",
   "uniqueVisitors": "Unique visitors",
   "totalClicks": "Total clicks",
   "campaignLinks": "Campaign links",
@@ -1183,5 +1183,8 @@
   "enableSenderOnDaySat":"Sending emails on Saturday",
   "updatePreferences":"Update Your Preferences",
   "updateYourEmail":"Update Your Email Address",
-  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?"
+  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?",
+  "clickPerSubscriber":"Open and click counts per currently subscribed subscriber",
+  "statsInfo":"Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through",
+  "functionnalityOfProduct":"functionality of HCFMailer+"
 }
