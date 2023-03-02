@@ -16,10 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/Mailtrain-org/mailtrain.git"
+    "url": "git://github.com/highcanfly-club/hcfmailer-plus.git"
   },
   "license": "GPL-3.0",
-  "homepage": "https://mailtrain.org/",
+  "homepage": "https://github.com/highcanfly-club/hcfmailer-plus",
   "dependencies": {
     "@coreui/coreui": "^4.2.6",
     "@fortawesome/fontawesome-free": "^6.3.0",

@@ -1,16 +1,18 @@
 @import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,400i,700,700i|Ubuntu:300,300i,400,400i,700,700i&subset=latin-ext');
 
-$font-family-sans-serif: 'Ubuntu', sans-serif;
-$font-family-monospace: 'Ubuntu Mono', monospace;
+@import "../../node_modules/@coreui/coreui/scss/coreui";
+@import "./variables.scss";
 
 $fa-font-path: "../static-npm/fontawesome";
-$enable-print-styles: false;
-
-@import "./variables.scss";
-@import "../../node_modules/@coreui/coreui/scss/coreui.scss";
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss";
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
+$font-family-sans-serif: 'Ubuntu', sans-serif;
+$font-family-monospace: 'Ubuntu Mono', monospace;
+
+
+$enable-print-styles: false;
+
 
 .custom-select {
   -webkit-appearance: none; // This is a fix for Chrome
@@ -39,8 +41,7 @@ body.mailtrain {
   .mt-breadcrumb-and-tertiary-navbar {
     display: flex;
     border-radius: 0;
-    @include border-radius($breadcrumb-border-radius);
-    @include borders($breadcrumb-borders);
+    border-bottom: 1px solid #c8ced3;
     background-color: $breadcrumb-bg;
 
     .breadcrumb {
@@ -94,7 +95,9 @@ body.mailtrain {
     }
 
     .navbar-toggler {
-      .navbar-toggler-icon, &:hover .navbar-toggler-icon {
+
+      .navbar-toggler-icon,
+      &:hover .navbar-toggler-icon {
         background-image: $navbar-dark-toggler-icon-bg;
       }
     }
@@ -155,7 +158,7 @@ body.mailtrain {
 
   .navbar-dark {
     .navbar-nav {
-      .active > .nav-link:hover {
+      .active>.nav-link:hover {
         color: $navbar-dark-active-color;
       }
     }
@@ -165,4 +168,3 @@ body.mailtrain {
 .gpg-text {
   font-family: monospace;
 }
-
