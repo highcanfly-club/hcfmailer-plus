@@ -39,6 +39,7 @@ module.exports = {
                                 '@babel/preset-react'
                             ],
                             plugins: [
+                                ["@babel/plugin-proposal-private-property-in-object", { "loose": true }],
                                 ["@babel/plugin-proposal-decorators", { "legacy": true }],
                                 ["@babel/plugin-proposal-class-properties", { "loose": true }],
                                 "@babel/plugin-proposal-function-bind"
@@ -60,14 +61,7 @@ module.exports = {
             },
             {
                 test: /\.(png|jpg|gif)$/,
-                use: [
-                    {
-                        loader: 'url-loader',
-                        options: {
-                            limit: 8192 // inline base64 URLs for <=8k images, direct URLs for the rest
-                        }
-                    }
-                ]
+                type: 'asset/inline',
             },
             {
                 test: /\.scss$/,
@@ -86,9 +80,7 @@ module.exports = {
             },
             {
                 test: /\.(svg|otf|woff2|woff|ttf|eot)$/,
-                use: [
-                    'url-loader'
-                ]
+                type: 'asset/resource'
             }
         ]
     },
