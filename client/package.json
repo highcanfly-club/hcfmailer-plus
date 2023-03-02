@@ -59,6 +59,7 @@
     "react-google-charts": "^4.0.0",
     "react-i18next": "^12.2.0",
     "react-router-dom": "^5.2.0",
+    "react-router-dom-v5-compat":"^6.8.2",
     "react-sortable-tree": "^2.8.0",
     "shallowequal": "^1.1.0",
     "shortid": "^2.2.16",

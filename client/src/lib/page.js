@@ -3,8 +3,8 @@
 import React, {Component} from "react";
 import i18n, {withTranslation} from './i18n';
 import PropTypes from "prop-types";
-import {withRouter} from "react-router";
-import {BrowserRouter , Link, Route, Switch} from "react-router-dom";
+import { withRouter, BrowserRouter , Link, Switch, Route } from "react-router-dom";
+import { CompatRouter } from "react-router-dom-v5-compat";
 import {withErrorHandling} from "./error-handling";
 import interoperableErrors from "../../../shared/interoperable-errors";
 import {ActionLink, Button, DismissibleAlert, DropdownActionLink, Icon} from "./bootstrap-components";
@@ -548,7 +548,9 @@ export class Section extends Component {
 
         return (
             <BrowserRouter basename={getBaseDir()} getUserConfirmation={this.getUserConfirmationHandler}>
-                <SectionContent wrappedComponentRef={node => this.sectionContent = node} root={this.props.root} structure={structure} />
+                <CompatRouter>
+                    <SectionContent wrappedComponentRef={node => this.sectionContent = node} root={this.props.root} structure={structure} />
+                </CompatRouter>
             </BrowserRouter>
         );
     }
