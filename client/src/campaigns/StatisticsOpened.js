@@ -8,7 +8,7 @@ import {withAsyncErrorHandler, withErrorHandling} from '../lib/error-handling';
 import axios from "../lib/axios";
 import {getUrl} from "../lib/urls";
 
-import Chart from 'react-google-charts';
+import {Chart} from 'react-google-charts';
 
 import styles from "./styles.scss";
 import {Table} from "../lib/table";
