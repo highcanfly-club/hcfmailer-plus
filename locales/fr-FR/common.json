@@ -986,7 +986,7 @@
   "googleMapsApiKey": "Clé API Google Maps",
   "xxxxxx": "XXXXXX",
   "theMapOverviewInCampaignStatistics": "L'aperçu de la carte dans les statistiques de campagne nécessite une clé API Google Maps. Veuillez l'entrer ici. Si aucune clé n'est fournie, Google peut limiter les demandes de carte, ce qui entraînera une indisponibilité occasionnelle de la carte dans les statistiques de campagne.",
-  "frontpageShoutOut": "Cri de première page",
+  "frontpageShoutOut": "Accroche de première page",
   "htmlCodeShownInTheFrontPageHeaderSection": "Code HTML affiché dans la section d'en-tête de la première page",
   "gpgSigning": "Signature GPG",
   "privateKeyPassphrase": "Phrase secrète de clé privée",
