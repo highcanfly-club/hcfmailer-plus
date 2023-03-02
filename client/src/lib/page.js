@@ -4,7 +4,7 @@ import React, {Component} from "react";
 import i18n, {withTranslation} from './i18n';
 import PropTypes from "prop-types";
 import {withRouter} from "react-router";
-import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
+import {BrowserRouter , Link, Route, Switch} from "react-router-dom";
 import {withErrorHandling} from "./error-handling";
 import interoperableErrors from "../../../shared/interoperable-errors";
 import {ActionLink, Button, DismissibleAlert, DropdownActionLink, Icon} from "./bootstrap-components";
@@ -547,9 +547,9 @@ export class Section extends Component {
         }
 
         return (
-            <Router basename={getBaseDir()} getUserConfirmation={this.getUserConfirmationHandler}>
+            <BrowserRouter basename={getBaseDir()} getUserConfirmation={this.getUserConfirmationHandler}>
                 <SectionContent wrappedComponentRef={node => this.sectionContent = node} root={this.props.root} structure={structure} />
-            </Router>
+            </BrowserRouter>
         );
     }
 }
