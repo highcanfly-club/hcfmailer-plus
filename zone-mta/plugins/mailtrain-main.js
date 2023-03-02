@@ -1,7 +1,7 @@
 'use strict';
 
 // Set module title
-module.exports.title = 'HCF Mailer integration (main)';
+module.exports.title = 'HCFMailer+ integration (main)';
 
 // Initialize the module
 module.exports.init = (app, done) => {

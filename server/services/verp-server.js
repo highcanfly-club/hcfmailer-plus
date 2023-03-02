@@ -78,7 +78,7 @@ const server = new SMTPServer({
     // log to console
     logger: false,
 
-    banner: 'HCF Mailer VERP bouncer',
+    banner: 'HCFMailer+ VERP bouncer',
 
     disabledCommands: ['AUTH', 'STARTTLS'],
 

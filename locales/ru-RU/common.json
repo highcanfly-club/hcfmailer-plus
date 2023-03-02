@@ -1,5 +1,5 @@
 {
-  "mailtrain2": "HCF Mailer",
+  "mailtrain2": "HCFMailer+",
   "build": "Build",
   "personalAccessToken": "Личный токен доступа",
   "accessTokenNotYetGenerated": "Токен доступа еще не создан",
