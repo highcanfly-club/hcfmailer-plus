@@ -21,7 +21,7 @@
   "license": "GPL-3.0",
   "homepage": "https://mailtrain.org/",
   "dependencies": {
-    "@coreui/coreui": "^2.1.16",
+    "@coreui/coreui": "^4.2.6",
     "@fortawesome/fontawesome-free": "^6.3.0",
     "@popperjs/core":"^2.11.6",
     "axios": "^1.3.4",
