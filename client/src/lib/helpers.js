@@ -1,6 +1,6 @@
 'use strict';
 
-import ellipsize from "ellipsize";
+import {ellipsize} from "ellipsize";
 
 
 export function ellipsizeBreadcrumbLabel(label) {
