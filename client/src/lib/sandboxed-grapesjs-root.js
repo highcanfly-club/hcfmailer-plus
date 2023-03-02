@@ -13,7 +13,10 @@ import mjml2html from "./mjml";
 
 import 'grapesjs/dist/css/grapes.min.css';
 import grapesjs from 'grapesjs';
-
+import fr from 'grapesjs/locale/fr';
+import en from 'grapesjs/locale/en';
+import es from 'grapesjs/locale/es';
+import pt from 'grapesjs/locale/pt';
 import 'grapesjs-mjml';
 
 import grapePlugin from 'grapesjs-preset-newsletter';
@@ -145,10 +148,14 @@ export class GrapesJSSandbox extends Component {
             storageManager:{
                 type: 'none'
             },
+            i18n: {
+                detectLocale: true,
+                messages: { en, fr, es, pt },
+              },
             assetManager: {
                 assets: this.state.assets,
                 upload: getSandboxUrl(`grapesjs/upload/${this.props.entityTypeId}/${this.props.entityId}`),
-                uploadText: 'Drop images here or click to upload',
+                uploadText: 'Déposez des images ici ou cliquez pour télécharger',
                 headers: {
                     'X-CSRF-TOKEN': '{{csrfToken}}',
                 },
@@ -199,7 +206,7 @@ export class GrapesJSSandbox extends Component {
                 '                  <table class="table100 c1790">\n' + 
                 '                    <tr>\n' + 
                 '                      <td class="top-cell" id="c1793">\n' + 
-                '                        <u class="browser-link" id="c307">View in browser\n' + 
+                '                        <u class="browser-link" id="c307"><a href="[LINK_BROWSER]">Ouvrir dans un navigateur</a>\n' + 
                 '                        </u>\n' + 
                 '                      </td>\n' + 
                 '                    </tr>\n' + 
@@ -210,7 +217,7 @@ export class GrapesJSSandbox extends Component {
                 '                        <img class="c926" src="https://grapesjs.com/img/grapesjs-logo.png" alt="GrapesJS."/>\n' + 
                 '                      </td>\n' + 
                 '                      <td class="cell c1776">\n' + 
-                '                        <div class="c1144">GrapesJS Newsletter Builder\n' + 
+                '                        <div class="c1144">GrapesJS Éditeur de newsletter\n' + 
                 '                          <br/>\n' + 
                 '                        </div>\n' + 
                 '                      </td>\n' + 
@@ -219,19 +226,19 @@ export class GrapesJSSandbox extends Component {
                 '                  <table class="card">\n' + 
                 '                    <tr>\n' + 
                 '                      <td class="card-cell">\n' + 
-                '                        <img class="c1271" src="https://grapesjs.com/img/tmp-header-txt.jpg" alt="Big image here"/>\n' + 
+                '                        <img class="c1271" src="https://grapesjs.com/img/tmp-header-txt.jpg" alt="Grande image ici"/>\n' + 
                 '                        <table class="table100 c1357">\n' + 
                 '                          <tr>\n' + 
                 '                            <td class="card-content">\n' + 
-                '                              <h1 class="card-title">Build your newsletters faster than ever\n' + 
+                '                              <h1 class="card-title">Écrivez vos newsletter plus vite que jamais.\n' + 
                 '                                <br/>\n' + 
                 '                              </h1>\n' + 
-                '                              <p class="card-text">Import, build, test and export responsive newsletter templates faster than ever using the GrapesJS Newsletter Builder.\n' + 
+                '                              <p class="card-text">Importez, concevez, testez et exportez des modèles de newsletters réactifs plus rapidement avec GrapesJS.\n' + 
                 '                              </p>\n' + 
                 '                              <table class="c1542">\n' + 
                 '                                <tr>\n' + 
                 '                                  <td class="card-footer" id="c1545">\n' + 
-                '                                    <a class="button" href="https://github.com/artf/grapesjs">Free and Open Source\n' + 
+                '                                    <a class="button" href="https://github.com/artf/grapesjs">Libre et Open Source\n' + 
                 '                                    </a>\n' + 
                 '                                  </td>\n' + 
                 '                                </tr>\n' + 
@@ -251,9 +258,9 @@ export class GrapesJSSandbox extends Component {
                 '                              <img class="list-item-image" src="https://grapesjs.com/img/tmp-blocks.jpg" alt="Image1"/>\n' + 
                 '                            </td>\n' + 
                 '                            <td class="list-cell-right">\n' + 
-                '                              <h1 class="card-title">Built-in Blocks\n' + 
+                '                              <h1 class="card-title">Blocs intégrés\n' + 
                 '                              </h1>\n' + 
-                '                              <p class="card-text">Drag and drop built-in blocks from the right panel and style them in a matter of seconds\n' + 
+                '                              <p class="card-text">Faites glisser et déposez des blocs intégrés à partir du panneau de droite et stylisez-les en quelques secondes\n' + 
                 '                              </p>\n' + 
                 '                            </td>\n' + 
                 '                          </tr>\n' + 
@@ -270,9 +277,9 @@ export class GrapesJSSandbox extends Component {
                 '                              <img class="list-item-image" src="https://grapesjs.com/img/tmp-tgl-images.jpg" alt="Image2"/>\n' + 
                 '                            </td>\n' + 
                 '                            <td class="list-cell-right">\n' + 
-                '                              <h1 class="card-title">Toggle images\n' + 
+                '                              <h1 class="card-title">Basculer les images\n' + 
                 '                              </h1>\n' + 
-                '                              <p class="card-text">Build a good looking newsletter even without images enabled by the email clients\n' + 
+                '                              <p class="card-text">Créez une belle newsletter même sans images activées par les clients de messagerie\n' + 
                 '                              </p>\n' + 
                 '                            </td>\n' + 
                 '                          </tr>\n' + 
@@ -290,9 +297,9 @@ export class GrapesJSSandbox extends Component {
                 '                              <table class="grid-item-card-body">\n' + 
                 '                                <tr>\n' + 
                 '                                  <td class="grid-item-card-content">\n' + 
-                '                                    <h1 class="card-title">Test it\n' + 
+                '                                    <h1 class="card-title">Testez-le\n' + 
                 '                                    </h1>\n' + 
-                '                                    <p class="card-text">You can send email tests directly from the editor and check how are looking on your email clients\n' + 
+                '                                    <p class="card-text">Vous pouvez envoyer des tests par e-mail directement à partir de l’éditeur et vérifier à quoi ressemblent vos clients de messagerie\n' + 
                 '                                    </p>\n' + 
                 '                                  </td>\n' + 
                 '                                </tr>\n' + 
@@ -311,7 +318,7 @@ export class GrapesJSSandbox extends Component {
                 '                                  <td class="grid-item-card-content">\n' + 
                 '                                    <h1 class="card-title">Responsive\n' + 
                 '                                    </h1>\n' + 
-                '                                    <p class="card-text">Using the device manager you\'ll always send a fully responsive contents\n' + 
+                '                                    <p class="card-text">En utilisant le gestionnaire de périphériques, vous enverrez toujours un contenu entièrement réactif\n' + 
                 '                                    </p>\n' + 
                 '                                  </td>\n' + 
                 '                                </tr>\n' + 
@@ -326,13 +333,12 @@ export class GrapesJSSandbox extends Component {
                 '                    <tr>\n' + 
                 '                      <td class="footer-cell">\n' + 
                 '                        <div class="c2577">\n' + 
-                '                          <p class="footer-info">GrapesJS Newsletter Builder is a free and open source preset (plugin) used on top of the GrapesJS core library.\n' + 
-                '                        For more information about and how to integrate it inside your applications check<p>\n' + 
-                '                        <a class="link" href="https://github.com/artf/grapesjs-preset-newsletter">GrapesJS Newsletter Preset</a>\n' + 
+                '                          <p class="footer-info">GrapesJS Newsletter Builder est un plugin gratuit et open source il a été intégré ici par<p>\n' + 
+                '                        <a class="link" href="https://sctg.eu.org">© SCTG 2023</a>\n' + 
                 '                          <br/>\n' + 
                 '                        </div>\n' + 
                 '                        <div class="c2421">\n' + 
-                '                          MADE BY <a class="link" href="https://github.com/artf">ARTUR ARSENIEV</a>\n' + 
+                '                          <a class="link" href="[LINK_PREFERENCES]">Se désabonner</a>\n' + 
                 '                          <p>\n' + 
                 '                        </div>\n' + 
                 '                      </td>\n' + 
