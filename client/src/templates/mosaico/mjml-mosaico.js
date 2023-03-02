@@ -1,6 +1,6 @@
 'use strict';
 
-import htmlparser from 'htmlparser2'
+import * as htmlparser from 'htmlparser2' 
 import min from 'lodash/min';
 import {BodyComponent, HeadComponent, MJML} from "../../lib/mjml";
 import shortid from "shortid";
