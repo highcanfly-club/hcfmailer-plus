@@ -46,6 +46,7 @@
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-end;
+  min-height: 16em;
 }
 
 .buttonRow {}
@@ -302,7 +303,7 @@
 
 .dayPicker {
   position: absolute;
-  z-index: 10;
+  z-index: 99;
   background-color: white;
   border: 1px solid grey;
   box-shadow: 10px 5px 5px grey;
