@@ -5,6 +5,7 @@ import {withTranslation} from './i18n';
 import PropTypes from 'prop-types';
 import {withAsyncErrorHandler, withErrorHandling} from './error-handling';
 import {withComponentMixins} from "./decorator-helpers";
+import Dropdown from 'react-bootstrap/Dropdown';
 
 @withComponentMixins([
     withTranslation,
@@ -135,11 +136,16 @@ export class ButtonDropdown extends Component {
         }
 
         return (
-            <div className={className}>
-                <button type="button" className={buttonClassName} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{icon}{iconSpacer}{props.label}</button>
-                <ul className={menuClassName}>{props.children}</ul>
-            </div>
-        );
+            <Dropdown className={className}>
+              <Dropdown.Toggle id="dropdown-basic" >
+              {icon}{iconSpacer}{props.label}
+              </Dropdown.Toggle>
+        
+              <Dropdown.Menu>
+              {props.children}
+              </Dropdown.Menu>
+            </Dropdown>
+          );
     }
 }
 
