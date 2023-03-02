@@ -69,6 +69,10 @@ i18n
 // Show moment text in selected language
 moment.locale(i18n.language);
 
+export function shortLanguage(){
+    return i18n.language.substring(0,2);
+}
+
 export default i18n;
 
 

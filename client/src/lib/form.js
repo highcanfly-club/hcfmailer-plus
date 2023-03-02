@@ -1,7 +1,7 @@
 'use strict';
 
 import React, {Component} from 'react';
-import {withTranslation} from './i18n';
+import {withTranslation,shortLanguage} from './i18n';
 import axios, {HTTPMethod} from './axios';
 import Immutable from 'immutable';
 import PropTypes from 'prop-types';
@@ -17,8 +17,9 @@ import ACEEditorRaw from 'react-ace';
 import 'ace-builds/src-noconflict/theme-github';
 import 'ace-builds/src-noconflict/ext-searchbox';
 
-import DayPicker from 'react-day-picker';
-import 'react-day-picker/lib/style.css';
+import {DayPicker} from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
+import { fr ,enUS ,es ,pt,de} from 'date-fns/locale';
 import {
     birthdayYear,
     DateFormat,
@@ -994,7 +995,26 @@ class DateTimePicker extends Component {
             minute: selectedDate.getMinutes(),
             second: selectedDate.getSeconds()
         };
+        let lang = enUS;
+        switch (shortLanguage()){
+            case 'fr':
+                lang = fr
+                break;
+            case 'es':
+                lang = es
+                break;
+            case 'pt':
+                lang = pt
+                break;
+            case 'de':
+                lang = de
+                break;
+            case 'en':
+                lang = enUS
+            default:
 
+        }
+        const currentYear = new Date().getFullYear()
         return wrapInput(id, htmlId, owner, props.format, '', props.label, props.help,
             <>
                 <div className={props.disabled ? '' : "input-group"}>
@@ -1012,12 +1032,16 @@ class DateTimePicker extends Component {
                 {this.state.dateOpened &&
                 <div className={styles.dayPickerWrapper}>
                     <DayPicker
+                        captionLayout="dropdown"
+                        fromYear={1900} toYear={currentYear}
+                        locale={lang}
                         onDayClick={date => this.dateTimeChange(date, time)}
                         selectedDays={selectedDate}
-                        initialMonth={selectedDate}
+                        defaultMonth={selectedDate}
                         fromMonth={fromMonth}
                         toMonth={toMonth}
                         captionElement={captionElement}
+                        className={styles.dayPicker}
                     />
                     {showTime &&
                     <TimePicker

@@ -2,14 +2,16 @@
 @import "bootstrap/scss/variables";
 @import "../scss/variables.scss";
 @import "../scss/mixins";
-@import "~react-day-picker/lib/style.css";
+@import "~react-day-picker/dist/style.css";
 
 .toolbar {
   float: right;
   margin-bottom: 15px;
 }
 
-.form { // This is here to give the styles below higher priority than Bootstrap has
+.form {
+
+  // This is here to give the styles below higher priority than Bootstrap has
   :global .DayPicker {
     border: $input-border-width solid $input-border-color;
     border-radius: $input-border-radius;
@@ -46,14 +48,13 @@
   justify-content: flex-end;
 }
 
-.buttonRow {
-}
+.buttonRow {}
 
-.buttonRow > * {
+.buttonRow>* {
   margin-right: 15px;
 }
 
-.buttonRow > *:last-child {
+.buttonRow>*:last-child {
   margin-right: 0px;
 }
 
@@ -71,11 +72,11 @@
   overflow-x: auto;
 }
 
-.actionLinks > * {
+.actionLinks>* {
   margin-right: 8px;
 }
 
-.actionLinks > *:last-child {
+.actionLinks>*:last-child {
   margin-right: 0px;
 }
 
@@ -134,16 +135,20 @@
   text-align: center;
 }
 
-.columnScroller{
+.columnScroller {
   cursor: pointer;
-  -webkit-user-select: none; /* Safari */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* IE10+/Edge */
-  user-select: none; /* Standard */
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE10+/Edge */
+  user-select: none;
+  /* Standard */
 
   &:hover {
     //border: 1px dashed var(--gray);
-    box-shadow:0 0 1px 1px var(--gray);
+    box-shadow: 0 0 1px 1px var(--gray);
   }
 }
 
@@ -155,16 +160,19 @@
 .columnSelect {
   list-style-type: none;
   overflow: hidden;
-  padding:0;
+  padding: 0;
   height: 20em;
   margin: 0;
 
-  @include hocus(){
+  @include hocus() {
     overflow-y: scroll;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
 
-    &::-webkit-scrollbar { /* WebKit */
+    &::-webkit-scrollbar {
+      /* WebKit */
       width: 0;
       height: 0;
     }
@@ -177,13 +185,14 @@
 
   &.columnSelectItemSelected {
     background-color: #4A90E2;
-    color:white;
+    color: white;
+
     @include hocus() {
-      background-color:#51A0FA;
+      background-color: #51A0FA;
     }
   }
 
-  @include hocus(){
+  @include hocus() {
     background-color: #F0F8FF;
   }
 }
@@ -235,7 +244,7 @@
   padding-top: 3px;
 }
 
-.dropZone{
+.dropZone {
   padding-top: 20px;
   padding-bottom: 20px;
   margin-bottom: 3px;
@@ -290,3 +299,12 @@
   }
 }
 
+
+.dayPicker {
+  position: absolute;
+  z-index: 10;
+  background-color: white;
+  border: 1px solid grey;
+  box-shadow: 10px 5px 5px grey;
+  border-width: thin;
+}
