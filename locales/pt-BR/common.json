@@ -1402,5 +1402,6 @@
   "thePasswordMustContainAtLeastOneNumber": "A senha deve conter pelo menos um número",
   "thePasswordMustContainAtLeastOneSpecial": "A senha deve conter pelo menos um caractere especial",
   "updatePreferences":"Update Your Preferences",
-  "updateYourEmail":"Update Your Email Address"
+  "updateYourEmail":"Update Your Email Address",
+  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?"
 }

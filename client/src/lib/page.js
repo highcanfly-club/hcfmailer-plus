@@ -421,7 +421,7 @@ export class SectionContent extends Component {
         if (queryParams.indexOf('cas-login-error') > -1) this.setFlashMessage('danger', t('authenticationFailed'));
 
         window.addEventListener('beforeunload', this.beforeUnloadHandler);
-        this.historyUnblock = this.props.history.block('Changes you made may not be saved. Are you sure you want to leave this page?');
+        this.historyUnblock = this.props.history.block(t('alertQuitPage'));
     }
 
     componentWillUnmount() {
