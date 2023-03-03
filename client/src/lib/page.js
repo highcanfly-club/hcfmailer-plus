@@ -211,8 +211,8 @@ function renderFrameWithContent(t, panelInFullScreen, showSidebar, primaryMenu, 
                     </main>
                 </div>
 
-                <footer key="appFooter" className="footer fixed-bottom mt-auto bg-light">
-                    <div className="text-muted">&copy; 2023 <a href="https://sctg.eu.org">SCTG.eu.org</a>, Mailtrain.org. <a href="https://github.com/highcanfly-club/mailtrain/tree/hcf">{t('sourceOnGitHub')}</a></div>
+                <footer key="appFooter" className="footer fixed-bottom mt-auto">
+                    <div className="">&copy; 2023 <a href="https://sctg.eu.org">SCTG.eu.org</a>, Mailtrain.org. <a href="https://github.com/highcanfly-club/mailtrain/tree/hcf">{t('sourceOnGitHub')}</a></div>
                 </footer>
             </div>
         );
