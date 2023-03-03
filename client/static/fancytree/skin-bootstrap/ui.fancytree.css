@@ -210,7 +210,7 @@ div.fancytree-drag-helper span.fancytree-childcounter,
 div.fancytree-drag-helper span.fancytree-dnd-modifier {
   display: inline-block;
   color: #fff;
-  background: #337ab7;
+  background: #a53d64;
   border: 1px solid gray;
   min-width: 10px;
   height: 10px;
@@ -558,7 +558,7 @@ span.fancytree-node span.fancytree-expander:hover {
   background-color: #f5f5f5;
 }
 .fancytree-plain.fancytree-container span.fancytree-node.fancytree-active span.fancytree-title {
-  background-color: #5094ce;
+  background-color: #cfdede;
   color: #fff;
 }
 .fancytree-plain.fancytree-container span.fancytree-node.fancytree-active:hover span.fancytree-title {
@@ -568,11 +568,11 @@ span.fancytree-node span.fancytree-expander:hover {
   color: #fff;
 }
 .fancytree-plain.fancytree-container.fancytree-treefocus span.fancytree-node.fancytree-focused span.fancytree-title {
-  border-color: #337ab7;
+  border-color: #a53d64;
 }
 .fancytree-plain.fancytree-container.fancytree-treefocus span.fancytree-node.fancytree-active span.fancytree-title {
-  background-color: #337ab7;
-  border-color: #337ab7;
+  background-color: #a53d64;
+  border-color: #a53d64;
 }
 .fancytree-plain.fancytree-container.fancytree-treefocus span.fancytree-node.fancytree-active:hover span.fancytree-title {
   background-color: #2e6da4;
@@ -613,7 +613,7 @@ table.fancytree-ext-table.fancytree-colorize-selected > tbody > tr.fancytree-act
   outline-color: #80c780;
 }
 table.fancytree-ext-table.fancytree-container > tbody > tr.fancytree-active > td {
-  background-color: #5094ce;
+  background-color: #cfdede;
 }
 table.fancytree-ext-table.fancytree-container > tbody > tr.fancytree-active > td,
 table.fancytree-ext-table.fancytree-container > tbody > tr.fancytree-active > td span.fancytree-title {
@@ -623,7 +623,7 @@ table.fancytree-ext-table.fancytree-treefocus.fancytree-container > tbody > tr.f
   outline: 1px dotted #000;
 }
 table.fancytree-ext-table.fancytree-treefocus.fancytree-container > tbody > tr.fancytree-active > td {
-  background-color: #337ab7;
+  background-color: #a53d64;
 }
 table.fancytree-ext-table.fancytree-treefocus.fancytree-container.table-hover > tbody > tr.fancytree-active:hover > td {
   background-color: #2e6da4;
