@@ -168,13 +168,12 @@ async function createApp(appType) {
     app.use(cookieParser());
 
     if (config.redis.enabled) {
-        const RedisStore = require('connect-redis')(session);
+        const RedisStore = require('connect-redis').default;
         const { createClient } = require("redis")
         let redisClient = createClient({ 
-            legacyMode: true,
+            legacyMode: false,
             url: `redis://${config.redis.host}:${config.redis.port}` })
         redisClient.connect().catch(console.error)
-
         app.use(session({
             store: new RedisStore({client: redisClient, ...config.redis}),
             secret: config.www.secret,
