@@ -149,7 +149,7 @@ body.mailtrain {
 
   .main .container-fluid {
     padding: 0 15px;
-
+    margin-bottom: 3.5rem;
     @include media-breakpoint-down(md) {
       padding: 0 3px;
     }
