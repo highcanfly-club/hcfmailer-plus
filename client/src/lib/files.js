@@ -158,12 +158,15 @@ export default class Files extends Component {
 
                 {
                     this.props.entity.permissions.includes(this.props.managePermission) &&
-                    <Dropzone onDrop={::this.onDrop}>
-                        {({getRootProps, getInputProps, isDragActive, draggedFiles}) => (
+
+                    <Dropzone onDrop={acceptedFiles => {console.log(acceptedFiles);this.onDrop(acceptedFiles)}}>
+                        {({getRootProps, getInputProps, isDragActive, acceptedFiles}) => (
+                            <section>
                             <div {...getRootProps()} className={styles.dropZone + (isDragActive ? ' ' + styles.dropZoneActive : '')}>
                                 <input {...getInputProps()} />
-                                <p>{isDragActive ? t('dropCountFile', {count: draggedFiles.length}) : t('dropFilesHere')}</p>
+                                <p>{t('dropFilesHere')}</p>
                             </div>
+                            </section>
                         )}
                     </Dropzone>
                 }
