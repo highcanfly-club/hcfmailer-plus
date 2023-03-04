@@ -184,7 +184,7 @@ export class DeleteModalDialog extends Component {
 
         return <RestActionModalDialog
             title={t('confirmDeletion')}
-            message={t('areYouSureYouWantToDeleteName?', {name})}
+            message={t('bugmodal')+'\r'+t('areYouSureYouWantToDeleteName?', {name})}
             stateOwner={this.props.stateOwner}
             visible={this.props.visible}
             actionMethod={HTTPMethod.DELETE}

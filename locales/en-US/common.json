@@ -1186,5 +1186,6 @@
   "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?",
   "clickPerSubscriber":"Open and click counts per currently subscribed subscriber",
   "statsInfo":"Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through",
-  "functionnalityOfProduct":"functionality of HCFMailer+"
+  "functionnalityOfProduct":"functionality of HCFMailer+",
+  "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. "
 }

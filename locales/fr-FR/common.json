@@ -1172,5 +1172,6 @@
   "alertQuitPage":"Les modifications que vous avez apportées peuvent ne pas être enregistrées. Voulez-vous vraiment quitter cette page ?",
   "clickPerSubscriber":"Ouvrir et nombre de clics par abonné actuellement abonné",
   "statsInfo":"Ci-dessous, vous pouvez télécharger des rapports prédéfinis liés à cette campagne. Chaque lien génère un fichier CSV qui peut être visualisé dans un éditeur de tableur. Les rapports personnalisés et les rapports qui couvrent plusieurs campagnes peuvent être créés via cette fonctionnalité",
-  "functionnalityOfProduct":"fonctionnalité de HCFMailer+"
+  "functionnalityOfProduct":"fonctionnalité de HCFMailer+",
+  "bugmodal":"BUG: Utilisez actuellement [Supprimer] de la vue de liste, cliquez en dehors de cette modale pour la fermer. "
 }
