@@ -25,7 +25,7 @@ import {Entity, Event} from '../../../../shared/triggers';
 import moment from 'moment';
 import {getCampaignLabels} from "../helpers";
 import {withComponentMixins} from "../../lib/decorator-helpers";
-
+import {enableDeleteModal} from "../../settings/settings";
 
 @withComponentMixins([
     withTranslation,

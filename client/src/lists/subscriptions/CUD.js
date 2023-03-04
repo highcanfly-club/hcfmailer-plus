@@ -25,6 +25,7 @@ import {getFieldColumn, SubscriptionStatus} from '../../../../shared/lists';
 import {getFieldTypes, getSubscriptionStatusLabels} from './helpers';
 import moment from 'moment-timezone';
 import {withComponentMixins} from "../../lib/decorator-helpers";
+import {enableDeleteModal} from "../../settings/settings";
 
 @withComponentMixins([
     withTranslation,
@@ -239,7 +240,7 @@ export default class CUD extends Component {
                     <ButtonRow>
                         <Button type="submit" className="btn-primary" icon="check" label={t('save')}/>
                         <Button type="submit" className="btn-primary" icon="check" label={t('saveAndLeave')} onClickAsync={async () => await this.submitHandler(true)}/>
-                        {isEdit && <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/lists/${this.props.list.id}/subscriptions/${this.props.entity.id}/delete`}/>}
+                        {enableDeleteModal && isEdit && <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/lists/${this.props.list.id}/subscriptions/${this.props.entity.id}/delete`}/>}
                     </ButtonRow>
                 </Form>
             </div>

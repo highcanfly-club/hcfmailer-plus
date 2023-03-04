@@ -25,6 +25,7 @@ import {getDefaultNamespace, NamespaceSelect, validateNamespace} from '../lib/na
 import {DeleteModalDialog} from "../lib/modals";
 import {getUrl} from "../lib/urls";
 import {withComponentMixins} from "../lib/decorator-helpers";
+import {enableDeleteModal} from "../settings/settings";
 
 @withComponentMixins([
     withTranslation,
@@ -285,7 +286,7 @@ export default class CUD extends Component {
                     <ButtonRow>
                         <Button type="submit" className="btn-primary" icon="check" label={t('save')}/>
                         <Button type="submit" className="btn-primary" icon="check" label={t('saveAndLeave')} onClickAsync={async () => await this.submitHandler(true)}/>
-                        {canDelete &&
+                        {enableDeleteModal && canDelete &&
                             <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/reports/${this.props.entity.id}/delete`}/>
                         }
                     </ButtonRow>

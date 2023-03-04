@@ -37,6 +37,7 @@ import {getCampaignLabels, ListsSelectorHelper} from "./helpers";
 import {withComponentMixins} from "../lib/decorator-helpers";
 import interoperableErrors from "../../../shared/interoperable-errors";
 import {Trans} from "react-i18next";
+import {enableDeleteModal} from "../settings/settings";
 
 @withComponentMixins([
     withTranslation,
@@ -786,7 +787,7 @@ export default class CUD extends Component {
                                 }
                             </>
                         }
-                        {canDelete && <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/campaigns/${this.props.entity.id}/delete`}/> }
+                        {enableDeleteModal && canDelete && <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/campaigns/${this.props.entity.id}/delete`}/> }
                     </ButtonRow>
                 </Form>
             </div>
