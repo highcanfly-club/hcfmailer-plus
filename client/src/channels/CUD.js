@@ -37,6 +37,7 @@ import {getCampaignLabels, ListsSelectorHelper} from "../campaigns/helpers";
 import {withComponentMixins} from "../lib/decorator-helpers";
 import interoperableErrors from "../../../shared/interoperable-errors";
 import {Trans} from "react-i18next";
+import {enableDeleteModal} from "../settings/settings";
 
 @withComponentMixins([
     withTranslation,
@@ -579,7 +580,7 @@ export default class CUD extends Component {
                                 <Button type="submit" className="btn-primary" icon="check" label={t('saveAndLeave')} onClickAsync={async () => await this.submitHandler(true)}/>
                             </>
                         }
-                        {canDelete && <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/channels/${this.props.entity.id}/delete`}/> }
+                        {enableDeleteModal && canDelete && <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/channels/${this.props.entity.id}/delete`}/> }
                     </ButtonRow>
                 </Form>
             </div>

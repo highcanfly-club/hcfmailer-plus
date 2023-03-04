@@ -25,6 +25,7 @@ import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-handlebars';
 import {withComponentMixins} from "../../lib/decorator-helpers";
+import {enableDeleteModal} from "../../settings/settings";
 
 @withComponentMixins([
     withTranslation,
@@ -324,7 +325,7 @@ export default class CUD extends Component {
                     <ButtonRow>
                         <Button type="submit" className="btn-primary" icon="check" label={t('save')}/>
                         <Button type="submit" className="btn-primary" icon="check" label={t('saveAndLeave')} onClickAsync={async () => await this.submitHandler(true)}/>
-                        {canDelete &&
+                        {enableDeleteModal && canDelete &&
                             <LinkButton className="btn-danger" icon="trash-alt" label={t('delete')} to={`/reports/templates/${this.props.entity.id}/delete`}/>
                         }
                     </ButtonRow>
