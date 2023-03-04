@@ -1290,5 +1290,6 @@
   "thePasswordMustContainAtLeastOneSpecial": "La contraseña debe tener al menos un caracter especial",
   "updatePreferences":"Actualice sus preferencias",
   "updateYourEmail":"Actualiza su dirección de correo electrónico",
-  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?"
+  "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?",
+  "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. "
 }
