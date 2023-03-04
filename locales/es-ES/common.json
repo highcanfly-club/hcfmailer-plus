@@ -1291,5 +1291,6 @@
   "updatePreferences":"Actualice sus preferencias",
   "updateYourEmail":"Actualiza su dirección de correo electrónico",
   "alertQuitPage":"Changes you made may not be saved. Are you sure you want to leave this page?",
-  "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. "
+  "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. ",
+  "noEmailConfirmation":"This person will not receive a confirmation email so make sure that you have permission to email them."
 }
