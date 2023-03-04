@@ -232,8 +232,7 @@ export default class CUD extends Component {
                     {!isEdit &&
                         <AlignedRow>
                             <p className="text-warning">
-                                This person will not receive a confirmation email so make sure that you have permission to
-                                email them.
+                                {t('noEmailConfirmation')}
                             </p>
                         </AlignedRow>
                     }

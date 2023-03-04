@@ -1187,5 +1187,6 @@
   "clickPerSubscriber":"Open and click counts per currently subscribed subscriber",
   "statsInfo":"Below, you can download pre-made reports related to this campaign. Each link generates a CSV file that can be viewed in a spreadsheet editor. Custom reports and reports that cover more than one campaign can be created through",
   "functionnalityOfProduct":"functionality of HCFMailer+",
-  "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. "
+  "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. ",
+  "noEmailConfirmation":"This person will not receive a confirmation email so make sure that you have permission to email them."
 }
