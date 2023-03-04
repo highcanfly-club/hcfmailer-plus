@@ -4,6 +4,7 @@
   "version": "2.0.0",
   "description": "Self hosted email newsletter app - server",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node index.js",
     "sqlinit": "node setup/sql/init.js",
@@ -91,7 +92,7 @@
     "morgan": "^1.9.1",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.2.0",
-    "nanoid": "^3.1.12",
+    "nanoid": "^3.3.4",
     "node-ipc": "^9.1.1",
     "node-mocks-http": "^1.8.1",
     "node-object-hash": "^1.4.1",
