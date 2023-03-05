@@ -6,7 +6,24 @@ MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\"
 cat << EOF 
 From: "SAUVEGARDE @HCFMailer+" <$BACKUP_FROM>
 To: "Backup@Mailtrain" <$BACKUP_TO>
-Subect: Sauvegarde
+MIME-Version: 1.0
+Subject: Sauvegarde HCFMailer+
+Content-Type: multipart/mixed; boundary="-"
+
+This is a MIME encoded message.  Decode it with "munpack"
+or any other MIME reading software.  Mpack/munpack is available
+via anonymous FTP in ftp.andrew.cmu.edu:pub/mpack/
+---
+Content-Type: text/plain
+
+Voici la sauvegarde d'aujourd'hui
+HCFMailer+ team
+
+---
+Content-Type: application/octet-stream; name="backup.sql.bz2"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="backup.sql.bz2"
+
 EOF
-)    | (cat - && /usr/bin/uuencode -m /app/server/files/backup.sql.bz2 backup.sql.bz2)\
+)    | (cat - && /usr/bin/openssl base64 < /app/server/files/backup.sql.bz2 && echo "" && echo "---")\
      | /usr/sbin/sendmail -f $BACKUP_FROM -v -au$MAILUSER -ap$MAILPASSWD -amPLAIN  -S 127.0.0.1:2525 -t --

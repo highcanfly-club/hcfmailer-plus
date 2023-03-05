@@ -4,7 +4,15 @@ FROM node:18-alpine as builder
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    make gcc g++ git python3 mysql-client mariadb-connector-c-dev
+    make gcc g++ git python3 automake autoconf
+
+RUN set -ex; \
+    cd / &&\
+    git clone https://github.com/eltorio/mpack.git &&\
+    cd mpack &&\
+    rm -f aclocal.m4 && aclocal && automake --add-missing && autoreconf &&\
+    ./configure &&\
+    make 
 
 # Copy package.json dependencies
 COPY server/package.json /app/server/package.json
@@ -33,6 +41,7 @@ RUN set -ex; \
 RUN set -ex; \
    cd /app/client && \
    rm -rf node_modules
+
 # Final Image
 FROM node:18-alpine
 LABEL maintainer="Ronan Le Meillat <ronan@parapente.cf>"
@@ -52,6 +61,12 @@ RUN chmod ugo+x /app/init-cloudflare.sh &&\
     chmod ugo+x /update-cloudflare-dns.sh
 
 COPY --from=builder /app/ /app/
+COPY --from=builder /mpack/mpack /usr/bin/mpack
+COPY --from=builder /mpack/munpack /usr/bin/munpack
+
+RUN set -ex; \
+    apk add --update --no-cache \
+    mysql-client mariadb-connector-c-dev
 
 EXPOSE 3000 3003 3004
 ENTRYPOINT ["bash", "/app/docker-entrypoint.sh"]
