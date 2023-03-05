@@ -51,16 +51,17 @@ WORKDIR /app/
 RUN set -ex; \
     apk add --update --no-cache \
     pwgen netcat-openbsd bash imagemagick curl acme.sh &&\
-    echo "23       32      *       *       0       /app/sendemail" >> /etc/crontabs/root &&\
+    echo "23       32      *       *       0       /autobackup" >> /etc/crontabs/root &&\
     echo "*/10     *       *       *       *       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/crontabs/root &&\
     echo "0        0       *       *       0       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/crontabs/root 
 COPY scripts/init-cloudflare.sh /app/
 COPY scripts/init-letsencrypt.sh /app/
 COPY scripts/update-cloudflare-dns.sh /
+COPY scripts/autobackup /
 RUN chmod ugo+x /app/init-cloudflare.sh &&\
     chmod ugo+x /app/init-letsencrypt.sh &&\
     chmod ugo+x /update-cloudflare-dns.sh &&\
-    chmod ugo+x /app/sendemail
+    chmod ugo+x /autobackup
 
 COPY --from=builder /app/ /app/
 COPY --from=builder /mpack/mpack /usr/bin/mpack
