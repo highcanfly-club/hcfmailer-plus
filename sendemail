@@ -1,0 +1,12 @@
+#!/bin/bash
+MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.*\"\(.*\)\",$/\1/p'`
+MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'`
+/usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases | bzip2 -9 > /app/server/files/backup.sql.bz2
+(
+cat << EOF 
+From: "SAUVEGARDE @HCFMailer+" <$BACKUP_FROM>
+To: "Backup@Mailtrain" <$BACKUP_TO>
+Subect: Sauvegarde
+EOF
+)    | (cat - && /usr/bin/uuencode -m /app/server/files/backup.sql.bz2 backup.sql.bz2)\
+     | /usr/sbin/sendmail -f $BACKUP_FROM -v -au$MAILUSER -ap$MAILPASSWD -amPLAIN  -S 127.0.0.1:2525 -t --

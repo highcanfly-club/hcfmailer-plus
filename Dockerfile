@@ -4,7 +4,7 @@ FROM node:18-alpine as builder
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    make gcc g++ git python3
+    make gcc g++ git python3 mysql-client mariadb-connector-c-dev
 
 # Copy package.json dependencies
 COPY server/package.json /app/server/package.json
