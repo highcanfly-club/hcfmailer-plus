@@ -135,7 +135,11 @@ async function createConfig() {
                 connections: config.builtinZoneMTA.connections,
                 pool: 'default'
             }
-        }
+        },
+
+        mtaSts: {
+            enabled: true
+        },
     };
 
     await fs.writeFile(zoneMtaBuiltingConfig, JSON.stringify(cnf, null, 2));
