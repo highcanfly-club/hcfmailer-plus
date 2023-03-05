@@ -27,6 +27,8 @@ stringData:
   CLOUDFLARE_API_KEY: $CLOUDFLARE_API_KEY
   CLOUDFLARE_ZONE_ID: $CLOUDFLARE_ZONE_ID
   CLOUDFLARE_DNS_RECORDS: $CLOUDFLARE_DNS_RECORDS
+  BACKUP_TO: $BACKUP_TO
+  BACKUP_FROM: $BACKUP_FROM
 
 ---
 apiVersion: v1
@@ -337,6 +339,16 @@ spec:
                 secretKeyRef:
                   name: mailtrain
                   key: ADMIN_PASSWORD
+            - name: BACKUP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: BACKUP_FROM
+            - name: BACKUP_TO
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: BACKUP_TO
             - name: CLOUDFLARE_API_KEY
               valueFrom:
                 secretKeyRef:
