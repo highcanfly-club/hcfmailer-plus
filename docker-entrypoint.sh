@@ -95,7 +95,7 @@ redis:
 builtinZoneMTA:
   enabled: $WITH_ZONE_MTA
   log:
-    level: warn
+    level: info
   mongo: mongodb://${MONGO_HOST}:27017/zone-mta
   redis: redis://${REDIS_HOST}:6379/2
   poolName: $POOL_NAME
@@ -185,7 +185,7 @@ else
 mysql:
   host: $MYSQL_HOST
 log:
-  level: warn
+  level: info
 EOT
 fi
 
