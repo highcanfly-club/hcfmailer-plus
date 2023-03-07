@@ -729,7 +729,16 @@ export const requiresAuthenticatedUser = createComponentMixin({
     }
 });
 
+function ifLanguageisShort(lang){
+    if (typeof lang === "string" && lang.length===2){
+        return `${lang}-${lang.toUpperCase()}`
+    }else{
+        return lang
+    }
+}
+
 export function getLanguageChooser(t) {
+   console.log(mailtrainConfig.enabledLanguages)
     const languageOptions = [];
     for (const lng of mailtrainConfig.enabledLanguages) {
         const langDesc = getLang(lng);
@@ -740,7 +749,7 @@ export function getLanguageChooser(t) {
         )
     }
 
-    const currentLngCode = getLang(i18n.language).getShortLabel(t);
+    const currentLngCode = getLang(ifLanguageisShort(i18n.language)).getShortLabel(t);
 
     const languageChooser = (
         <NavDropdown menuclassname="dropdown-menu-right" title={currentLngCode}>

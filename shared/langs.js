@@ -63,7 +63,7 @@ const langCodes = {
     },
     'fr-FR': {
         getShortLabel: t => 'FR',
-        getLabel: t => 'Francais',
+        getLabel: t => 'Français',
         longCode: 'fr-FR'
     },
     'ru-RU': {
