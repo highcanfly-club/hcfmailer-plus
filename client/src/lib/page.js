@@ -738,7 +738,6 @@ function ifLanguageisShort(lang){
 }
 
 export function getLanguageChooser(t) {
-   console.log(mailtrainConfig.enabledLanguages)
     const languageOptions = [];
     for (const lng of mailtrainConfig.enabledLanguages) {
         const langDesc = getLang(lng);
