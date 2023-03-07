@@ -6,7 +6,7 @@
   "scripts": {
     "setdate": "sed -i.bak -E \"s/__BUILD_DATE__/`date -I`/g\" src/Home.js",
     "js": "webpack",
-    "watch-js": "webpack --watch",
+    "watch-js": "webpack --watch -d inline-source-map",
     "css": "npm-run-all --sequential css-compile css-minify",
     "css-compile": "npx sass --source-map src/scss/mailtrain.scss dist/mailtrain.css",
     "css-minify": "cleancss --source-map --source-map-inline-sources --input-source-map dist/mailtrain.css.map --output dist/mailtrain.min.css dist/mailtrain.css",
@@ -59,7 +59,7 @@
     "react-google-charts": "^4.0.0",
     "react-i18next": "^12.2.0",
     "react-router-dom": "^5.2.0",
-    "react-router-dom-v5-compat":"^6.8.2",
+    "react-router-dom-v5-compat": "^6.8.2",
     "react-sortable-tree": "^2.8.0",
     "shallowequal": "^1.1.0",
     "shortid": "^2.2.16",
