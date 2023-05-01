@@ -26,6 +26,11 @@ spec:
               name: mailtrain      
               port: 
                 number: {{ .Values.service.basePort }}
+  {{ if .Values.ingress.clusterIssuer -}}
+  tls:
+  - hosts: [{{ .Values.app.HOST_BASE_TRUSTED }}]
+    secretName: mailtrain-trusted-tls-cert
+  {{ end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -53,6 +58,11 @@ spec:
               name: mailtrain      
               port: 
                 number: {{ .Values.service.sandboxPort }}
+  {{ if .Values.ingress.clusterIssuer -}}
+  tls:
+  - hosts: [{{ .Values.app.HOST_BASE_SANDBOX }}]
+    secretName: mailtrain-sandbox-tls-cert
+  {{ end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -80,6 +90,11 @@ spec:
               name: mailtrain      
               port: 
                 number: {{ .Values.service.publicPort }}
+  {{ if .Values.ingress.clusterIssuer -}}
+  tls:
+  - hosts: [{{ .Values.app.HOST_BASE_PUBLIC }}]
+    secretName: mailtrain-public-tls-cert
+  {{ end }}
 ---
 {{- if .Values.phpmyadmin.enabled }}
 apiVersion: networking.k8s.io/v1
@@ -108,5 +123,10 @@ spec:
               name: phpmyadmin      
               port: 
                 number: {{ .Values.phpmyadmin.port }}
+  {{ if .Values.ingress.clusterIssuer -}}
+  tls:
+  - hosts: [{{ .Values.app.HOST_BASE_PHPMYADMIN }}]
+    secretName: mailtrain-phpmyadmin-tls-cert
+  {{ end }}
 {{ end }}
 {{ end }}
