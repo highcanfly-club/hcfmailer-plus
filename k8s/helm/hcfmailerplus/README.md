@@ -14,6 +14,5 @@ helm install --create-namespace --namespace hcfmailer-plus hcfmailerplus highcan
                     --set app.HOST_BASE_PHPMYADMIN=hcfmailer-plus-phpmyadmin.example.org \
                     --set ingress.clusterIssuer=company-ca-issuer \
                     --set ingress.annotations."traefik\.ingress\.kubernetes\.io/router\.entrypoints"=websecure \
-                    --set ingress.annotations."external\-dns\.alpha\.kubernetes\.io/target"="ha.example.org" \
-                    --set ingress.annotations."external\-dns\.alpha\.kubernetes\.io/ttl"=86400 
+                    --set ingress.annotations."external\-dns\.alpha\.kubernetes\.io/target"="ha.example.org" 
 ```
