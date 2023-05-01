@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: mailtrain-files
+  name: mailtrain-files
+spec:
+  accessModes: {{ .Values.storage.main.accessModes | toYaml | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.main.size }}
+  volumeMode: Filesystem
+status: {}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: mailtrain-mysql
+  name: mailtrain-mysql
+spec:
+  accessModes: {{ .Values.storage.mysql.accessModes | toYaml | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.mysql.size }}
+  volumeMode: Filesystem
+status: {}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: mailtrain-kvdata
+  name: mailtrain-kvdata
+spec:
+  accessModes: {{ .Values.storage.kvdata.accessModes | toYaml | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.kvdata.size }}
+  volumeMode: Filesystem
+status: {}
