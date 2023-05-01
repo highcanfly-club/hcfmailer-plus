@@ -42,3 +42,20 @@ spec:
       storage: {{ .Values.storage.kvdata.size }}
   volumeMode: Filesystem
 status: {}
+
+{{ if not .Values.storage.kvdata.shareKvStorage }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: mailtrain-mongo
+  name: mailtrain-mongo
+spec:
+  accessModes: {{ .Values.storage.kvdata.accessModes | toYaml | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.kvdata.size }}
+  volumeMode: Filesystem
+status: {}
+{{ end }}

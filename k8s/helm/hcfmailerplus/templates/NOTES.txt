@@ -1,0 +1,26 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+for accessing your application visit:
+  {{ .Values.app.URL_BASE_TRUSTED}}
+  for getting your credentials issue:
+   $  echo Username: admin
+   $  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} mailtrain -o jsonpath="{.data.ADMIN_PASSWORD}" | base64 -d)
+other declared hosts are:
+  sandbox: {{ .Values.app.URL_BASE_SANDBOX }}
+  public: {{ .Values.app.URL_BASE_PUBLIC }}
+  
+{{ if .Values.phpmyadmin.enabled }}
+  phpmyadmin: {{ .Values.app.HOST_BASE_PHPMYADMIN }}
+    for getting your credentials issue:
+   $  echo Username: root
+   $  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} mysql -o jsonpath="{.data.MYSQL_ROOT_PASSWORD}" | base64 -d)
+   $  echo Username: mailtrain
+   $  echo Password: $(kubectl get secret --namespace {{ .Release.Namespace }} mysql -o jsonpath="{.data.MYSQL_PASSWORD}" | base64 -d)
+{{ end }}
