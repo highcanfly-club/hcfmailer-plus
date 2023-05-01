@@ -222,7 +222,7 @@ async function createApp(appType) {
         } else {
             res.status(500);
             res.render('error', {
-                message: 'Mailtrain is starting. Try again after a few seconds.',
+                message: 'HCFMailer+ is starting. Try again after a few seconds.',
                 error: {}
             });
         }
