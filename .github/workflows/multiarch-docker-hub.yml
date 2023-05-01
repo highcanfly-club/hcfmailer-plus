@@ -8,24 +8,9 @@
 # Vous pouvez également référencer une balise ou une branche, mais l’action peut changer sans avertissement.
 
 name: Publish amd64/arm64 to docker Hub
-
 on:
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-        type: choice
-        options:
-        - info
-        - warning
-        - debug
-      tags:
-        description: 'mutliarch'
-        required: false
-        type: boolean
-
+  release:
+    types: [published]
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
@@ -47,7 +32,7 @@ jobs:
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v4.4.0
         with:
           images: ${{ secrets.DOCKER_IMAGE_NAME }}
       
@@ -57,5 +42,5 @@ jobs:
           context: .
           platforms: linux/arm64, linux/amd64
           push: true
-          tags: ${{ secrets.DOCKER_IMAGE_NAME }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
