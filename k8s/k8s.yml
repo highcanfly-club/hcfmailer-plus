@@ -397,7 +397,7 @@ spec:
                 secretKeyRef:
                   name: mysql
                   key: MYSQL_PASSWORD
-          image: highcanfly/mailtrain:latest
+          image: highcanfly/hcfmailer-plus:latest
           name: mailtrain
           ports:
             - containerPort: 3000
