@@ -1,0 +1,129 @@
+# Default values for hcfmailerplus.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: highcanfly/hcfmailer-plus
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+storage:
+  main: 
+    size: 1Gi   #Size for the mailtrain storage
+    accessModes: 
+      - ReadWriteOnce
+  mysql: 
+    size: 1Gi   #Size for the mysql storage
+    accessModes: 
+      - ReadWriteOnce
+    port: 3306
+  kvdata: 
+    redisPort: 6379
+    mongoPort: 27017
+    size: 1Gi   #Size for the kv storage
+    accessModes: 
+      - ReadWriteOnce
+
+
+service:
+  type: ClusterIP
+  basePort: 3000  #[trusted] listening
+  sandboxPort: 3003 #[sandbox] listening
+  publicPort: 3004 #[public] listening
+
+phpmyadmin:
+  host: 
+  enabled: true
+  port: 80
+
+backup:
+  to: dest@example.com         #send backup to this recepient
+  from: noreply@example.com     #send backup from this recepient
+
+cloudflare:
+  apiKey: 0f91371e27fd51c4bf8f4cf253c5cd4f9a259437 # cloudflare api key with zone edit privilege
+  zoneId: dcc0020a47c305b84b2d4428a3a3db282b22caa3 # cloudflare zone id
+  dnsRecord: smtp.example.com  # existing A record, it will be updated with the current ip address
+
+
+ingress:
+  clusterIssuer: ""     #may be set if certificate ClusterIssuer can deliver certificate for host
+  enabled: true
+  className: "traefik"  #defaulting to traefik
+  annotations: 
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure #for traefik
+    external-dns.alpha.kubernetes.io/target: 1.2.3.4            #Ip for creating A record for host (if external-dns is availaible) or CNAME if fqdn
+    external-dns.alpha.kubernetes.io/ttl: "86400"
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+app:
+  MYSQL_HOST: "mysql"
+  DEFAULT_LANGUAGE: "fr-FR"
+  ENABLED_LANGUAGE: "fr-FR, en-US"
+  WWW_PROXY: "true"
+  REDIS_HOST: "redis"
+  HOST_BASE_TRUSTED: "hcfmailer-plus.example.com"
+  HOST_BASE_SANDBOX: "sandbox-hcfmailer-plus.example.com"
+  HOST_BASE_PUBLIC: "list-hcfmailer-plus.example.com"
+  HOST_BASE_PHPMYADMIN: "phpmyadmin-hcfmailer-plus.example.com"
+  URL_BASE_TRUSTED: "https://hcfmailer-plus.example.com"
+  URL_BASE_SANDBOX: "https://sandbox-hcfmailer-plus.example.com"
+  URL_BASE_PUBLIC: "https://list-hcfmailer-plus.example.com/"
