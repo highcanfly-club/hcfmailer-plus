@@ -69,7 +69,7 @@ spec:
     - name: {{ .Values.service.basePort | quote }}
       port: {{ .Values.service.basePort }}
       targetPort: {{ .Values.service.basePort }}
-    - name: {{ .Values.service.basePort | quote }}
+    - name: {{ .Values.service.sandboxPort | quote }}
       port: {{ .Values.service.sandboxPort }}
       targetPort: {{ .Values.service.sandboxPort }}
     - name: {{ .Values.service.publicPort | quote }}

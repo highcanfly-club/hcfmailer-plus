@@ -50,6 +50,7 @@ storage:
     redisPort: 6379
     mongoPort: 27017
     size: 1Gi   #Size for the kv storage
+    shareKvStorage: false
     accessModes: 
       - ReadWriteOnce
 
@@ -79,10 +80,10 @@ ingress:
   clusterIssuer: ""     #may be set if certificate ClusterIssuer can deliver certificate for host
   enabled: true
   className: "traefik"  #defaulting to traefik
-  annotations: 
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure #for traefik
-    external-dns.alpha.kubernetes.io/target: 1.2.3.4            #Ip for creating A record for host (if external-dns is availaible) or CNAME if fqdn
-    external-dns.alpha.kubernetes.io/ttl: "86400"
+  annotations: {}
+    # traefik.ingress.kubernetes.io/router.entrypoints: websecure #for traefik
+    # external-dns.alpha.kubernetes.io/target: 1.2.3.4            #Ip for creating A record for host (if external-dns is availaible) or CNAME if fqdn
+    # external-dns.alpha.kubernetes.io/ttl: "86400"
 
   tls: []
   #  - secretName: chart-example-tls

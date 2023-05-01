@@ -243,3 +243,46 @@ spec:
       restartPolicy: Always
 status: {}
 {{ end }}
+
+---
+{{- $storage := .Values.storage.kvdata.shareKvStorage | ternary  "mailtrain-kvdata" "mailtrain-mongo" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongo
+  name: mongo
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mongo
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: mongo
+    spec:
+      containers:
+        - image: mongo:latest
+          name: mongo
+          ports:
+            - containerPort: 27019
+          resources:
+            limits:
+              cpu: 1
+              memory: "1Gi"
+          volumeMounts:
+            - mountPath: /data
+              name: {{ $storage }}
+      restartPolicy: Always
+      volumes:
+        - name: {{ $storage }}
+          persistentVolumeClaim:
+            claimName: {{ $storage }}
+status: {}
