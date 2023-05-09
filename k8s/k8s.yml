@@ -328,6 +328,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: CERT_DIR
+              value: $CERT_DIR
             - name: URL_BASE_TRUSTED
               value: $URL_BASE_TRUSTED
             - name: URL_BASE_SANDBOX
