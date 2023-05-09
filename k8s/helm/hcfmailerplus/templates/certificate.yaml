@@ -1,0 +1,15 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.app.CERT_SECRET }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+     k8s-app: mailtrain
+spec:
+  commonName: {{ .Values.cloudflare.dnsRecord }}
+  dnsNames: {{ .Values.cloudflare.dnsRecord }}
+  secretName: {{ .Values.app.CERT_SECRET }}
+  issuerRef:
+    name: {{ .Values.ingress.clusterIssuer }}
+    kind: ClusterIssuer

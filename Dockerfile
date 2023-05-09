@@ -1,4 +1,10 @@
 # Mutistaged Node.js Build
+FROM golang:1.20-alpine as gobuilder
+WORKDIR /app
+COPY autocert/* ./
+RUN go mod tidy
+RUN go build -o autocert -ldflags="-s -w" main.go
+
 FROM node:18-alpine as builder
 
 # Install system dependencies
@@ -64,6 +70,7 @@ RUN chmod ugo+x /app/init-cloudflare.sh &&\
     chmod ugo+x /autobackup
 
 COPY --from=builder /app/ /app/
+COPY --from=gobuilder /app/autocert /usr/bin/autocert
 COPY --from=builder /mpack/mpack /usr/bin/mpack
 COPY --from=builder /mpack/munpack /usr/bin/munpack
 

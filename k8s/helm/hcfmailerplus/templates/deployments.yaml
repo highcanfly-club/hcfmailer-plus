@@ -117,6 +117,10 @@ spec:
     spec:
       containers:
         - env:
+            - name: CERT_SECRET
+              value: {{ .Values.app.CERT_SECRET | quote }}
+            - name: CERT_DIR
+              value:  {{ .Values.app.CERT_DIR | quote }}
             - name: URL_BASE_TRUSTED
               value: {{ .Values.app.URL_BASE_TRUSTED | quote }}
             - name: URL_BASE_SANDBOX

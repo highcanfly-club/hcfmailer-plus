@@ -116,6 +116,8 @@ tolerations: []
 affinity: {}
 
 app:
+  CERT_DIR: "/app/server/files/certs"
+  CERT_SECRET: "tls-cert"
   MYSQL_HOST: "mysql"
   DEFAULT_LANGUAGE: "fr-FR"
   ENABLED_LANGUAGE: "fr-FR, en-US"
