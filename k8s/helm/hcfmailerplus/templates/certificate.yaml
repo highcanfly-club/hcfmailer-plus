@@ -7,7 +7,7 @@ metadata:
   labels:
      k8s-app: mailtrain
 spec:
-  commonName: {{ .Values.cloudflare.dnsRecord }}
+  commonName: {{ .Values.cloudflare.dnsRecord | first }}
   dnsNames: {{ .Values.cloudflare.dnsRecord }}
   secretName: {{ .Values.app.CERT_SECRET }}
   issuerRef:

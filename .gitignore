@@ -13,3 +13,8 @@ k8s/okteto-kube-admb.config
 private/
 server/config/tunnel.yaml
 k8s/helm/hcfmailerplus/Chart.yaml.bak
+
+# Ignore DevSpace cache and log folder
+.devspace/
+devspace_start.sh
+devspace.yaml

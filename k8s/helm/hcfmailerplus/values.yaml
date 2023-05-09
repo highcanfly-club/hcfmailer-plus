@@ -73,7 +73,8 @@ backup:
 cloudflare:
   apiKey: 0f91371e27fd51c4bf8f4cf253c5cd4f9a259437 # cloudflare api key with zone edit privilege
   zoneId: dcc0020a47c305b84b2d4428a3a3db282b22caa3 # cloudflare zone id
-  dnsRecord: smtp.example.com  # existing A record, it will be updated with the current ip address
+  dnsRecord: 
+    - smtp.example.com  # existing A record, it will be updated with the current ip address
 
 
 ingress:
