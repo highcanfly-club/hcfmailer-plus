@@ -190,7 +190,8 @@ spec:
                 secretKeyRef:
                   name: mysql
                   key: MYSQL_PASSWORD
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          #image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: highcanfly/hcfmailer-plus:v20230509.3
           name: mailtrain
           ports:
             - containerPort: {{ .Values.service.basePort }}

@@ -18,6 +18,6 @@ else
         #only in k8s namespace
         NAMESPACE=`cat /var/run/secrets/kubernetes.io/serviceaccount/namespace`
         echo "use certificate from Kubernetes secret $NAMESPACE\$CLOUDFLARE_DNS_RECORDS-cert"
-        autocert -cert-dir=$CERT_DIR -dns-name=$CLOUDFLARE_DNS_RECORDS -secret=$CLOUDFLARE_DNS_RECORDS-cert
+        autocert -cert-dir=$CERT_DIR -dns-name=$CLOUDFLARE_DNS_RECORDS -secret=$CERT_SECRET
     fi
 fi

@@ -16,5 +16,4 @@ k8s/helm/hcfmailerplus/Chart.yaml.bak
 
 # Ignore DevSpace cache and log folder
 .devspace/
-devspace_start.sh
-devspace.yaml
+dev-values.yaml
