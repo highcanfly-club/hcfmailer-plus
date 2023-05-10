@@ -1,5 +1,6 @@
 #!/bin/bash
 CERT_DIR=${CERT_DIR:='/app/server/files/certs'}
+mkdir -p $CERT_DIR
 if [ -z $CERT_SECRET ]; then
     if [ ! -f $CERT_DIR/$CLOUDFLARE_DNS_RECORDS.key ]; then
         sleep $(($(od -vAn -N2 -tu2 </dev/urandom) % 60))
