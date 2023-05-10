@@ -1,7 +1,7 @@
 #!/bin/bash
 #1-store
 cd $PROJECT_ROOT
-tar -cvJf _sensitive_datas/_sensitive_datas.tar.xz private .vscode/settings.json server/config/dev.yaml k8s/okteto-kube-admb.config zone-mta/dkim.rsa devspace*
+tar -cvJf _sensitive_datas/_sensitive_datas.tar.xz Tiltfile private .vscode/settings.json server/config/dev.yaml k8s/okteto-kube-admb.config zone-mta/dkim.rsa devspace* dev-values.yaml
 #2-encrypt
 openssl aes-256-cbc -base64 -md sha256 -in _sensitive_datas/_sensitive_datas.tar.xz -out _sensitive_datas/_sensitive_datas.tar.xz.enc
 #3-delete 

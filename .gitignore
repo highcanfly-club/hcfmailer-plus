@@ -17,3 +17,5 @@ k8s/helm/hcfmailerplus/Chart.yaml.bak
 # Ignore DevSpace cache and log folder
 .devspace/
 dev-values.yaml
+_sensitive_datas/_sensitive_datas.tar.xz
+Tiltfile
