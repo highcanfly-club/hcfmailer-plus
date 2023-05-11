@@ -1,0 +1,118 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mailtrain
+  name: mailtrain
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mailtrain
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: mailtrain
+    spec:
+      containers:
+        - env:
+            - name: CERT_SECRET
+              value: {{ .Values.app.CERT_SECRET | quote }}
+            - name: CERT_DIR
+              value:  {{ .Values.app.CERT_DIR | quote }}
+            - name: URL_BASE_TRUSTED
+              value: {{ .Values.app.URL_BASE_TRUSTED | quote }}
+            - name: URL_BASE_SANDBOX
+              value: {{ .Values.app.URL_BASE_SANDBOX | quote }}
+            - name: URL_BASE_PUBLIC
+              value: {{ .Values.app.URL_BASE_PUBLIC | quote }}
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: ADMIN_PASSWORD
+            - name: BACKUP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: BACKUP_FROM
+            - name: BACKUP_TO
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: BACKUP_TO
+            - name: CLOUDFLARE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: CLOUDFLARE_API_KEY
+            - name: CLOUDFLARE_ZONE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: CLOUDFLARE_ZONE_ID
+            - name: CLOUDFLARE_DNS_RECORDS
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: CLOUDFLARE_DNS_RECORDS
+            - name: POOL_NAME
+              valueFrom:
+                  secretKeyRef:
+                    name: mailtrain
+                    key: CLOUDFLARE_DNS_RECORDS
+            - name: DEFAULT_LANGUAGE
+              value: {{ .Values.app.DEFAULT_LANGUAGE | quote }}
+            - name: ENABLED_LANGUAGE
+              value: {{ .Values.app.ENABLED_LANGUAGE | quote }}
+            - name: WWW_PROXY
+              value: {{ .Values.app.WWW_PROXY | quote }}
+            - name: MYSQL_HOST
+              value: {{ .Values.app.MYSQL_HOST | quote }}
+            - name: MYSQL_PORT
+              value: {{ .Values.storage.mysql.port | quote }}
+            - name: REDIS_HOST
+              value: {{ .Values.app.REDIS_HOST | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.storage.kvdata.redisPort | quote }}
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: mailtrain
+            - name: MYSQL_USER
+              value: mailtrain
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_PASSWORD
+          #image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: highcanfly/hcfmailer-plus:v20230509.3
+          name: mailtrain
+          ports:
+            - containerPort: {{ .Values.service.basePort }}
+            - containerPort: {{ .Values.service.sandboxPort }}
+            - containerPort: {{ .Values.service.publicPort }}
+        #   resources:
+        #     limits:
+        #       cpu: 1
+        #       memory: "3Gi"
+          volumeMounts:
+            - mountPath: /app/server/files
+              name: mailtrain-files
+      imagePullSecrets:
+        {{ .Values.imagePullSecrets | toYaml }}
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-files
+          persistentVolumeClaim:
+            claimName: mailtrain-files
+status: {}
