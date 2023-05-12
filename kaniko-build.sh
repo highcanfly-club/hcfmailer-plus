@@ -20,21 +20,19 @@ kubectl create namespace $NAMESPACE
 kubectl create secret -n $NAMESPACE docker-registry registry-credentials --docker-server=$EXPECTED_REGISTRY --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_PASSWORD --docker-email=$DOCKER_EMAIL
 tar -cv --exclude "node_modules" --exclude "dkim.rsa" --exclude "private" --exclude "k8s" --exclude ".git" --exclude ".github" --exclude-vcs --exclude ".docker" --exclude "_sensitive_datas" -f - . | gzip -9 | kubectl run -n $NAMESPACE kaniko \
   --rm --stdin=true \
-  --image=gcr.io/kaniko-project/executor:latest --restart=Never \
+  --image=highcanfly/kaniko:latest --restart=Never \
   --overrides='{
   "apiVersion": "v1",
   "spec": {
     "containers": [
       {
         "name": "kaniko",
-        "image": "gcr.io/kaniko-project/executor:latest",
+        "image": "highcanfly/kaniko:latest",
         "stdin": true,
         "stdinOnce": true,
         "args": [
           "-v","info",
-          "--cache=true",
-          "--compressed-caching=true",
-          "--cache-dir=/cache",
+          "--cache=false",
           "--dockerfile=Dockerfile",
           "--context=tar://stdin",
           "--skip-tls-verify",
@@ -44,10 +42,6 @@ tar -cv --exclude "node_modules" --exclude "dkim.rsa" --exclude "private" --excl
           {
             "name": "kaniko-secret",
             "mountPath": "/kaniko/.docker"
-          },
-          {
-            "name": "kaniko-cache",
-            "mountPath": "/cache"
           }
         ]
       }
@@ -64,11 +58,6 @@ tar -cv --exclude "node_modules" --exclude "dkim.rsa" --exclude "private" --excl
             }
           ]
         }
-      },
-      {
-        "name": "kaniko-cache",
-        "persistentVolumeClaim":
-            {"claimName": "kaniko-cache"}
       }
     ],
     "restartPolicy": "Never"
