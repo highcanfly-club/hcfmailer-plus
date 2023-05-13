@@ -19,6 +19,10 @@ spec:
         io.kompose.network/hcf-default: "true"
         io.kompose.service: mailtrain
     spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       containers:
         - env:
             - name: CERT_SECRET
@@ -94,8 +98,13 @@ spec:
                 secretKeyRef:
                   name: mysql
                   key: MYSQL_PASSWORD
-          #image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-          image: highcanfly/hcfmailer-plus:v20230509.3
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          {{if .Values.image.debug }}
+          command:
+            - tail
+            - -f
+            - /dev/null
+          {{end}}
           name: mailtrain
           ports:
             - containerPort: {{ .Values.service.basePort }}
@@ -108,8 +117,6 @@ spec:
           volumeMounts:
             - mountPath: /app/server/files
               name: mailtrain-files
-      imagePullSecrets:
-        {{ .Values.imagePullSecrets | toYaml }}
       restartPolicy: Always
       volumes:
         - name: mailtrain-files

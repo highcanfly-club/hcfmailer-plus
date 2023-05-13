@@ -18,6 +18,32 @@
 #   EXPECTED_REGISTRY=server.fqdn
 kubectl create namespace $NAMESPACE
 kubectl create secret -n $NAMESPACE docker-registry registry-credentials --docker-server=$EXPECTED_REGISTRY --docker-username=$DOCKER_USERNAME --docker-password=$DOCKER_PASSWORD --docker-email=$DOCKER_EMAIL
+cat << EOF | kubectl -f apply -
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: $NAMESPACE
+  name: secret-reader
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["secrets"]  #grants reading namespace pods and secrets
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: secret-reader
+  namespace: $NAMESPACE
+subjects:
+- kind: ServiceAccount
+  name: default # "name" is case sensitive
+  namespace: $NAMESPACE
+roleRef:
+  kind: Role #this must be Role or ClusterRole
+  name: secret-reader 
+  apiGroup: rbac.authorization.k8s.io
+---
+EOF
 tar -cv --exclude "node_modules" --exclude "dkim.rsa" --exclude "private" --exclude "k8s" --exclude ".git" --exclude ".github" --exclude-vcs --exclude ".docker" --exclude "_sensitive_datas" -f - . | gzip -9 | kubectl run -n $NAMESPACE kaniko \
   --rm --stdin=true \
   --image=highcanfly/kaniko:latest --restart=Never \
@@ -32,11 +58,14 @@ tar -cv --exclude "node_modules" --exclude "dkim.rsa" --exclude "private" --excl
         "stdinOnce": true,
         "args": [
           "-v","info",
-          "--cache=false",
+          "--cache=true",
           "--dockerfile=Dockerfile",
           "--context=tar://stdin",
           "--skip-tls-verify",
-          "--destination='$EXPECTED_REF'"
+          "--destination='$EXPECTED_REF'",
+          "--image-fs-extract-retry=3",
+          "--push-retry=3",
+          "--use-new-run"
         ],
         "volumeMounts": [
           {
