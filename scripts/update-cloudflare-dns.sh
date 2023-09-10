@@ -52,11 +52,11 @@ if [ "${what_ip}" == "internal" ] && [ "${proxied}" == "true" ]; then
   exit 0
 fi
 
-### Get External ip from https://checkip.amazonaws.com
+### Get External ip from https://whatismyip.akamai.com
 if [ "${what_ip}" == "external" ]; then
-  ip=$(curl -4 -s -X GET https://checkip.amazonaws.com --max-time 10)
+  ip=$(curl -k -4 -s -X GET https://whatismyip.akamai.com --max-time 10)
   if [ -z "$ip" ]; then
-    echo "Error! Can't get external ip from https://checkip.amazonaws.com"
+    echo "Error! Can't get external ip from https://whatismyip.akamai.com"
     exit 0
   fi
   echo "==> External IP is: $ip"

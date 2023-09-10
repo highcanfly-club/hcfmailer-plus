@@ -42,6 +42,7 @@ MYSQL_DATABASE=${MYSQL_DATABASE:-'mailtrain'}
 MYSQL_USER=${MYSQL_USER:-'mailtrain'}
 MYSQL_PASSWORD=${MYSQL_PASSWORD:-'mailtrain'}
 WITH_ZONE_MTA=${WITH_ZONE_MTA:-'true'}
+ZONE_MTA_MAX_SIZE=${ZONE_MTA_MAX_SIZE:-'104857600'}
 POOL_NAME=${POOL_NAME:-$(hostname)}
 LOG_LEVEL=${LOG_LEVEL:-'info'}
 ADMIN_PASSWORD=${ADMIN_PASSWORD:-'test'}
@@ -50,6 +51,8 @@ DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE:-'en-US'}
 WITH_POSTFIXBOUNCE=${WITH_POSTFIXBOUNCE:-'false'}
 POSTFIXBOUNCE_PORT=${POSTFIXBOUNCE_PORT:-'5699'}
 POSTFIXBOUNCE_HOST=${POSTFIXBOUNCE_HOST:-'127.0.0.1'}
+#RELAY_HOST
+#RELAY_HOST_PORT
 
 /app/init-letsencrypt.sh
 /app/init-cloudflare.sh
@@ -99,6 +102,9 @@ builtinZoneMTA:
   mongo: mongodb://${MONGO_HOST}:27017/zone-mta
   redis: redis://${REDIS_HOST}:6379/2
   poolName: $POOL_NAME
+  relayHost: $RELAY_HOST
+  relyHostPort: $RELAY_HOST_PORT
+  maxSize: $ZONE_MTA_MAX_SIZE
 
 queue:
   processes: 5

@@ -76,8 +76,8 @@ async function createConfig() {
                 // How many worker processes to spawn
                 processes: 1,
 
-                // Maximum allowed message size 30MB
-                maxSize: 31457280,
+                // Maximum allowed message size 100MB
+                maxSize: config.builtinZoneMTA.maxSize,
 
                 // Local IP and port to bind to
                 host: config.builtinZoneMTA.host,

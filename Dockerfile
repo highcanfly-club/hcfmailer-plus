@@ -1,5 +1,5 @@
 # Mutistaged Node.js Build
-FROM golang:1.20-alpine as gobuilder
+FROM golang:1.21-alpine as gobuilder
 WORKDIR /app
 COPY autocert/* ./
 RUN go mod tidy
