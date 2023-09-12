@@ -9,7 +9,7 @@ image:
   repository: highcanfly/hcfmailer-plus
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "v20230910.1"
 
 imagePullSecrets: []
 nameOverride: ""
