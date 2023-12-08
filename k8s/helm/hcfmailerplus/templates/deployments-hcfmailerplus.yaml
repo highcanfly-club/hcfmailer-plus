@@ -12,7 +12,7 @@ spec:
     matchLabels:
       io.kompose.service: mailtrain
   strategy:
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       labels:
