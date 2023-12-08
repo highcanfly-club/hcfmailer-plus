@@ -132,3 +132,7 @@ app:
   URL_BASE_TRUSTED: "https://hcfmailer-plus.example.com"
   URL_BASE_SANDBOX: "https://sandbox-hcfmailer-plus.example.com"
   URL_BASE_PUBLIC: "https://list-hcfmailer-plus.example.com/"
+  RELAY_HOST: ""
+  RELAY_HOST_PORT: ""
+  RELAY_HOST_USER: ""
+  RELAY_HOST_PASSWORD: ""
