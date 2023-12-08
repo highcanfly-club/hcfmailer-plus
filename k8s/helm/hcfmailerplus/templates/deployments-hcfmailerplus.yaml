@@ -98,6 +98,22 @@ spec:
                 secretKeyRef:
                   name: mysql
                   key: MYSQL_PASSWORD
+            {{ if .Values.app.RELAY_HOST }}
+            - name: RELAY_HOST
+              value: {{.Values.app.RELAY_HOST | quote}}
+            {{ end }}
+            {{ if .Values.app.RELAY_HOST_PORT }}
+            - name: RELAY_HOST_PORT
+              value: {{.Values.app.RELAY_HOST_PORT | quote}}
+            {{ end }}
+            {{ if .Values.app.RELAY_HOST_USER }}
+            - name: RELAY_HOST_USER
+              value: {{.Values.app.RELAY_HOST_USER | quote}}
+            {{ end }}
+            {{ if .Values.app.RELAY_HOST_PASSWORD }}
+            - name: RELAY_HOST_PASSWORD
+              value: {{.Values.app.RELAY_HOST_PASSWORD | quote}}
+            {{ end }}
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           {{if .Values.image.debug }}
           command:
