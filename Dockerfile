@@ -56,7 +56,7 @@ WORKDIR /app/
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    pwgen netcat-openbsd bash imagemagick curl acme.sh &&\
+    pwgen netcat-openbsd bash imagemagick curl acme.sh xz &&\
     echo "23       20      *       *       0       /autobackup" >> /etc/crontabs/root &&\
     echo "*/10     *       *       *       *       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/crontabs/root &&\
     echo "0        0       *       *       0       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/crontabs/root 

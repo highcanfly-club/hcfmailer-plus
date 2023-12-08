@@ -1,9 +1,9 @@
 #!/bin/bash
-MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.*\"\(.*\)\",$/\1/p'`
-MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'`
+MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.*\"\(.*\)\",$/\1/p'| head -n1`
+MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'| head -n1`
 NOW=`date -I`
-/usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases | bzip2 -9 > /app/server/files/backup.sql.bz2
-tar -cvjf /app/server/files/backup.tar.bz2 /app/server/files/backup.sql.bz2 /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded
+/usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases | xz -9 > /app/server/files/backup.sql.xz
+tar -cvJf /app/server/files/backup.tar.xz /app/server/files/backup.sql.xz /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded
 (
 cat << EOF 
 From: "SAUVEGARDE @HCFMailer+" <$BACKUP_FROM>
@@ -22,10 +22,10 @@ Voici la sauvegarde du $NOW
 HCFMailer+ team
 
 ---
-Content-Type: application/octet-stream; name="backup-$NOW.tar.bz2"
+Content-Type: application/octet-stream; name="backup-$NOW.tar.xz"
 Content-Transfer-Encoding: base64
-Content-Disposition: inline; filename="backup-$NOW.tar.bz2"
+Content-Disposition: inline; filename="backup-$NOW.tar.xz"
 
 EOF
-)    | (cat - && /usr/bin/openssl base64 < /app/server/files/backup.tar.bz2 && echo "" && echo "---")\
+)    | (cat - && /usr/bin/openssl base64 < /app/server/files/backup.tar.xz && echo "" && echo "---")\
      | /usr/sbin/sendmail -f $BACKUP_FROM -au$MAILUSER -ap$MAILPASSWD -amPLAIN  -S 127.0.0.1:2525 -t --
