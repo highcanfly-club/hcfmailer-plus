@@ -122,8 +122,8 @@ async function createConfig() {
 
         pools: {
             default: {
-              address: '0.0.0.0',
-              name: config.builtinZoneMTA.poolName || os.hostname()
+                address: '0.0.0.0',
+                name: config.builtinZoneMTA.poolName || os.hostname()
             }
         },
 
@@ -142,6 +142,20 @@ async function createConfig() {
         },
     };
 
+    if ((typeof (config.builtinZoneMTA.relayHost) == "string") && (config.builtinZoneMTA.relayHost.length > 0)) {
+        cnf.zones.default.host = config.builtinZoneMTA.relayHost;
+    }
+    if (((typeof (config.builtinZoneMTA.relayHostPort) == "string") && (config.builtinZoneMTA.relayHostPort.length > 0))
+        || ((typeof (config.builtinZoneMTA.relayHostPort) == "number") && (config.builtinZoneMTA.relayHostPort > 0))) {
+        cnf.zones.default.port = parseInt(config.builtinZoneMTA.relayHostPort,10);
+    }
+    if ((typeof (config.builtinZoneMTA.relayHostUser) == "string") && (config.builtinZoneMTA.relayHostUser.length > 0)
+        && (typeof (config.builtinZoneMTA.relayHostPassword) == "string") && (config.builtinZoneMTA.relayHostPassword.length > 0)) {
+        cnf.zones.default.auth = {
+            user: config.builtinZoneMTA.relayHostUser,
+            pass: config.builtinZoneMTA.relayHostPassword
+        }
+    }
     await fs.writeFile(zoneMtaBuiltingConfig, JSON.stringify(cnf, null, 2));
 }
 
@@ -159,7 +173,7 @@ function restart(callback) {
         ['--config=' + zoneMtaBuiltingConfig],
         {
             cwd: zoneMtaDir,
-            env: {NODE_ENV: process.env.NODE_ENV}
+            env: { NODE_ENV: process.env.NODE_ENV }
         }
     );
 
