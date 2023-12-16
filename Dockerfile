@@ -70,8 +70,6 @@ RUN chmod ugo+x /app/init-cloudflare.sh &&\
     chmod ugo+x /autobackup
 
 COPY --from=builder /app/docker-entrypoint.sh  /app/docker-entrypoint.sh 
-COPY --from=builder /app/init-cloudflare.sh /app/init-cloudflare.sh
-COPY --from=builder /app/init-letsencrypt.sh /app/init-letsencrypt.sh
 COPY --from=builder /app/locales /app/locales
 COPY --from=builder /app/mvis /app/mvis
 COPY --from=builder /app/proxy /app/proxy
