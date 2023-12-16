@@ -69,10 +69,21 @@ RUN chmod ugo+x /app/init-cloudflare.sh &&\
     chmod ugo+x /update-cloudflare-dns.sh &&\
     chmod ugo+x /autobackup
 
-COPY --from=builder /app/ /app/
-COPY --from=gobuilder /app/autocert /usr/bin/autocert
+COPY --from=builder /app/docker-entrypoint.sh  /app/docker-entrypoint.sh 
+COPY --from=builder /app/init-cloudflare.sh /app/init-cloudflare.sh
+COPY --from=builder /app/init-letsencrypt.sh /app/init-letsencrypt.sh
+COPY --from=builder /app/locales /app/locales
+COPY --from=builder /app/mvis /app/mvis
+COPY --from=builder /app/proxy /app/proxy
+COPY --from=builder /app/scripts /app/scripts
+COPY --from=builder /app/server /app/server
+COPY --from=builder /app/setup /app/setup
+COPY --from=builder /app/shared /app/shared
+COPY --from=builder /app/unlockMigration.sh /app/unlockMigration.sh
+COPY --from=builder /app/zone-mta /app/zone-mta
 COPY --from=builder /mpack/mpack /usr/bin/mpack
 COPY --from=builder /mpack/munpack /usr/bin/munpack
+COPY --from=gobuilder /app/autocert /usr/bin/autocert
 
 RUN set -ex; \
     apk add --update --no-cache \
