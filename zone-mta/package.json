@@ -11,10 +11,10 @@
     "license": "GPL-3.0",
     "homepage": "https://mailtrain.org/",
     "engines": {
-        "node": ">=14.0.0"
+        "node": ">=16.0.0"
     },
     "dependencies": {
-        "zone-mta": "^3.6.13",
+        "zone-mta": "^3.7.0",
         "zonemta-delivery-counters": "^1.0.1",
         "zonemta-limiter": "^1.0.0",
         "zonemta-loop-breaker": "^1.0.2"
