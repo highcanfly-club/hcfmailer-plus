@@ -2,8 +2,9 @@
 MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.*\"\(.*\)\",$/\1/p'| head -n1`
 MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'| head -n1`
 NOW=`date -I`
-/usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases | xz -9 > /app/server/files/backup.sql.xz
-tar -cvJf /app/server/files/backup.tar.xz /app/server/files/backup.sql.xz /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded
+/usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases > /app/server/files/backup.sql
+tar -cv /app/server/files/backup.sql /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded | xz -9 > /app/server/files/backup.tar.xz 
+rm /app/server/files/backup.sql
 (
 cat << EOF 
 From: "SAUVEGARDE @HCFMailer+" <$BACKUP_FROM>
