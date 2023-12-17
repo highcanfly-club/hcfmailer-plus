@@ -1,0 +1,19 @@
+---
+{{- if and .Values.storage.persistence.enabled (not .Values.storage.mysql.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: {{ .Values.storage.mysql.claimName }}
+  name: {{ .Values.storage.mysql.claimName }}
+spec:
+  accessModes: {{ .Values.storage.mysql.accessModes | toYaml | nindent 4 }}
+  {{ if .Values.storage.mysql.storageClassName }}
+  storageClassName: {{ .Values.storage.mysql.storageClassName }}
+  {{ end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.mysql.size }}
+  volumeMode: Filesystem
+status: {}
+{{ end }}

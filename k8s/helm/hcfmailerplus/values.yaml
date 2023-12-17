@@ -9,7 +9,7 @@ image:
   repository: highcanfly/hcfmailer-plus
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v20230910.1"
+  tag: "v20231216.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -38,12 +38,18 @@ securityContext: {}
   # runAsUser: 1000
 
 storage:
+  persistence:
+    enabled: true
   main: 
     size: 1Gi   #Size for the mailtrain storage
+    claimName: mailtrain-files
+    existingClaim: null
     accessModes: 
       - ReadWriteOnce
   mysql: 
     size: 1Gi   #Size for the mysql storage
+    claimName: mailtrain-mysql
+    existingClaim: null
     accessModes: 
       - ReadWriteOnce
     port: 3306
@@ -51,9 +57,14 @@ storage:
     redisPort: 6379
     mongoPort: 27017
     size: 1Gi   #Size for the kv storage
+    claimName: mailtrain-kvdata
+    existingClaim: null
     shareKvStorage: false
     accessModes: 
       - ReadWriteOnce
+  mongo:
+    claimName: mailtrain-mongo
+    existingClaim: null
 
 
 service:
@@ -81,7 +92,7 @@ cloudflare:
 ingress:
   clusterIssuer: ""     #may be set if certificate ClusterIssuer can deliver certificate for host
   enabled: true
-  className: "traefik"  #defaulting to traefik
+  className: "nginx"  #defaulting to nginx
   annotations: {}
     # traefik.ingress.kubernetes.io/router.entrypoints: websecure #for traefik
     # external-dns.alpha.kubernetes.io/target: 1.2.3.4            #Ip for creating A record for host (if external-dns is availaible) or CNAME if fqdn
@@ -136,3 +147,77 @@ app:
   RELAY_HOST_PORT: ""
   RELAY_HOST_USER: ""
   RELAY_HOST_PASSWORD: ""
+  ADMIN_PASSWORD: ""
+  MYSQL_ROOT_PASSWORD: ""
+  MYSQL_PASSWORD: ""
+
+cloudflared:
+  enabled: false
+  autoscaling:
+    enabled: false
+  image:
+    repository: highcanfly/net-tools
+    tag: latest
+  config: |
+    # Name of the tunnel you want to run
+    tunnel: s3-tunnel
+    credentials-file: /etc/cloudflared/creds/credentials.json
+    metrics: 0.0.0.0:2000
+    no-autoupdate: true
+    ingress:
+      - hostname: s3.chart-example.local
+        service: http://minio:9000
+      - hostname: s3-console.chart-example.local
+        service: http://minio-console:9001
+      # This rule matches any traffic which didn't match a previous rule, and responds with HTTP 404.
+      - service: http_status:404
+  credentials: {"AccountTag": "none", "TunnelSecret": "none=", "TunnelID": ""}
+  cert: |
+    -----BEGIN PRIVATE KEY-----
+    MIIBVgIBADANBgkqhkiG9w0BAQEFAASCAUAwggE8AgEAAkEA6q+dGMx28Sw30Sm3
+    09NOvNPIMuujZaA1yvQ0EHAd9adN7sNreo0PwwbsOcofKmTnl0+jr0kgo96/7aWs
+    CK/UkQIDAQABAkEAye1iaUT8DlTyjdisX+lPtS8v8YhIZhesUT0/Uul1DbhJbVQQ
+    RsyF3WgYBz0P1ADJEOQ2JjhAugE6+5rDpb0OsQIhAPr/ry+DpgmsA1PZTLWC/oSt
+    P2fn4p7X6yQy7cEvjcqNAiEA71y4Qf+khBFUjZtV6ADcO4u7dbzdtOkAp/FDCDuM
+    0xUCIQCe937ZhfSL3aDB4zddIljWaO9mfIuf9LpdU9AW8WpJJQIgBmnZlgsfgVpl
+    hZXP63N6cy3/S9xPpHVJyzYvsZzG3TECIQDQRA24/D9E+2Xw5nJLS0pD6kAgOGi5
+    9aGxUUBVB7jF4Q==
+    -----END PRIVATE KEY-----
+    -----BEGIN CERTIFICATE-----
+    MIICxzCCAnGgAwIBAgIUOp5ZxkMH+gAThWwfRQfk5vECEvEwDQYJKoZIhvcNAQEL
+    BQAwgbcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQH
+    DA1TYW4gRnJhbmNpc2NvMRkwFwYDVQQKDBBDbG91ZEZsYXJlLCBJbmMuMTgwNgYD
+    VQQLDC9DbG91ZEZsYXJlIE9yaWdpbiBTU0wgRUNDIENlcnRpZmljYXRlIEF1dGhv
+    cml0eTEmMCQGA1UEAwwdQ2xvdWRGbGFyZSBPcmlnaW4gQ2VydGlmaWNhdGUwHhcN
+    MjMxMTE4MDcyMzIxWhcNMjQxMTE3MDcyMzIxWjCBtzELMAkGA1UEBhMCVVMxEzAR
+    BgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDVNhbiBGcmFuY2lzY28xGTAXBgNV
+    BAoMEENsb3VkRmxhcmUsIEluYy4xODA2BgNVBAsML0Nsb3VkRmxhcmUgT3JpZ2lu
+    IFNTTCBFQ0MgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MSYwJAYDVQQDDB1DbG91ZEZs
+    YXJlIE9yaWdpbiBDZXJ0aWZpY2F0ZTBcMA0GCSqGSIb3DQEBAQUAA0sAMEgCQQDq
+    r50YzHbxLDfRKbfT006808gy66NloDXK9DQQcB31p03uw2t6jQ/DBuw5yh8qZOeX
+    T6OvSSCj3r/tpawIr9SRAgMBAAGjUzBRMB0GA1UdDgQWBBTSCk/pNTwU1wN4ocDq
+    lz7yno+2yTAfBgNVHSMEGDAWgBTSCk/pNTwU1wN4ocDqlz7yno+2yTAPBgNVHRMB
+    Af8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA0EAOyeDz+gMO9AfNPuQYDyojYWs58jL
+    qJUUzvY9YPiJwFcJcqgZ7up1gwA/xcGi7SsdRHLMVPDikRqtfdDO/HNjYA==
+    -----END CERTIFICATE-----
+    -----BEGIN ARGO TUNNEL TOKEN-----
+    eWFlNGthcGFpMXJlaTZhaFdpMldlZXk3dWhvbzlhaXF1YWk3WG91RjdFZXF1b2FmYWlGb2hQaDZh
+    aUdpZXlldGg5bG9vN3lhc2g5b29naGFpcGlldDlnYTBpZXYzb2Rvbmczb2h5ZUtlaWgyYWVjM2hp
+    ZTVlZW5lZTNlZW1vNW9oY2hhaWNoYWk3QmVlcjFvb0RpZVBoZWUzY2h1MXNvb3BoOW9vVmlpMWVl
+    RGFlOG5ldVBhaDVQZWk5d2VlOGFpbmVpN2hpZW1vaGhvc2hlaTdhZWJvaGJhaHNvaHphU2hlaW4y
+    YWlnaGFoMG9zaHVhOHdhZUY5b29aNFB1OXRob29jb29rM2VlbmdvaDVzaG9oejZlVGFoQmVlNGll
+    R2hpZWs4aWV0aGVlY2hvaE01b3VmaWVLNmpvaG5nYWk1b2hoZWlOYTVlaVJpcXVpWmF2NWVlbmdl
+    ZTdzb2ljOUFpc2FpbmFoYmVpcnVvdjd3ZWlnaDRBZVY0b2h4b3VzaDR1ZGkzTmV5ZWUwYmVlc2gx
+    aUNvaHNoZWVtYWk0YWl5YWVzNkVpZDNhaGNoZWViZWV0aGVlMUFpRmllOWhlaWpvaHBlZWZvb2No
+    aTBhZWphdmFocDBlZUJvYWxhZTFTaGFoYzF6ZWl0aDhqYWhsb2h0aTBvb3RoaWVrZWkwZWl4NkwK
+    -----END ARGO TUNNEL TOKEN-----
+  resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    limits:
+      cpu: 400m
+      memory: 256Mi
+    requests:
+      memory: 256Mi

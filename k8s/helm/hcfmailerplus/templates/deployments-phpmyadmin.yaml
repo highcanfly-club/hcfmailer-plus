@@ -1,0 +1,37 @@
+---
+{{ if .Values.phpmyadmin.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: phpmyadmin
+  name: phpmyadmin
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: phpmyadmin
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: phpmyadmin
+    spec:
+      containers:
+        - env:
+            - name: PMA_HOST
+              value: {{ .Values.app.MYSQL_HOST | quote }}
+          image: phpmyadmin:latest
+          name: phpmyadmin
+          ports:
+            - containerPort: {{ .Values.phpmyadmin.port }}
+        #   resources:
+        #     limits:
+        #       cpu: "0.25"
+        #       memory: "512M"
+      restartPolicy: Always
+status: {}
+{{ end }}

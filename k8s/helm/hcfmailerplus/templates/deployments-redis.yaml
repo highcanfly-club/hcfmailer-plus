@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: redis
+  name: redis
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: redis
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: redis
+    spec:
+      containers:
+        - image: redis:latest
+          name: redis
+          ports:
+            - containerPort: {{ .Values.storage.kvdata.redisPort }}
+        #   resources:
+        #     limits:
+        #       cpu: 1
+        #       memory: "1Gi"
+          volumeMounts:
+            - mountPath: /data
+              name: mailtrain-kvdata
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-kvdata
+          persistentVolumeClaim:
+            claimName: {{ not .Values.storage.kvdata.existingClaim | ternary .Values.storage.kvdata.claimName .Values.storage.kvdata.existingClaim }}
+status: {}

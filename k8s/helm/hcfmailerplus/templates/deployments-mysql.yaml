@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mysql
+  name: mysql
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.network/hcf-default: "true"
+        io.kompose.service: mysql
+    spec:
+      containers:
+        - env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              value: mailtrain
+            - name: MYSQL_USER
+              value: mailtrain
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_PASSWORD
+          image: mysql:latest
+          name: mysql
+          ports:
+            - containerPort: {{ .Values.storage.mysql.port }}
+        #   resources:
+        #     limits:
+        #       cpu: "1"
+        #       memory: "2Gi"
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mailtrain-mysql
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      restartPolicy: Always
+      volumes:
+        - name: mailtrain-mysql
+          persistentVolumeClaim:
+            claimName: {{ not .Values.storage.mysql.existingClaim | ternary .Values.storage.mysql.claimName .Values.storage.mysql.existingClaim }}
+status: {}

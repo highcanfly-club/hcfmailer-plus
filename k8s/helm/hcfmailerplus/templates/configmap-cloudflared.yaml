@@ -1,0 +1,9 @@
+{{ if .Values.cloudflared.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared
+data:
+  config.yaml: {{ .Values.cloudflared.config | toYaml | indent 2}}
+  cert.pem: {{ .Values.cloudflared.cert | toYaml | indent 2 }}
+{{ end }}

@@ -1,0 +1,89 @@
+{{ if .Values.cloudflared.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+spec:
+  {{- if not .Values.cloudflared.autoscaling.enabled }}
+  replicas: {{ .Values.cloudflared.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      {{- with .Values.cloudflared.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: cloudflared
+    spec:
+      {{- with .Values.cloudflared.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.cloudflared.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ printf "%s-%s" .Chart.Name "cloudflared"}}
+          securityContext:
+            {{- toYaml .Values.cloudflared.securityContext | nindent 12 }}
+          image: "{{ .Values.cloudflared.image.repository }}:{{ .Values.cloudflared.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.cloudflared.image.pullPolicy }}
+          {{- if .Values.cloudflared.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.cloudflared.command "context" $) | nindent 12 }}
+          {{- else}}
+          command: 
+            - cloudflared
+          {{- end }}
+          {{- if .Values.cloudflared.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.cloudflared.args "context" $) | nindent 12 }}
+          {{- else}}
+            - tunnel
+            - --config
+            - /etc/cloudflared/config/config.yaml
+            - --origincert=/etc/cloudflared/config/cert.pem
+            - run
+          {{- end }}
+          resources:
+            {{- toYaml .Values.cloudflared.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: creds
+              mountPath: /etc/cloudflared/creds
+              readOnly: true
+            - name: config
+              mountPath: /etc/cloudflared/config
+              readOnly: true
+      volumes:
+        - name: creds
+          secret:
+            secretName: cloudflared
+        - name: config
+          configMap:
+            name: cloudflared
+            items:
+            - key: config.yaml
+              path: config.yaml
+            - key: cert.pem
+              path: cert.pem
+      {{- with .Values.cloudflared.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cloudflared.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cloudflared.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{ end }}

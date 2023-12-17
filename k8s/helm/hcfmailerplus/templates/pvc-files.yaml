@@ -1,0 +1,20 @@
+---
+{{- if and .Values.storage.persistence.enabled (not .Values.storage.main.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: mailtrain-files
+  name: {{ .Values.storage.main.claimName }}
+spec:
+  accessModes: {{ .Values.storage.main.accessModes | toYaml | nindent 4 }}
+  {{ if .Values.storage.main.storageClassName }}
+  storageClassName: {{ .Values.storage.main.storageClassName }}
+  {{ end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.main.size }}
+  volumeMode: Filesystem
+status: {}
+{{ end }}
+---

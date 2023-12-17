@@ -1,0 +1,22 @@
+
+{{ if not .Values.storage.kvdata.shareKvStorage }}
+---
+{{- if and .Values.storage.persistence.enabled (not .Values.storage.mongo.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    io.kompose.service: mailtrain-mongo
+  name: {{ .Values.storage.mongo.claimName }}
+spec:
+  accessModes: {{ .Values.storage.kvdata.accessModes | toYaml | nindent 4 }}
+  {{- if .Values.storage.kvdata.storageClassName }}
+  storageClassName: {{ .Values.storage.kvdata.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.storage.kvdata.size }}
+  volumeMode: Filesystem
+status: {}
+{{- end }}
+{{ end }}

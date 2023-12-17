@@ -98,29 +98,29 @@ spec:
                 secretKeyRef:
                   name: mysql
                   key: MYSQL_PASSWORD
-            {{ if .Values.app.RELAY_HOST }}
+            {{- if .Values.app.RELAY_HOST }}
             - name: RELAY_HOST
               value: {{.Values.app.RELAY_HOST | quote}}
-            {{ end }}
-            {{ if .Values.app.RELAY_HOST_PORT }}
+            {{- end }}
+            {{- if .Values.app.RELAY_HOST_PORT }}
             - name: RELAY_HOST_PORT
               value: {{.Values.app.RELAY_HOST_PORT | quote}}
-            {{ end }}
-            {{ if .Values.app.RELAY_HOST_USER }}
+            {{- end }}
+            {{- if .Values.app.RELAY_HOST_USER }}
             - name: RELAY_HOST_USER
               value: {{.Values.app.RELAY_HOST_USER | quote}}
-            {{ end }}
-            {{ if .Values.app.RELAY_HOST_PASSWORD }}
+            {{- end }}
+            {{- if .Values.app.RELAY_HOST_PASSWORD }}
             - name: RELAY_HOST_PASSWORD
               value: {{.Values.app.RELAY_HOST_PASSWORD | quote}}
-            {{ end }}
+            {{- end }}
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
-          {{if .Values.image.debug }}
+          {{- if .Values.image.debug }}
           command:
             - tail
             - -f
             - /dev/null
-          {{end}}
+          {{- end}}
           name: mailtrain
           ports:
             - containerPort: {{ .Values.service.basePort }}
@@ -137,5 +137,5 @@ spec:
       volumes:
         - name: mailtrain-files
           persistentVolumeClaim:
-            claimName: mailtrain-files
+            claimName: {{ not .Values.storage.main.existingClaim | ternary .Values.storage.main.claimName .Values.storage.main.existingClaim }}
 status: {}

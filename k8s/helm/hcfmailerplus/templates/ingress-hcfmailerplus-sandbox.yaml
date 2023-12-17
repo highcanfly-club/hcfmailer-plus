@@ -1,0 +1,33 @@
+{{ if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mailtrain-sandbox
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{ if .Values.ingress.clusterIssuer -}}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+    {{ end -}}
+    {{ if .Values.ingress.annotations -}}
+    {{ .Values.ingress.annotations | toYaml | nindent 4}}
+    {{ end -}}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.app.HOST_BASE_SANDBOX }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+  - host: {{ .Values.app.HOST_BASE_SANDBOX }}
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: mailtrain      
+              port: 
+                number: {{ .Values.service.sandboxPort }}
+  {{ if .Values.ingress.clusterIssuer -}}
+  tls:
+  - hosts: [{{ .Values.app.HOST_BASE_SANDBOX }}]
+    secretName: mailtrain-sandbox-tls-cert
+  {{ end }}
+{{ end }}

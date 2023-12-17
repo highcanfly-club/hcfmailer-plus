@@ -1,0 +1,19 @@
+{{ if .Values.phpmyadmin.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: phpmyadmin
+  name: phpmyadmin
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: {{ .Values.phpmyadmin.port | quote }}
+      port: {{ .Values.phpmyadmin.port }}
+      targetPort: {{ .Values.phpmyadmin.port }}
+  selector:
+    io.kompose.service: phpmyadmin
+status:
+  loadBalancer: {}
+{{ end }}
