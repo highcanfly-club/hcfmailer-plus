@@ -1,4 +1,4 @@
-{{- if and .Values.storage.persistence.enabled (not .Values.storage.kvdata.existingClaim) }}
+{{- if and .Values.storage.persistence.enabled (not .Values.storage.kvdata.existingClaim) .Values.storage.redis.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

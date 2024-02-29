@@ -62,7 +62,12 @@ storage:
     shareKvStorage: false
     accessModes: 
       - ReadWriteOnce
+  redis:
+    persistence:
+      enabled: true
   mongo:
+    persistence:
+      enabled: true
     claimName: mailtrain-mongo
     existingClaim: null
 

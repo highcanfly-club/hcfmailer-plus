@@ -1,7 +1,7 @@
 
 {{ if not .Values.storage.kvdata.shareKvStorage }}
 ---
-{{- if and .Values.storage.persistence.enabled (not .Values.storage.mongo.existingClaim) }}
+{{- if and .Values.storage.persistence.enabled (not .Values.storage.mongo.existingClaim) .Values.storage.mongo.persistence.enabled }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
