@@ -28,12 +28,16 @@ spec:
         #     limits:
         #       cpu: 1
         #       memory: "1Gi"
+          {{  if .Values.storage.redis.persistence.enabled }}
           volumeMounts:
             - mountPath: /data
               name: mailtrain-kvdata
+          {{ end }}
       restartPolicy: Always
+      {{ if .Values.storage.redis.persistence.enabled }}
       volumes:
         - name: mailtrain-kvdata
           persistentVolumeClaim:
             claimName: {{ not .Values.storage.kvdata.existingClaim | ternary .Values.storage.kvdata.claimName .Values.storage.kvdata.existingClaim }}
+      {{ end }}
 status: {}

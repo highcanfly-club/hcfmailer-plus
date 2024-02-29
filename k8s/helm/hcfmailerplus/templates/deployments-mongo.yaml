@@ -31,12 +31,16 @@ spec:
             limits:
               cpu: 1
               memory: "1Gi"
+          {{ if .Values.storage.mongo.persistence.enabled }}
           volumeMounts:
             - mountPath: /data
               name: {{ $storage }}
+          {{ end }}
       restartPolicy: Always
+      {{ if .Values.storage.mongo.persistence.enabled }}
       volumes:
         - name: {{ $storage }}
           persistentVolumeClaim:
             claimName: {{ not .Values.storage.mongo.existingClaim | ternary $storage .Values.storage.mongo.existingClaim }}
+      {{ end }}
 status: {}
