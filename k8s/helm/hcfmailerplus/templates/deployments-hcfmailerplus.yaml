@@ -146,12 +146,15 @@ spec:
         #     limits:
         #       cpu: 1
         #       memory: "3Gi"
+          {{ if .Values.storage.persistence.enabled }}
           volumeMounts:
             - mountPath: /app/server/files
               name: mailtrain-files
+          {{ end }}
       restartPolicy: Always
+      {{ if .Values.storage.persistence.enabled }}
       volumes:
         - name: mailtrain-files
           persistentVolumeClaim:
             claimName: {{ not .Values.storage.main.existingClaim | ternary .Values.storage.main.claimName .Values.storage.main.existingClaim }}
-status: {}
+      {{ end }}
