@@ -58,6 +58,7 @@ RUN set -ex; \
     apk add --update --no-cache \
     pwgen netcat-openbsd bash imagemagick curl acme.sh xz imagemagick file jpeg &&\
     echo "23       20      *       *       0       /autobackup" >> /etc/crontabs/root &&\
+    echo "23       43      *       *       *       /autobackup-s3" >> /etc/crontabs/root &&\
     echo "*/10     *       *       *       *       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/crontabs/root &&\
     echo "0        0       *       *       0       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/crontabs/root 
 COPY scripts/init-cloudflare.sh /app/
@@ -97,6 +98,6 @@ RUN ARCH=$(uname -m)\
         curl -L https://dl.min.io/client/mc/release/linux-arm/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
     fi
 COPY --chmod=755 scripts/init-from-s3.sh /app/init-from-s3.sh
-
+COPY --chmod=755 scripts/autobackup-s3 /autobackup-s3
 EXPOSE 3000 3003 3004
 ENTRYPOINT ["bash", "/app/docker-entrypoint.sh"]
