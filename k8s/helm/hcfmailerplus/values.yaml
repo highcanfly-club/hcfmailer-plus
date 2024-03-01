@@ -86,6 +86,15 @@ phpmyadmin:
 backup:
   to: dest@example.com         #send backup to this recepient
   from: noreply@example.com     #send backup from this recepient
+  s3:
+    enabled: false
+    endpoint: "https://s3.example.com"
+    accessKey: "access"
+    secret: "secret"
+    bucket: "mailtrain-backup"
+    region: "us-east-1"
+    path: ""
+    initFromS3: false
 
 cloudflare:
   apiKey: 0f91371e27fd51c4bf8f4cf253c5cd4f9a259437 # cloudflare api key with zone edit privilege
