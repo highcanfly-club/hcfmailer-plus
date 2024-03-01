@@ -88,7 +88,14 @@ RUN set -ex; \
     apk add --update --no-cache \
     mysql-client mariadb-connector-c-dev
 
-RUN curl -L https://dl.min.io/client/mc/release/linux-$(dpkg --print-architecture)/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc
+RUN ARCH=$(uname -m)\
+    && if [ "$ARCH" = "x86_64" ]; then\
+        curl -L https://dl.min.io/client/mc/release/linux-amd64/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
+    elif [ "$ARCH" = "aarch64" ]; then\
+        curl -L https://dl.min.io/client/mc/release/linux-arm64/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
+    else\
+        curl -L https://dl.min.io/client/mc/release/linux-arm/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
+    fi
 COPY --chmod=755 scripts/init-from-s3.sh /app/init-from-s3.sh
 
 EXPOSE 3000 3003 3004

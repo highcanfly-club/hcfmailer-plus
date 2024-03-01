@@ -203,6 +203,9 @@ fi
 echo 'Info: Waiting for MySQL Server'
 while ! nc -z $MYSQL_HOST $MYSQL_PORT; do sleep 1; done
 
+echo 'Info: Running s3 restore script'
+/app/init-from-s3.sh
+
 if [ "$WITH_REDIS" = "true" ]; then
   echo 'Info: Waiting for Redis Server'
   while ! nc -z $REDIS_HOST $REDIS_PORT; do sleep 1; done
@@ -230,8 +233,6 @@ if [ "$WITH_LDAP" = "true" ]; then
     npm install passport-ldapauth
   fi
 fi
-
-/app/init-from-s3.sh
 
 NODE_ENV=production node setup/docker-entrypoint-db-setup.js "$ADMIN_PASSWORD" "$ADMIN_ACCESS_TOKEN"
 
