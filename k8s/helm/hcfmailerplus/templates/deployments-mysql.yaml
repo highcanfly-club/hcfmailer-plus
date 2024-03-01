@@ -57,4 +57,5 @@ spec:
         - name: mailtrain-mysql
           persistentVolumeClaim:
             claimName: {{ not .Values.storage.mysql.existingClaim | ternary .Values.storage.mysql.claimName .Values.storage.mysql.existingClaim }}
+      {{ end }}
 status: {}
