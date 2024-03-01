@@ -1,4 +1,10 @@
 #!/bin/bash
+# Script to backup the database and files
+# Run only if BACKUP_TO and BACKUP_FROM are set
+if [ -z "$BACKUP_TO" ] || [ -z "$BACKUP_FROM" ]; then
+  echo "BACKUP_TO and BACKUP_FROM must be set"
+  exit 1
+fi
 MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.*\"\(.*\)\",$/\1/p'| head -n1`
 MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'| head -n1`
 NOW=`date -I`

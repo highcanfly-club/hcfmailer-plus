@@ -50,7 +50,7 @@ RUN set -ex; \
 
 # Final Image
 FROM node:20-alpine
-LABEL maintainer="Ronan Le Meillat <ronan@parapente.cf>"
+LABEL maintainer="Ronan Le Meillat <ronan@parapente.eu.org>"
 WORKDIR /app/
 
 # Install system dependencies
@@ -87,6 +87,9 @@ COPY --from=gobuilder /app/autocert /usr/bin/autocert
 RUN set -ex; \
     apk add --update --no-cache \
     mysql-client mariadb-connector-c-dev
+
+RUN curl -L https://dl.min.io/client/mc/release/linux-$(dpkg --print-architecture)/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc
+COPY --chmod=755 scripts/init-from-s3.sh /app/init-from-s3.sh
 
 EXPOSE 3000 3003 3004
 ENTRYPOINT ["bash", "/app/docker-entrypoint.sh"]
