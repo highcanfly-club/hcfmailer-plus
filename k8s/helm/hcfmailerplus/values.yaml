@@ -72,6 +72,7 @@ storage:
     existingClaim: null
 
 
+
 service:
   type: ClusterIP
   basePort: 3000  #[trusted] listening
@@ -128,7 +129,14 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
+mongo:
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 autoscaling:
   enabled: false
   minReplicas: 1

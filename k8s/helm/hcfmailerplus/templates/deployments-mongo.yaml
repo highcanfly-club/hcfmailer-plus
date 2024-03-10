@@ -27,10 +27,7 @@ spec:
           name: mongo
           ports:
             - containerPort: 27019
-          resources:
-            limits:
-              cpu: 1
-              memory: "1Gi"
+          resources: {{ .Values.mongo.resources }}
           {{ if .Values.storage.mongo.persistence.enabled }}
           volumeMounts:
             - mountPath: /data
