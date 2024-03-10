@@ -27,7 +27,9 @@ spec:
           name: mongo
           ports:
             - containerPort: 27019
-          resources: {{ .Values.mongo.resources }}
+          {{- if .Values.mongo.resources }}
+          resources: {{ toYaml .Values.mongo.resources | nindent 12 }}
+          {{- end }}
           {{ if .Values.storage.mongo.persistence.enabled }}
           volumeMounts:
             - mountPath: /data
