@@ -47,6 +47,7 @@ storage:
     accessModes: 
       - ReadWriteOnce
   mysql: 
+    tag: 8.4
     size: 1Gi   #Size for the mysql storage
     claimName: mailtrain-mysql
     existingClaim: null

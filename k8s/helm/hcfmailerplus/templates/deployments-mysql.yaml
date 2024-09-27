@@ -35,7 +35,7 @@ spec:
                 secretKeyRef:
                   name: mysql
                   key: MYSQL_PASSWORD
-          image: mysql:latest
+          image: mysql:{{ .Values.storage.mysql.tag }}
           name: mysql
           ports:
             - containerPort: {{ .Values.storage.mysql.port }}
