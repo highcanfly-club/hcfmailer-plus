@@ -1,6 +1,6 @@
 #!/bin/bash
 MYSQL_DATABASE=${MYSQL_DATABASE:-'mailtrain'}
-BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS:-'90'}
+BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS:-'30'}
 # test if variables S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION, S3_PATH are set
 if [ -z "${S3_BUCKET}" ] || [ -z "${S3_ACCESS_KEY}" ] || [ -z "${S3_SECRET_KEY}" ] || [ -z "${S3_ENDPOINT}" ] || [ -z "${S3_PATH}" ]; then
     echo "S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION, S3_PATH are not set"
