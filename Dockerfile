@@ -1,11 +1,11 @@
 # Mutistaged Node.js Build
-FROM golang:1.21-alpine as gobuilder
+FROM golang:1.21-alpine AS gobuilder
 WORKDIR /app
 COPY autocert/* ./
 RUN go mod tidy
 RUN go build -o autocert -ldflags="-s -w" main.go
 
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 # Install system dependencies
 RUN set -ex; \
