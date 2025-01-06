@@ -1,5 +1,80 @@
 #!/bin/bash
 # Script to backup the database and files
+# and send them by email
+
+# Function to send the backup by email
+# $1: NOW (date)
+# $2: COUNT (current part)
+# $3: TOTAL (total parts)
+# $4: FILE (full path)
+# $5: BACKUP_FROM
+# $6: BACKUP_TO
+# $7: MAILUSER
+# $8: MAILPASSWD
+# $9: MAILSERVER
+send_backup_email() {
+    local _NOW=$1
+    local _COUNT=$2
+    local _TOTAL=$3
+    local _FILE=$4
+    local _BACKUP_FROM=$5
+    local _BACKUP_TO=$6
+    local _MAILUSER=$7
+    local _MAILPASSWD=$8
+    local _MAILSERVER=$9
+    _FILE_WITHOUT_PATH=$(basename $_FILE)
+    echo "Sending backup email $_COUNT/$_TOTAL from '$_BACKUP_FROM' to '$_BACKUP_TO' with file '$_FILE_WITHOUT_PATH' via server '$_MAILSERVER'"
+(
+    cat << EOF 
+From: "SAUVEGARDE @HCFMailer+" <$_BACKUP_FROM>
+To: "$_BACKUP_TO" <$_BACKUP_TO>
+MIME-Version: 1.0
+Subject: Sauvegarde HCFMailer+ du $_NOW ($_COUNT/$_TOTAL)
+Content-Type: multipart/mixed; boundary="-"
+
+This is a MIME encoded message.  Decode it with "munpack"
+or any other MIME reading software.  Mpack/munpack is available
+via anonymous FTP in ftp.andrew.cmu.edu:pub/mpack/
+---
+Content-Type: multipart/alternative; boundary="inner-boundary"
+
+--inner-boundary
+Content-Type: text/plain; charset="utf-8"
+
+Voici la sauvegarde du $_NOW
+Partie $_COUNT sur $_TOTAL
+
+HCFMailer+ team
+
+--inner-boundary
+Content-Type: text/html; charset="utf-8"
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body style="font-family: Arial, sans-serif;">
+    <h2 style="color: #2c3e50;">Sauvegarde HCFMailer+</h2>
+    <p>Voici la sauvegarde du <strong>$_NOW</strong></p>
+    <p>Partie $_COUNT sur $_TOTAL</p>
+    <hr>
+    <p style="color: #7f8c8d;">HCFMailer+ team</p>
+</body>
+</html>
+
+--inner-boundary--
+---
+Content-Type: application/octet-stream; name="$_FILE_WITHOUT_PATH"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline; filename="$_FILE_WITHOUT_PATH"
+
+EOF
+) | (cat - && /usr/bin/openssl base64 < $_FILE && echo "" && echo "---")\
+  | /usr/sbin/sendmail -f $_BACKUP_FROM -au$_MAILUSER -ap$_MAILPASSWD -amPLAIN  -S $_MAILSERVER -t --
+  # echo "Command line: /usr/sbin/sendmail -f $_BACKUP_FROM -au$_MAILUSER -ap$_MAILPASSWD -amPLAIN  -S $_MAILSERVER -t --"
+}
+
 # Run only if BACKUP_TO and BACKUP_FROM are set
 if [ -z "$BACKUP_TO" ] || [ -z "$BACKUP_FROM" ]; then
   echo "BACKUP_TO and BACKUP_FROM must be set"
@@ -8,31 +83,15 @@ fi
 MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.*\"\(.*\)\",$/\1/p'| head -n1`
 MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'| head -n1`
 NOW=`date -I`
+
 /usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases > /app/server/files/backup.sql
 tar -cv /app/server/files/backup.sql /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded | xz -9 > /app/server/files/backup.tar.xz 
 rm /app/server/files/backup.sql
-(
-cat << EOF 
-From: "SAUVEGARDE @HCFMailer+" <$BACKUP_FROM>
-To: "Backup@Mailtrain" <$BACKUP_TO>
-MIME-Version: 1.0
-Subject: Sauvegarde HCFMailer+ du $NOW
-Content-Type: multipart/mixed; boundary="-"
-
-This is a MIME encoded message.  Decode it with "munpack"
-or any other MIME reading software.  Mpack/munpack is available
-via anonymous FTP in ftp.andrew.cmu.edu:pub/mpack/
----
-Content-Type: text/plain
-
-Voici la sauvegarde du $NOW
-HCFMailer+ team
-
----
-Content-Type: application/octet-stream; name="backup-$NOW.tar.xz"
-Content-Transfer-Encoding: base64
-Content-Disposition: inline; filename="backup-$NOW.tar.xz"
-
-EOF
-)    | (cat - && /usr/bin/openssl base64 < /app/server/files/backup.tar.xz && echo "" && echo "---")\
-     | /usr/sbin/sendmail -f $BACKUP_FROM -au$MAILUSER -ap$MAILPASSWD -amPLAIN  -S 127.0.0.1:2525 -t --
+split -b 10m /app/server/files/backup.tar.xz /tmp/backup.$NOW.tar.xz.
+COUNT="O"
+TOTAL=$(ls /tmp/backup.$NOW.tar.xz.* | wc -l | tr -d ' ')
+for FILE in /tmp/backup.$NOW.tar.xz.*; do
+  COUNT=$((COUNT+1))
+  send_backup_email "$NOW" "$COUNT" "$TOTAL" "$FILE" "$BACKUP_FROM" "$BACKUP_TO" "$MAILUSER" "$MAILPASSWD" '127.0.0.1:2525'
+  rm $FILE
+done

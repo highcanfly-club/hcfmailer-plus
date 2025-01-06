@@ -61,10 +61,10 @@ RUN set -ex; \
     echo "23       43      *       *       *       /autobackup-s3" >> /etc/crontabs/root &&\
     echo "*/10     *       *       *       *       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/crontabs/root &&\
     echo "0        0       *       *       0       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/crontabs/root 
-COPY scripts/init-cloudflare.sh /app/
-COPY scripts/init-letsencrypt.sh /app/
-COPY scripts/update-cloudflare-dns.sh /
-COPY scripts/autobackup /
+COPY --chmod=755 scripts/init-cloudflare.sh /app/
+COPY --chmod=755 scripts/init-letsencrypt.sh /app/
+COPY --chmod=755 scripts/update-cloudflare-dns.sh /
+COPY --chmod=755 scripts/autobackup /
 RUN chmod ugo+x /app/init-cloudflare.sh &&\
     chmod ugo+x /app/init-letsencrypt.sh &&\
     chmod ugo+x /update-cloudflare-dns.sh &&\
