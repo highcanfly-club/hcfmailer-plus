@@ -1,9 +1,11 @@
 #!/bin/bash
 MYSQL_DATABASE=${MYSQL_DATABASE:-'mailtrain'}
-# test if variables S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION, S3_PATH are set
+MYSQL_SSL_VERIFY_SERVER_CERT=${MYSQL_SSL_VERIFY_SERVER_CERT:-'FALSE'}
+
+# test if variables S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_PATH are set
 if [ -z "${S3_BUCKET}" ] || [ -z "${S3_ACCESS_KEY}" ] || [ -z "${S3_SECRET_KEY}" ] || [ -z "${S3_ENDPOINT}" ] || [ -z "${S3_PATH}" ]; then
-    echo "S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION, S3_PATH are not set"
-    exit 1
+    echo "S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_PATH are not set, don't restore"
+    exit 0
 fi
 
 # test is mysql variables are set
@@ -57,7 +59,7 @@ if [[ "$TEST_DB" != "0" && "$INIT_FROM_S3" == "1" ]]; then
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 EOF
     sed -n -e "/^-- Current Database: \`${MYSQL_DATABASE}\`/,/^-- Current Database: \`/p" /app/server/files/backup.sql >>/app/server/files/${MYSQL_DATABASE}.sql
-    mysql -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" < /app/server/files/${MYSQL_DATABASE}.sql
+    mariadb --ssl-verify-server-cert=$MYSQL_SSL_VERIFY_SERVER_CERT -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" < /app/server/files/${MYSQL_DATABASE}.sql
 else
     echo "Database ${MYSQL_DATABASE} already exists"
 fi

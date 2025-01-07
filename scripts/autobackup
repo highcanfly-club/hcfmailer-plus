@@ -2,6 +2,8 @@
 # Script to backup the database and files
 # and send them by email
 
+MYSQL_SSL_VERIFY_SERVER_CERT=${MYSQL_SSL_VERIFY_SERVER_CERT:-'FALSE'}
+
 # Function to send the backup by email
 # $1: NOW (date)
 # $2: COUNT (current part)
@@ -84,7 +86,7 @@ MAILUSER=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"user\":.
 MAILPASSWD=`cat /app/zone-mta/config/builtin-zonemta.json |sed -n 's/^.*\"pass\":.*\"\(.*\)\"$/\1/p'| head -n1`
 NOW=`date -I`
 
-/usr/bin/mysqldump -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases > /app/server/files/backup.sql
+/usr/bin/mariadb-dump --ssl-verify-server-cert=$MYSQL_SSL_VERIFY_SERVER_CERT -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases > /app/server/files/backup.sql
 tar -cv /app/server/files/backup.sql /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded | xz -9 > /app/server/files/backup.tar.xz 
 rm /app/server/files/backup.sql
 split -b 10m /app/server/files/backup.tar.xz /tmp/backup.$NOW.tar.xz.

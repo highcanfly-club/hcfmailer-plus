@@ -5,7 +5,7 @@ COPY autocert/* ./
 RUN go mod tidy
 RUN go build -o autocert -ldflags="-s -w" main.go
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Install system dependencies
 RUN set -ex; \
@@ -49,7 +49,7 @@ RUN set -ex; \
    rm -rf node_modules
 
 # Final Image
-FROM node:20-alpine
+FROM node:22-alpine
 LABEL maintainer="Ronan Le Meillat <ronan@parapente.eu.org>"
 WORKDIR /app/
 
