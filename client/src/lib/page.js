@@ -212,7 +212,7 @@ function renderFrameWithContent(t, panelInFullScreen, showSidebar, primaryMenu, 
                 </div>
 
                 <footer key="appFooter" className="footer fixed-bottom mt-auto">
-                    <div className="">&copy; 2022-2024 <a href="https://sctg.eu.org">SCTG.eu.org</a>, Mailtrain.org. <a href="https://github.com/highcanfly-club/mailtrain/tree/hcf">{t('sourceOnGitHub')}</a></div>
+                    <div className="">&copy; 2022-2025 <a href="https://sctg.eu.org">SCTG.eu.org</a>, Mailtrain.org. <a href="https://github.com/highcanfly-club/mailtrain/tree/hcf">{t('sourceOnGitHub')}</a></div>
                 </footer>
             </div>
         );

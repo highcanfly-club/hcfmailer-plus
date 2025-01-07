@@ -334,7 +334,7 @@ export class GrapesJSSandbox extends Component {
                 '                      <td class="footer-cell">\n' + 
                 '                        <div class="c2577">\n' + 
                 '                          <p class="footer-info">GrapesJS Newsletter Builder est un plugin gratuit et open source il a été intégré ici par<p>\n' + 
-                '                        <a class="link" href="https://sctg.eu.org">© SCTG 2022-2024</a>\n' + 
+                '                        <a class="link" href="https://sctg.eu.org">© SCTG 2022-2025</a>\n' + 
                 '                          <br/>\n' + 
                 '                        </div>\n' + 
                 '                        <div class="c2421">\n' + 
