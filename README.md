@@ -30,6 +30,14 @@ INIT_FROM_S3="0" \
 docker compose up
 ```
 
+## S3 Backup initialization
+
+If you set `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_PATH` and `INIT_FROM_S3` to `1`, the initializion will use the backup from the S3 bucket. This is useful when you want to restore the backup from the S3 bucket.
+
+## S3 Backup
+
+If you set `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_PATH` you can use the embedded script `/autobackup-s3` to backup the system to the S3 bucket. The script will be executed every day at 23:43. This setting is hardcoded in the `Dockerfile` file.
+
 ## Features
 
 * Subscriber lists management
@@ -42,6 +50,8 @@ docker compose up
 * Hierarchical namespaces for enterprise-level situations
 * Builtin Zone-MTA (https://github.com/zone-eu/zone-mta) for close-to-zero setup of mail delivery
 * Automatic Dynamic DNS record (CLOUDFLARE_DNS_RECORDS) with Cloudflare API
+* Autobackup to S3
+* Autobackup to email
 
 ## Recommended minimal hardware Requirements
 * 2 vCPU
