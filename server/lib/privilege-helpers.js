@@ -33,7 +33,9 @@ function _getConfigUidGid(userKey, groupKey, defaultUid, defaultGid) {
             log.info('PrivilegeHelpers', 'Failed to resolve group id "%s"', config[groupKey]);
         }
     } else {
-        log.info('PrivilegeHelpers', 'Posix module not installed. Cannot resolve uid/gid');
+        // silently ignore
+        // log.info('PrivilegeHelpers', 'Posix module not installed. Cannot resolve uid/gid');
+        return { uid, gid };
     }
 
     return { uid, gid };
