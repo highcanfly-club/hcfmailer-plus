@@ -28,19 +28,13 @@ module.exports = {
                         loader: 'babel-loader',
                         options: {
                             presets: [
-                                ['@babel/preset-env', {
-                                    targets: {
-                                        "chrome": "58",
-                                        "edge": "15",
-                                        "firefox": "55",
-                                        "ios": "10"
-                                    }
-                                }],
+                                ['@babel/preset-env'],
                                 '@babel/preset-react'
                             ],
                             plugins: [
+                                ["@babel/plugin-proposal-decorators", { "version": "legacy" }],
+                                ["@babel/plugin-proposal-private-methods", { "loose": true }],
                                 ["@babel/plugin-proposal-private-property-in-object", { "loose": true }],
-                                ["@babel/plugin-proposal-decorators", { "legacy": true }],
                                 ["@babel/plugin-proposal-class-properties", { "loose": true }],
                                 "@babel/plugin-proposal-function-bind"
                             ]

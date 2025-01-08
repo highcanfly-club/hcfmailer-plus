@@ -86,5 +86,10 @@
     "style-loader": "^4.0.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1"
-  }
+  },
+  "browserList": [
+    "> 1%",
+    "not dead",
+    "not ie <= 11"
+  ]
 }
