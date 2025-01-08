@@ -9,6 +9,27 @@ If you are upgrading from Mailtrain v1, backup the DB and use it for Mailtrain v
 
 ![](https://mailtrain.org/mailtrain.png)
 
+## Sample use with Docker
+
+```bash
+CLOUDFLARE_API_KEY="" \
+S3_ACCESS_KEY="5e65317943ad7ad2e1f3541a928f1896149b8c38" \
+S3_BUCKET="master" \
+S3_ENDPOINT="https://mys3bucket.compat.objectstorage.eu-london-1.oraclecloud.com" \
+S3_PATH="mys3_path" \
+S3_SECRET_KEY="ZmRmODRlNDY2ODk5YJkMGJkY2ExMTZiYjQ2OTM3OAo=" \
+CLOUDFLARE_DNS_RECORDS=smtp.example.org \
+URL_BASE_TRUSTED="http://localhost:3000" \
+URL_BASE_SANDBOX="http://localhost:3003" \
+URL_BASE_PUBLIC="http://localhost:3004" \
+ADMIN_PASSWORD="testing" \
+DEFAULT_LANGUAGE="fr-FR" \
+ENABLED_LANGUAGE="fr-FR, en-US" \
+WWW_PROXY="false" \
+INIT_FROM_S3="0" \
+docker compose up
+```
+
 ## Features
 
 * Subscriber lists management
