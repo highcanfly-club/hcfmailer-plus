@@ -61,7 +61,7 @@ if (config.ldap.enabled) {
                     searchAttributes: [config.ldap.uidTag, config.ldap.nameTag, config.ldap.mailTag],
                     bindDN: config.ldap.bindUser,
                     bindCredentials: config.ldap.bindPassword
-                },
+                }
             };
         } catch (exc) {
             log.info('LDAP', 'Module "passport-ldapauth" not installed. It will not be used for LDAP auth.');
@@ -87,7 +87,7 @@ module.exports.loggedIn = (req, res, next) => {
 };
 
 module.exports.authByAccessToken = (req, res, next) => {
-    const accessToken = req.get('access-token') || req.query.access_token
+    const accessToken = req.get('access-token') || req.query.access_token;
 
     if (!accessToken) {
         res.status(403);
@@ -144,7 +144,7 @@ module.exports.setupRegularAuth = app => {
 };
 
 module.exports.restLogout = (req, res) => {
-    req.logout({},()=>{console.log('User logged out');});
+    req.logout({},()=>{log.info(`User logged out`);});
     res.json();
 };
 
@@ -177,13 +177,13 @@ module.exports.restLogin = (req, res, next) => {
 };
 let CasStrategy;
 if (config.cas && config.cas.enabled === true) {
-  try {
-    CasStrategy = require('passport-cas2').Strategy;
-    authMode = 'cas';
-    log.info('CAS', 'Found module "passport-cas2". It will be used for CAS auth.');
-  } catch (exc) {
-    log.info('CAS', 'Module passport-cas2 not installed.');
-  }
+    try {
+        CasStrategy = require('passport-cas2').Strategy;
+        authMode = 'cas';
+        log.info('CAS', 'Found module "passport-cas2". It will be used for CAS auth.');
+    } catch (exc) {
+        log.info('CAS', 'Module passport-cas2 not installed.');
+    }
 }
 if (CasStrategy) {
     log.info('Using CAS auth (passport-cas2)');
@@ -198,39 +198,39 @@ if (CasStrategy) {
         }
     }, 
     nodeifyFunction(async (username, profile) => { 
-      try {
-        const user = await users.getByUsername(username);
+        try {
+            const user = await users.getByUsername(username);
 
-        log.info('CAS', 'Old User: '+JSON.stringify(profile));
-        return {
-            id: user.id,
-            username: username,
-            name: profile.displayName,
-            email: profile.emails[0].value,
-            role: user.role
-        };
-      } catch (err) {
-        if (err instanceof interoperableErrors.NotFoundError) {
-            const userId = await users.create(contextHelpers.getAdminContext(), {
-                username: username,
-                role: config.cas.newUserRole,
-                namespace: config.cas.newUserNamespaceId,
-                name: profile.displayName,
-                email: profile.emails[0].value
-            });
-            log.info('CAS', 'New User: '+JSON.stringify(profile));
-
+            log.info('CAS', 'Old User: '+JSON.stringify(profile));
             return {
-                id: userId,
-                username: username,
+                id: user.id,
+                username,
                 name: profile.displayName,
                 email: profile.emails[0].value,
-                role: config.cas.newUserRole
+                role: user.role
             };
-        } else {
-            throw err;
+        } catch (err) {
+            if (err instanceof interoperableErrors.NotFoundError) {
+                const userId = await users.create(contextHelpers.getAdminContext(), {
+                    username,
+                    role: config.cas.newUserRole,
+                    namespace: config.cas.newUserNamespaceId,
+                    name: profile.displayName,
+                    email: profile.emails[0].value
+                });
+                log.info('CAS', 'New User: '+JSON.stringify(profile));
+
+                return {
+                    id: userId,
+                    username,
+                    name: profile.displayName,
+                    email: profile.emails[0].value,
+                    role: config.cas.newUserRole
+                };
+            } else {
+                throw err;
+            }
         }
-      }
     }));
     passport.use(cas);
     passport.serializeUser((user, done) => done(null, user));
@@ -246,7 +246,7 @@ if (CasStrategy) {
     module.exports.authMethod = 'ldap';
     module.exports.isAuthMethodLocal = false;
 
-    passport.use(new LdapStrategy(ldapStrategyOpts, nodeifyFunction(async (profile) => {
+    passport.use(new LdapStrategy(ldapStrategyOpts, nodeifyFunction(async profile => {
         try {
             const user = await users.getByUsername(profile[config.ldap.uidTag]);
 
@@ -287,9 +287,7 @@ if (CasStrategy) {
     module.exports.authMethod = 'local';
     module.exports.isAuthMethodLocal = true;
 
-    passport.use(new LocalStrategy(nodeifyFunction(async (username, password) => {
-        return await users.getByUsernameIfPasswordMatch(contextHelpers.getAdminContext(), username, password);
-    })));
+    passport.use(new LocalStrategy(nodeifyFunction(async (username, password) => await users.getByUsernameIfPasswordMatch(contextHelpers.getAdminContext(), username, password))));
 
     passport.serializeUser((user, done) => done(null, user.id));
     passport.deserializeUser((id, done) => nodeifyPromise(users.getById(contextHelpers.getAdminContext(), id), done));
