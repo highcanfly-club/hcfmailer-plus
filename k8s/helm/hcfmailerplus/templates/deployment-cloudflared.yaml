@@ -41,6 +41,9 @@ spec:
           args: {{- include "common.tplvalues.render" (dict "value" .Values.cloudflared.args "context" $) | nindent 12 }}
           {{- else}}
             - tunnel
+            - --management-diagnostics 
+            - --metrics 
+            - 0.0.0.0:2000
             - --config
             - /etc/cloudflared/config/config.yaml
             - --origincert=/etc/cloudflared/config/cert.pem
