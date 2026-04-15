@@ -40,6 +40,8 @@ if [[ "$TEST_DB" != "0" && "$INIT_FROM_S3" == "1" ]]; then
     rm /tmp/backup.tar.xz
 
     # Restore the mailtrain database
+    echo "Restoring database ${MYSQL_DATABASE}"
+    echo "Creating SQL file for database ${MYSQL_DATABASE}"
     cat << EOF > /app/server/files/${MYSQL_DATABASE}.sql
 -- MariaDB dump 10.19  Distrib 10.11.5-MariaDB, for Linux (aarch64)
 --
@@ -58,7 +60,11 @@ if [[ "$TEST_DB" != "0" && "$INIT_FROM_S3" == "1" ]]; then
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 EOF
+    echo "/app/server/files/backup.sql contains $(($(wc -l < /app/server/files/backup.sql) - 10)) lines of SQL commands for all databases"
+    echo "Extracting database ${MYSQL_DATABASE} from backup.sql and adding it to ${MYSQL_DATABASE}.sql"
     sed -n -e "/^-- Current Database: \`${MYSQL_DATABASE}\`/,/^-- Current Database: \`/p" /app/server/files/backup.sql >>/app/server/files/${MYSQL_DATABASE}.sql
+    echo "/app/server/files/${MYSQL_DATABASE}.sql contains $(($(wc -l < /app/server/files/${MYSQL_DATABASE}.sql) - 10)) lines of SQL commands for database ${MYSQL_DATABASE}"
+    echo "Restoring database ${MYSQL_DATABASE} to mysql server ${MYSQL_HOST}"
     mariadb --ssl-verify-server-cert=$MYSQL_SSL_VERIFY_SERVER_CERT -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" < /app/server/files/${MYSQL_DATABASE}.sql
 else
     echo "Database ${MYSQL_DATABASE} already exists"
