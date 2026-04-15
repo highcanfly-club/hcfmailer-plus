@@ -1,38 +1,57 @@
 #!/bin/bash
+set -o pipefail
+
+source "$(dirname "$0")/backup-common.sh"
+
 MYSQL_DATABASE=${MYSQL_DATABASE:-'mailtrain'}
 BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS:-'30'}
 MYSQL_SSL_VERIFY_SERVER_CERT=${MYSQL_SSL_VERIFY_SERVER_CERT:-'FALSE'}
 
-# test if variables S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION, S3_PATH are set
-if [ -z "${S3_BUCKET}" ] || [ -z "${S3_ACCESS_KEY}" ] || [ -z "${S3_SECRET_KEY}" ] || [ -z "${S3_ENDPOINT}" ] || [ -z "${S3_PATH}" ]; then
-    echo "S3_BUCKET, S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION, S3_PATH are not set"
-    exit 1
-fi
+require_env S3_BUCKET || exit 1
+require_env S3_ACCESS_KEY || exit 1
+require_env S3_SECRET_KEY || exit 1
+require_env S3_ENDPOINT || exit 1
+require_env S3_PATH || exit 1
+require_env MYSQL_HOST || exit 1
+require_env MYSQL_ROOT_PASSWORD || exit 1
+require_env BACKUP_FROM || exit 1
+require_env BACKUP_TO || exit 1
 
-# test is mysql variables are set
-if [ -z "${MYSQL_HOST}" ] || [ -z "${MYSQL_ROOT_PASSWORD}" ]; then
-    echo "MYSQL_HOST and MYSQL_ROOT_PASSWORD must be set"
-    exit 1
-fi
+require_command mc || exit 1
+require_command /usr/bin/mariadb-dump || exit 1
 
-# test if mc is installed
-if [ -z "$(which mc)" ]; then
-    echo "mc is not installed"
+ensure_mc_alias s3backup "$S3_ENDPOINT" "$S3_ACCESS_KEY" "$S3_SECRET_KEY" || {
+    send_admin_error "S3 alias setup failed" "Failed to configure mc alias 's3backup' with endpoint ${S3_ENDPOINT}."
     exit 1
-fi
-
-#  Test if mc alias s3backup exists
-if [ -z "$(mc alias list | grep s3backup)" ]; then
-    echo "s3backup alias not found"
-    echo "create s3backup alias"
-    mc alias set s3backup ${S3_ENDPOINT} ${S3_ACCESS_KEY} ${S3_SECRET_KEY}
-fi
+}
 
 NOW=$(date -I)
-/usr/bin/mariadb-dump --ssl-verify-server-cert=$MYSQL_SSL_VERIFY_SERVER_CERT -h $MYSQL_HOST --password="$MYSQL_ROOT_PASSWORD" --all-databases >/app/server/files/backup.sql
-tar -cv /app/server/files/backup.sql /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded | xz -9 >/app/server/files/backup.tar.xz
-rm /app/server/files/backup.sql
-mc cp /app/server/files/backup.tar.xz s3backup/${S3_BUCKET}/${S3_PATH}/backup-${NOW}.tar.xz
+LOCAL_DUMP="/app/server/files/backup.sql"
+BACKUP_ARCHIVE="/app/server/files/backup.tar.xz"
+REMOTE_OBJECT="s3backup/${S3_BUCKET}/${S3_PATH}/backup-${NOW}.tar.xz"
+
+/usr/bin/mariadb-dump --ssl-verify-server-cert=$MYSQL_SSL_VERIFY_SERVER_CERT -h "$MYSQL_HOST" --password="$MYSQL_ROOT_PASSWORD" --all-databases > "$LOCAL_DUMP"
+DUMP_RC=$?
+if ! check_mariadb_dump "$LOCAL_DUMP" "$DUMP_RC"; then
+    send_admin_error "Backup dump validation failed" "The database dump failed or produced invalid output for ${LOCAL_DUMP}."
+    exit 1
+fi
+
+if ! tar -cv "$LOCAL_DUMP" /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded | xz -9 > "$BACKUP_ARCHIVE"; then
+    send_admin_error "Backup archiving failed" "Failed to archive backup files into ${BACKUP_ARCHIVE}."
+    exit 1
+fi
+rm -f "$LOCAL_DUMP"
+
+if ! mc cp "$BACKUP_ARCHIVE" "$REMOTE_OBJECT"; then
+    send_admin_error "S3 upload failed" "Failed to upload ${BACKUP_ARCHIVE} to ${REMOTE_OBJECT}."
+    exit 1
+fi
+
+if ! verify_s3_upload "$REMOTE_OBJECT"; then
+    send_admin_error "S3 upload verification failed" "Uploaded object ${REMOTE_OBJECT} was not found or could not be verified after upload."
+    exit 1
+fi
 
 # Remove backups older than BACKUP_KEEP_DAYS days
-mc rm --recursive --force --older-than ${BACKUP_KEEP_DAYS}d s3backup/${S3_BUCKET}/${S3_PATH}
+mc rm --recursive --force --older-than ${BACKUP_KEEP_DAYS}d "s3backup/${S3_BUCKET}/${S3_PATH}"

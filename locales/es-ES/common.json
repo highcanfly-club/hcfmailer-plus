@@ -507,7 +507,7 @@
   "processing": "Procesando...",
   "search": "Buscar:",
   "noMatchingRecordsFound": "No se encontraron resultados",
-  "firs": "Primero",
+  "first": "Primero",
   "last": "Último",
   "previous": "Anterior",
   "activateToSortColumnAscending": ": Activar para ordenar la columna de manera ascendente",

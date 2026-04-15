@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql:
-    image: mysql:latest
+    image: mysql:8.4
     environment:
     - MYSQL_ROOT_PASSWORD=mailtrain
     - MYSQL_DATABASE=mailtrain
@@ -43,7 +43,8 @@ services:
             memory: "1G"
             
   mailtrain:
-    image: highcanfly/mailtrain:latest
+    #image: highcanfly/hcfmailer-plus:v20250108.3
+    image: highcanfly/hcfmailer-plus:latest
     #build: .
     ports:
     - "3000:3000"
@@ -69,6 +70,7 @@ services:
       - S3_ENDPOINT=$S3_ENDPOINT
       - S3_PATH=$S3_PATH
       - INIT_FROM_S3=$INIT_FROM_S3
+      - INIT_LETSENCRYPT=$INIT_LETSENCRYPT
       - MYSQL_ROOT_PASSWORD=mailtrain
       - MYSQL_HOST=mysql
     deploy:

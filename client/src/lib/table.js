@@ -344,7 +344,7 @@ class Table extends Component {
           "sSearch":         t("search"),
           "sZeroRecords":    t("noMatchingRecordsFound"),
           "oPaginate": {
-            "sFirst":    t("firs"),
+            "sFirst":    t("first"),
             "sLast":     t("last"),
             "sNext":     t("next"),
             "sPrevious": t("previous")
@@ -367,7 +367,7 @@ class Table extends Component {
             dtOptions.data = this.props.data;
         } else {
             dtOptions.serverSide = true;
-            dtOptions.ajax = ::this.fetchData;
+            dtOptions.ajax = this.fetchData;
         }
 
         this.table = jQuery(this.domTable).DataTable(dtOptions);

@@ -17,4 +17,4 @@ EOF
     chmod 744 /update-cloudflare-dns.sh
 fi
 
-crond
+cron -f &

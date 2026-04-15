@@ -1,4 +1,9 @@
 #!/bin/bash
+# Don't run if INIT_LETSENCRYPT="0"
+if [ "$INIT_LETSENCRYPT" = "0" ]; then
+    echo "INIT_LETSENCRYPT is set to 0, skipping certificate initialization."
+    exit 0
+fi
 CERT_DIR=${CERT_DIR:='/app/server/files/certs'}
 mkdir -p $CERT_DIR
 if [ -z $CERT_SECRET ] && [ ! -z $CLOUDFLARE_API_KEY ] && [ ! -z $CLOUDFLARE_DNS_RECORDS ]; then

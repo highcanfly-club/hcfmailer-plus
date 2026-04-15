@@ -1,12 +1,12 @@
 # Final Develop Image
-FROM node:10-alpine
+FROM node:22-alpine
 
 WORKDIR /app/
 
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    make gcc g++ git python pwgen netcat-openbsd bash imagemagick
+    make gcc g++ git python3 pwgen netcat-openbsd bash imagemagick
 
 EXPOSE 3000 3003 3004
 

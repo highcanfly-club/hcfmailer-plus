@@ -445,7 +445,7 @@
   "processing": "Обработка ...",
   "search": "Search:",
   "noMatchingRecordsFound": "Нет соответствующих записей не найдено",
-  "firs": "Ели(!)",
+  "first": "Ели(!)",
   "last": "Последний",
   "previous": "Предыдущий",
   "activateToSortColumnAscending": ": активировать для сортировки столбца по возрастанию",

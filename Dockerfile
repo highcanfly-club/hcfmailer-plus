@@ -1,16 +1,16 @@
 # Mutistaged Node.js Build
-FROM golang:1.21-alpine AS gobuilder
+FROM golang:1.21-bookworm AS gobuilder
 WORKDIR /app
 COPY autocert/* ./
 RUN go mod tidy
 RUN go build -o autocert -ldflags="-s -w" main.go
 
-FROM node:24-alpine AS builder
+FROM node:22 AS builder
 
 # Install system dependencies
-RUN set -ex; \
-    apk add --update --no-cache \
-    make gcc g++ git python3 automake autoconf
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    make gcc g++ git python3 automake autoconf && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN set -ex; \
     cd / &&\
@@ -49,18 +49,18 @@ RUN set -ex; \
    rm -rf node_modules
 
 # Final Image
-FROM node:24-alpine
+FROM node:22
 LABEL maintainer="Ronan Le Meillat <ronan@parapente.eu.org>"
 WORKDIR /app/
 
 # Install system dependencies
-RUN set -ex; \
-    apk add --update --no-cache \
-    pwgen netcat-openbsd bash imagemagick curl acme.sh xz imagemagick file jpeg &&\
-    echo "23       20      *       *       0       /autobackup" >> /etc/crontabs/root &&\
-    echo "23       43      *       *       *       /autobackup-s3" >> /etc/crontabs/root &&\
-    echo "*/10     *       *       *       *       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/crontabs/root &&\
-    echo "0        0       *       *       0       sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/crontabs/root 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pwgen netcat-openbsd imagemagick curl xz-utils file cron && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "23       20      *       *       0       /autobackup" >> /etc/cron.d/autobackup && \
+    echo "23       43      *       *       *       /autobackup-s3" >> /etc/cron.d/autobackup-s3 && \
+    echo "*/10     *       *       *       *       root sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/cron.d/cloudflare-dns && \
+    echo "0        0       *       *       0       root sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/cron.d/acme-renew 
 COPY --chmod=755 scripts/init-cloudflare.sh /app/
 COPY --chmod=755 scripts/init-letsencrypt.sh /app/
 COPY --chmod=755 scripts/update-cloudflare-dns.sh /
@@ -85,9 +85,9 @@ COPY --from=builder /mpack/mpack /usr/bin/mpack
 COPY --from=builder /mpack/munpack /usr/bin/munpack
 COPY --from=gobuilder /app/autocert /usr/bin/autocert
 
-RUN set -ex; \
-    apk add --update --no-cache \
-    mysql-client mariadb-connector-c-dev
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN ARCH=$(uname -m)\
     && if [ "$ARCH" = "x86_64" ]; then\
