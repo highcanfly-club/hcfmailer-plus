@@ -1,4 +1,5 @@
 # Mutistaged Node.js Build
+# docker buildx build --platform linux/amd64,linux/arm64 --tag highcanfly/hcfmailer-plus:v20260416.0 --push .
 FROM golang:1.21-bookworm AS gobuilder
 WORKDIR /app
 COPY autocert/* ./
@@ -43,7 +44,7 @@ COPY . /app
 RUN set -ex; \
    cd /app/client && \
    npm run setdate &&\
-   NODE_OPTIONS=--openssl-legacy-provider npm run build 
+   NODE_OPTIONS=--openssl-legacy-provider node --stack-size=65536 node_modules/.bin/webpack --config webpack.config.js 
 RUN set -ex; \
    cd /app/client && \
    rm -rf node_modules
