@@ -1,4 +1,22 @@
 #!/bin/bash
+#
+# Copyright (c) 2022-2026 Ronan LE MEILLAT
+# License: AGPL-3.0-or-later
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
 set -o pipefail
 
 # Load mail credentials from builtin zonemta config when needed.
@@ -55,15 +73,15 @@ send_mail() {
         printf 'MIME-Version: 1.0\n'
         if [ -n "$attachment" ]; then
             printf 'Content-Type: multipart/mixed; boundary="%s"\n\n' "$boundary"
-            printf '--%s\n' "$boundary"
+            printf '%s\n' "--$boundary"
             printf 'Content-Type: text/plain; charset="utf-8"\n\n'
             printf '%s\n\n' "$body"
-            printf '--%s\n' "$boundary"
+            printf '%s\n' "--$boundary"
             printf 'Content-Type: application/octet-stream; name="%s"\n' "$filename"
             printf 'Content-Transfer-Encoding: base64\n'
             printf 'Content-Disposition: attachment; filename="%s"\n\n' "$filename"
             /usr/bin/openssl base64 < "$attachment"
-            printf '\n--%s--\n' "$boundary"
+            printf '%s\n' "\n--${boundary}--"
         else
             printf 'Content-Type: text/plain; charset="utf-8"\n\n'
             printf '%s\n' "$body"
@@ -135,7 +153,8 @@ validate_dump_tables() {
     fi
 
     for table in "${EXPECTED_TABLES[@]}"; do
-        if ! grep -qE "^CREATE TABLE( IF NOT EXISTS)? \\`$table\\`" "$sqlfile"; then
+        local pattern='^CREATE TABLE( IF NOT EXISTS)? \`'"$table"'\`'
+        if ! grep -qE "$pattern" "$sqlfile"; then
             missing+=("$table")
         fi
     done

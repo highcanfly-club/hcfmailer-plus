@@ -1,0 +1,18 @@
+#Minimal Dockerfile for hot workaround v20260101.1
+#docker buildx build --platform linux/arm64,linux/amd64 . -f Dockerfile.mini --tag highcanfly/hcfmailer-plus:v20260101.1 --push   
+FROM highcanfly/hcfmailer-plus:v20250108.3
+COPY --chmod=755 scripts/init-cloudflare.sh /app/
+COPY --chmod=755 scripts/init-letsencrypt.sh /app/
+COPY --chmod=755 scripts/update-cloudflare-dns.sh /
+COPY --chmod=755 scripts/init-from-s3.sh /app/
+COPY --chmod=755 scripts/autobackup /
+COPY --chmod=755 scripts/autobackup-s3 /
+COPY --chmod=755 scripts/backup-common.sh /
+
+RUN chmod ugo+x /app/init-cloudflare.sh &&\
+    chmod ugo+x /app/init-letsencrypt.sh &&\
+    chmod ugo+x /update-cloudflare-dns.sh &&\
+    chmod ugo+x /autobackup &&\
+    chmod ugo+x /autobackup-s3 &&\
+    chmod ugo+x /app/init-from-s3.sh &&\
+    chmod ugo+x /backup-common.sh
