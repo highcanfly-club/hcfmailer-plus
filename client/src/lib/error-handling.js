@@ -9,7 +9,7 @@ function handleError(that, error) {
         errorHandled = that.errorHandler(error);
     }
 
-    if (!errorHandled && that.props.parentErrorHandler) {
+    if (!errorHandled && that.props?.parentErrorHandler) {
         errorHandled = handleError(that.props.parentErrorHandler, error);
     }
 

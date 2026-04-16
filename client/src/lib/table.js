@@ -132,6 +132,11 @@ class Table extends Component {
     @withAsyncErrorHandler
     async fetchData(data, callback) {
         // This custom ajax fetch function allows us to properly handle the case when the user is not authenticated.
+        if (!this.props.dataUrl) {
+            console.error('Table component error: dataUrl prop is required when data is not provided');
+            callback({data: [], recordsTotal: 0, recordsFiltered: 0});
+            return;
+        }
         const response = await axios.post(getUrl(this.props.dataUrl), data);
         callback(response.data);
     }
@@ -148,6 +153,10 @@ class Table extends Component {
                 }
 
                 if (keysToFetch.length > 0) {
+                    if (!this.props.dataUrl) {
+                        console.error('Table component error: dataUrl prop is required when data is not provided');
+                        return;
+                    }
                     const response = await axios.post(getUrl(this.props.dataUrl), {
                         operation: 'getBy',
                         column: this.props.selectionKeyIndex,
@@ -365,9 +374,11 @@ class Table extends Component {
 
         if (this.props.data) {
             dtOptions.data = this.props.data;
-        } else {
+        } else if (this.props.dataUrl) {
             dtOptions.serverSide = true;
-            dtOptions.ajax = this.fetchData;
+            dtOptions.ajax = (data, callback) => this.fetchData(data, callback);
+        } else {
+            console.warn('Table component: neither data nor dataUrl prop was provided, table will be empty');
         }
 
         this.table = jQuery(this.domTable).DataTable(dtOptions);
