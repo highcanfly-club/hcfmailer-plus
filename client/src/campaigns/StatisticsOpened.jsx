@@ -11,7 +11,7 @@ import { getUrl } from "../lib/urls";
 
 import { Chart } from 'react-google-charts';
 
-import "./styles.scss";
+import "./styles.module.scss";
 import { Table } from "../lib/table";
 import { Link } from "react-router-dom";
 

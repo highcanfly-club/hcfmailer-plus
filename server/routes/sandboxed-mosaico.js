@@ -204,15 +204,20 @@ async function getRouter(appType) {
                 }
             }
 
+            const isDev = process.env.NODE_ENV === 'development';
             res.render('mosaico/root', {
                 layout: 'mosaico/layout',
                 editorConfig: config.mosaico,
                 languageStrings: languageStrings,
                 reactCsrfToken: req.csrfToken(),
                 mailtrainConfig: JSON.stringify(mailtrainConfig),
-                scriptFiles: [
-                    getSandboxUrl('client/mosaico-root.js')
-                ],
+                isDev,
+                scriptFiles: isDev
+                    ? [
+                        { src: getSandboxUrl('client/@vite/client'), type: 'module' },
+                        { src: getSandboxUrl('client/src/lib/sandboxed-mosaico-root.jsx'), type: 'module' }
+                    ]
+                    : [getSandboxUrl('client/mosaico-root.js')],
                 publicPath: getSandboxUrl()
             });
         });

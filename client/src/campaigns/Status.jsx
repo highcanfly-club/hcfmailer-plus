@@ -25,7 +25,7 @@ import {getPublicUrl, getSandboxUrl, getUrl} from "../lib/urls";
 import interoperableErrors from '../../../shared/interoperable-errors';
 import {CampaignStatus, CampaignType} from "../../../shared/campaigns";
 import moment from 'moment-timezone';
-import "./styles.scss";
+import campaignsStyles from "./styles.module.scss";
 import {TestSendModalDialog, TestSendModalDialogMode} from "./TestSendModalDialog";
 import "../lib/styles.scss";
 

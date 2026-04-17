@@ -25,7 +25,7 @@ import mailtrainConfig from 'mailtrainConfig';
 import {getModals, getTagLanguages, getTemplateTypes, getTypeForm, ResourceType} from '../templates/helpers';
 import axios from '../lib/axios';
 import "../lib/styles.scss";
-import "./styles.scss";
+import campaignsStyles from "./styles.module.scss";
 import {getUrl} from "../lib/urls";
 import {campaignOverridables, CampaignSource, CampaignStatus, CampaignType} from "../../../shared/campaigns";
 import moment from 'moment';
@@ -247,6 +247,18 @@ export default function CUD({ action, entity, createFromChannel, createFromCampa
     if (!listsSelectorHelperRef.current) {
         listsSelectorHelperRef.current = new ListsSelectorHelper(formState, t, 'lists');
     }
+
+    // Compatibility shim: templates/helpers.jsx expects an "owner" with templateTypes,
+    // editorNode (set via ref), editorNodeRefHandler, and props.entity.
+    const editorNodeRef = useRef(null);
+    const editorNodeRefHandler = (node) => { editorNodeRef.current = node; };
+    const owner = {
+        ...formState,
+        templateTypes,
+        get editorNode() { return editorNodeRef.current; },
+        editorNodeRefHandler,
+        props: { entity }
+    };
 
     // Watch send_configuration changes to fetch send config details
     const sendConfigId = formState.getFormValue('send_configuration');
@@ -539,8 +551,8 @@ export default function CUD({ action, entity, createFromChannel, createFromCampa
         const customTemplateTypeKey = formState.getFormValue('data_sourceCustom_type');
 
         if (customTemplateTypeKey) {
-            templateModals = getModals(formState, customTemplateTypeKey, isEdit);
-            const customTemplateTypeForm = getTypeForm(formState, customTemplateTypeKey, isEdit);
+            templateModals = getModals(owner, customTemplateTypeKey, isEdit);
+            const customTemplateTypeForm = getTypeForm(owner, customTemplateTypeKey, isEdit);
 
             templateEdit = <div>
                 <Dropdown id="data_sourceCustom_type" label={t('type')} options={customTemplateTypeOptions}/>

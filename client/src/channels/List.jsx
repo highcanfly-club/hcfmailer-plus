@@ -7,7 +7,7 @@ import {LinkButton, Title, Toolbar} from '../lib/page';
 import {Table} from '../lib/table';
 import {useTableActionDialog} from "../lib/modals";
 import {useRequiresAuthenticatedUser} from '../lib/hooks/useRequiresAuthenticatedUser';
-import "./styles.scss";
+import "./styles.module.scss";
 import PropTypes from 'prop-types';
 
 export default function List({ permissions }) {

@@ -213,7 +213,7 @@ class MosaicoSandbox extends Component {
 
 
 
-export default function() {
+function init() {
     parentRPC.init();
     const ReactDOM = createRoot(document.getElementById('root'))
     ReactDOM.render(
@@ -221,6 +221,9 @@ export default function() {
             <UntrustedContentRoot render={props => <MosaicoSandbox {...props} />} />
         </TranslationRoot>
     );
-};
+}
+
+window.MailtrainReactBody = { default: init };
+export default init;
 
 

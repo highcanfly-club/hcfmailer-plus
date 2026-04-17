@@ -3,7 +3,7 @@
 $font-family-sans-serif: 'Ubuntu', sans-serif;
 $font-family-monospace: 'Ubuntu Mono', monospace;
 
-$fa-font-path: "../static-npm/fontawesome";
+$fa-font-path: "/static-npm/fontawesome";
 $enable-print-styles: false;
 @import "../../node_modules/@coreui/coreui/scss/_functions.scss";
 @import "./variables.scss";

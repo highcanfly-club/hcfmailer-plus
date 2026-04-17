@@ -27,7 +27,7 @@ import { getImportLabels } from './helpers';
 import { ImportSource, inProgress, MappingType, prepInProgress, prepFinished } from '../../../../shared/imports';
 import axios from "../../lib/axios";
 import { getUrl } from "../../lib/urls";
-import "../styles.scss";
+import listStyles from "../styles.module.scss";
 import "../../lib/styles.scss";
 import interoperableErrors from "../../../../shared/interoperable-errors";
 

@@ -114,6 +114,13 @@ const authByAccessToken = (req, res, next) => {
 };
 
 const tryAuthByRestrictedAccessToken = (req, res, next) => {
+    // Static asset paths (client bundles, static files) don't carry a token prefix.
+    // Vite emits absolute imports like /client/node_modules/.vite/deps/react.js that
+    // the browser fetches directly without the /{token}/ prefix — pass them through.
+    if (req.url.startsWith('/client') || req.url.startsWith('/static')) {
+        return next();
+    }
+
     const pathComps = req.url.split('/');
 
     pathComps.shift();

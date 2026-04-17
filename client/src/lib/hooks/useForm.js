@@ -50,11 +50,15 @@ export function useForm(settings = {}) {
 
   const getSaveData = useCallback((formStateData) => {
     let data = formStateData.map(attr => attr.get('value')).toJS();
+    const originalHash = data.originalHash;
     if (settingsRef.current.submitFormValuesMutator) {
       const newData = settingsRef.current.submitFormValuesMutator(data, false);
       if (newData !== undefined) {
         data = newData;
       }
+    }
+    if (originalHash !== undefined && data.originalHash === undefined) {
+      data.originalHash = originalHash;
     }
     return data;
   }, []);
@@ -329,7 +333,7 @@ export function useForm(settings = {}) {
       showFormValidation();
       await fn();
     } catch (error) {
-      if (error instanceof interoperableErrors.ValidationError) {
+      if (error instanceof interoperableErrors.InteroperableError && error.data && typeof error.data === 'object') {
         const mutState = formStateRef.current.withMutations(mutState => {
           mutState.update('data', stateData =>
             stateData.withMutations(mutStateData => {
@@ -352,6 +356,10 @@ export function useForm(settings = {}) {
       const response = await axios.get(getUrl(url));
       if (mountedRef.current) {
         let data = response.data;
+        if (data.hash !== undefined) {
+          data.originalHash = data.hash;
+          delete data.hash;
+        }
         if (settingsRef.current.getFormValuesMutator) {
           const mutated = settingsRef.current.getFormValuesMutator(data);
           if (mutated !== undefined) data = mutated;
@@ -371,9 +379,10 @@ export function useForm(settings = {}) {
   }, [disableForm, enableForm, populateFormValues]);
 
   const getFormValuesFromEntity = useCallback((entity) => {
-    let data = {};
-    for (const key in entity) {
-      data[key] = entity[key];
+    let data = Object.assign({}, entity);
+    if (data.hash !== undefined) {
+      data.originalHash = data.hash;
+      delete data.hash;
     }
     if (settingsRef.current.getFormValuesMutator) {
       const mutated = settingsRef.current.getFormValuesMutator(data);
@@ -414,17 +423,16 @@ export function useForm(settings = {}) {
 
       if (mountedRef.current) {
         enableForm();
-        dispatch({
-          type: 'SET',
-          updater: (state) => state.set('savedData', state.get('data'))
-        });
+        const savedState = formStateRef.current.set('savedData', formStateRef.current.get('data'));
+        formStateRef.current = savedState;
+        dispatch({ type: 'SET', updater: () => savedState });
         clearFormStatusMessage();
-        return true;
+        return response.data || true;
       }
     } catch (error) {
       if (mountedRef.current) {
         enableForm();
-        if (error instanceof interoperableErrors.ValidationError) {
+        if (error instanceof interoperableErrors.InteroperableError && error.data && typeof error.data === 'object') {
           dispatch({
             type: 'MUTATE',
             mutator: (mutState) => {

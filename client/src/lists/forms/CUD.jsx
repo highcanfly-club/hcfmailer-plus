@@ -30,7 +30,7 @@ import mailtrainConfig from 'mailtrainConfig';
 import { getTrustedUrl, getUrl } from "../../lib/urls";
 import { ActionLink, Icon } from "../../lib/bootstrap-components";
 import "../../lib/styles.scss";
-import "./styles.scss";
+import formsStyles from "./styles.module.scss";
 import axios from "../../lib/axios";
 
 export default function CUD({ action, entity, permissions }) {

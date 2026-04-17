@@ -1,7 +1,7 @@
 'use strict';
 
 import {CampaignStatus, CampaignType} from "../../../shared/campaigns";
-import "./styles.scss";
+import campaignsStyles from "./styles.module.scss";
 import {Button} from "../lib/bootstrap-components";
 import {CheckBox, Fieldset, TableSelect} from "../lib/form";
 import React from "react";

@@ -14,7 +14,7 @@ import {getPublicUrl, getUrl} from "../../lib/urls";
 import {useTableActionDialog} from "../../lib/modals";
 import {useRequiresAuthenticatedUser} from '../../lib/hooks/useRequiresAuthenticatedUser';
 import {usePageHelpers} from '../../lib/hooks/usePageHelpers';
-import "../styles.scss";
+import "../styles.module.scss";
 
 export default function List({ list, segments, segmentId }) {
     const { t } = useTranslation();

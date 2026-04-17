@@ -11,7 +11,7 @@ import moment from 'moment';
 import {CampaignSource, CampaignStatus, CampaignType} from "../../../shared/campaigns";
 import {getCampaignLabels} from "./helpers";
 import {useTableActionDialog} from "../lib/modals";
-import "./styles.scss";
+import "./styles.module.scss";
 import PropTypes from 'prop-types';
 
 export default function List({ permissions, channel }) {

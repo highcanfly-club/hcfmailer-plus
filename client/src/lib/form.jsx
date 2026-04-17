@@ -1065,12 +1065,17 @@ const withForm = createComponentMixin({
                 }
 
                 let data = this.getFormValues();
+                const originalHash = data.originalHash;
 
                 if (this.submitFormValuesMutator) {
                     const newData = this.submitFormValuesMutator(data, true);
                     if (newData !== undefined) {
                         data = newData;
                     }
+                }
+
+                if (originalHash !== undefined && data.originalHash === undefined) {
+                    data.originalHash = originalHash;
                 }
 
                 const response = await axios.method(method, getUrl(url), data);

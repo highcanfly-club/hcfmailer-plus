@@ -261,11 +261,11 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
                     templateId={owner.getFormValue(prefix + 'mosaicoTemplate')}
                     entityTypeId={entityTypeId}
                     title={t('mosaicoTemplateDesigner')}
-                    onSave={(...args) => owner(...args).save}
+                    onSave={() => owner.save?.()}
                     canSave={owner.isFormWithoutErrors()}
-                    onTestSend={(...args) => owner(...args).showTestSendModal}
-                    onShowExport={(...args) => owner(...args).showExportModal}
-                    onFullscreenAsync={(...args) => owner(...args).setElementInFullscreen}
+                    onTestSend={() => owner.showTestSendModal?.()}
+                    onShowExport={(...args) => owner.showExportModal?.(...args)}
+                    onFullscreenAsync={(...args) => owner.setElementInFullscreen?.(...args)}
                 />
             </AlignedRow>,
         exportHTMLEditorData: async owner => {
@@ -357,11 +357,11 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
                     templatePath={getSandboxUrl(`static/mosaico/templates/${owner.getFormValue(prefix + 'mosaicoFsTemplate')}/template-${owner.getFormValue(prefix + 'mosaicoFsTemplate')}.html`)}
                     entityTypeId={entityTypeId}
                     title={t('mosaicoTemplateDesigner')}
-                    onSave={(...args) => owner(...args).save}
+                    onSave={() => owner.save?.()}
                     canSave={owner.isFormWithoutErrors()}
-                    onTestSend={(...args) => owner(...args).showTestSendModal}
-                    onShowExport={(...args) => owner(...args).showExportModal}
-                    onFullscreenAsync={(...args) => owner(...args).setElementInFullscreen}
+                    onTestSend={() => owner.showTestSendModal?.()}
+                    onShowExport={(...args) => owner.showExportModal?.(...args)}
+                    onFullscreenAsync={(...args) => owner.setElementInFullscreen?.(...args)}
                 />
             </AlignedRow>,
         exportHTMLEditorData: async owner => {

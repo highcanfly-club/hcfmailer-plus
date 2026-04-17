@@ -32,13 +32,18 @@ async function getRouter(appType) {
         router.getAsync('/editor', passport.csrfProtection, async (req, res) => {
             const mailtrainConfig = await clientHelpers.getAnonymousConfig(req.context, appType);
 
+            const isDev = process.env.NODE_ENV === 'development';
             res.render('grapesjs/root', {
                 layout: 'grapesjs/layout',
                 reactCsrfToken: req.csrfToken(),
                 mailtrainConfig: JSON.stringify(mailtrainConfig),
-                scriptFiles: [
-                    getSandboxUrl('client/grapesjs-root.js')
-                ],
+                isDev,
+                scriptFiles: isDev
+                    ? [
+                        { src: getSandboxUrl('client/@vite/client'), type: 'module' },
+                        { src: getSandboxUrl('client/src/lib/sandboxed-grapesjs-root.jsx'), type: 'module' }
+                    ]
+                    : [getSandboxUrl('client/grapesjs-root.js')],
                 publicPath: getSandboxUrl()
             });
         });

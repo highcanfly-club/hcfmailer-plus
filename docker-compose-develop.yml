@@ -57,6 +57,16 @@ services:
           cpus: "0.5"
           memory: "1G"
 
+  fake-smtp:
+    image: haravich/fake-smtp-server
+    ports:
+      - 25:25
+      - 1080:1080
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "500M"
 volumes:
   mysql-data:
   redis-data:

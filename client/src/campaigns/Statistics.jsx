@@ -12,7 +12,7 @@ import { getUrl } from "../lib/urls";
 import { AlignedRow } from "../lib/form";
 import { Icon } from "../lib/bootstrap-components";
 
-import "./styles.scss";
+import "./styles.module.scss";
 import { Link } from "react-router-dom";
 
 export default function Statistics({ entity: entityProp }) {

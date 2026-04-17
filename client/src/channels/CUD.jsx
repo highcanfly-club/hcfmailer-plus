@@ -25,7 +25,7 @@ import mailtrainConfig from 'mailtrainConfig';
 import {getModals, getTagLanguages, getTemplateTypes, getTypeForm, ResourceType} from '../templates/helpers';
 import axios from '../lib/axios';
 import "../lib/styles.scss";
-import "./styles.scss";
+import campaignsStyles from "./styles.module.scss";
 import {getUrl} from "../lib/urls";
 import {campaignOverridables, CampaignSource, CampaignStatus} from "../../../shared/campaigns";
 import moment from 'moment';
@@ -221,6 +221,16 @@ export default function CUD({ action, entity, permissions, type }) {
         listsSelectorHelperRef.current = new ListsSelectorHelper(formState, t, 'lists', true);
     }
 
+    const editorNodeRef = useRef(null);
+    const editorNodeRefHandler = (node) => { editorNodeRef.current = node; };
+    const owner = {
+        ...formState,
+        templateTypes,
+        get editorNode() { return editorNodeRef.current; },
+        editorNodeRefHandler,
+        props: { entity }
+    };
+
     const sendConfigId = formState.getFormValue('send_configuration');
     useEffect(() => {
         setSendConfiguration(null);
@@ -385,8 +395,8 @@ export default function CUD({ action, entity, permissions, type }) {
         const customTemplateTypeKey = formState.getFormValue('data_sourceCustom_type');
 
         if (customTemplateTypeKey) {
-            templateModals = getModals(formState, customTemplateTypeKey, isEdit);
-            const customTemplateTypeForm = getTypeForm(formState, customTemplateTypeKey, false);
+            templateModals = getModals(owner, customTemplateTypeKey, isEdit);
+            const customTemplateTypeForm = getTypeForm(owner, customTemplateTypeKey, false);
 
             templateEdit = <div>
                 <Dropdown id="data_sourceCustom_type" label={t('type')} options={customTemplateTypeOptions}/>
