@@ -4,54 +4,58 @@ services:
   mysql:
     image: mysql:8.4
     environment:
-    - MYSQL_ROOT_PASSWORD=mailtrain
-    - MYSQL_DATABASE=mailtrain
-    - MYSQL_USER=mailtrain
-    - MYSQL_PASSWORD=mailtrain
+      - MYSQL_ROOT_PASSWORD=mailtrain
+      - MYSQL_DATABASE=mailtrain
+      - MYSQL_USER=mailtrain
+      - MYSQL_PASSWORD=mailtrain
     volumes:
-    - mysql-data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     ports:
       - 3306:3306
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-umailtrain", "-pmailtrain"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     deploy:
       resources:
-          limits:
-            cpus: "0.5"
-            memory: "500M"
+        limits:
+          cpus: "0.5"
+          memory: "500M"
 
   redis:
     image: redis:7
     volumes:
-    - redis-data:/data
+      - redis-data:/data
     ports:
       - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     deploy:
       resources:
-          limits:
-            cpus: "0.5"
-            memory: "1G"
+        limits:
+          cpus: "0.5"
+          memory: "1G"
 
   mongo:
     image: mongo:6
     volumes:
-    - mongo-data:/data/db
+      - mongo-data:/data/db
     ports:
       - 27017:27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
     deploy:
       resources:
-          limits:
-            cpus: "0.5"
-            memory: "1G"
-
-  mailtrain:
-    build:
-      context: .
-      dockerfile: Dockerfile-Develop
-    ports:
-    - "3000:3000"
-    - "3003:3003"
-    - "3004:3004"
-    volumes:
-    - ./:/app
+        limits:
+          cpus: "0.5"
+          memory: "1G"
 
 volumes:
   mysql-data:

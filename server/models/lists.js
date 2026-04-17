@@ -1,30 +1,27 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { EntityActivityType } from '../../shared/activity-log.js';
+import { UnsubscriptionMode, FieldWizard } from '../../shared/lists.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import shortid from '../lib/shortid.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import fields from './fields.js';
+import segments from './segments.js';
+import imports from './imports.js';
+import entitySettings from '../lib/entity-settings.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
+import activityLog from '../lib/activity-log.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const dtHelpers = require('../lib/dt-helpers');
-const shortid = require('../lib/shortid');
-const { enforce, filterObject } = require('../lib/helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const fields = require('./fields');
-const segments = require('./segments');
-const imports = require('./imports');
-const entitySettings = require('../lib/entity-settings');
-const dependencyHelpers = require('../lib/dependency-helpers');
-
-const {EntityActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
-
-const {UnsubscriptionMode, FieldWizard} = require('../../shared/lists');
 
 const allowedKeys = new Set(['name', 'description', 'default_form', 'public_subscribe', 'unsubscription_mode', 'contact_email', 'homepage', 'namespace', 'to_name', 'listunsubscribe_disabled', 'send_configuration']);
 
 function hash(entity) {
     return hasher.hash(filterObject(entity, allowedKeys));
 }
-
 
 async function _listDTAjax(context, namespaceId, params) {
     const campaignEntityType = entitySettings.getEntityType('campaign');
@@ -298,18 +295,34 @@ async function remove(context, id) {
     });
 }
 
+export { UnsubscriptionMode };
+export { hash };
+export { listDTAjax };
+export { listByNamespaceDTAjax };
+export { listWithSegmentByCampaignDTAjax };
+export { getByIdTx };
+export { getById };
+export { getByIdWithListFields };
+export { getByCidTx };
+export { getByCid };
+export { getByNamespaceId };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
 
-module.exports.UnsubscriptionMode = UnsubscriptionMode;
-module.exports.hash = hash;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listByNamespaceDTAjax = listByNamespaceDTAjax;
-module.exports.listWithSegmentByCampaignDTAjax = listWithSegmentByCampaignDTAjax;
-module.exports.getByIdTx = getByIdTx;
-module.exports.getById = getById;
-module.exports.getByIdWithListFields = getByIdWithListFields;
-module.exports.getByCidTx = getByCidTx;
-module.exports.getByCid = getByCid;
-module.exports.getByNamespaceId = getByNamespaceId;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
+export default {
+    UnsubscriptionMode,
+    create,
+    getByCid,
+    getByCidTx,
+    getById,
+    getByIdTx,
+    getByIdWithListFields,
+    getByNamespaceId,
+    hash,
+    listByNamespaceDTAjax,
+    listDTAjax,
+    listWithSegmentByCampaignDTAjax,
+    remove,
+    updateWithConsistencyCheck
+};

@@ -1,30 +1,28 @@
-'use strict';
-
-const config = require('./config');
-const log = require('./log');
-const mailers = require('./mailers');
-const knex = require('./knex');
-const subscriptions = require('../models/subscriptions');
-const contextHelpers = require('./context-helpers');
-const campaigns = require('../models/campaigns');
-const templates = require('../models/templates');
-const lists = require('../models/lists');
-const fields = require('../models/fields');
-const sendConfigurations = require('../models/send-configurations');
-const links = require('../models/links');
-const {CampaignSource, CampaignType} = require('../../shared/campaigns');
-const {toNameTagLangauge} = require('../../shared/lists');
-const {CampaignMessageStatus, CampaignMessageErrorType} = require('../../shared/campaigns');
-const tools = require('./tools');
-const htmlToText = require('html-to-text');
-const request = require('request-promise');
-const files = require('../models/files');
-const {getPublicUrl} = require('./urls');
-const blacklist = require('../models/blacklist');
-const libmime = require('libmime');
-const { enforce, hashEmail } = require('./helpers');
-const senders = require('./senders');
-const shortid = require('./shortid');
+import { CampaignSource, CampaignType } from '../../shared/campaigns.js';
+import { toNameTagLangauge } from '../../shared/lists.js';
+import { CampaignMessageStatus, CampaignMessageErrorType } from '../../shared/campaigns.js';
+import { getPublicUrl } from './urls.js';
+import { enforce, hashEmail } from './helpers.js';
+import config from './config.js';
+import log from './log.js';
+import mailers from './mailers.js';
+import knex from './knex.js';
+import subscriptions from '../models/subscriptions.js';
+import contextHelpers from './context-helpers.js';
+import campaigns from '../models/campaigns.js';
+import templates from '../models/templates.js';
+import lists from '../models/lists.js';
+import fields from '../models/fields.js';
+import sendConfigurations from '../models/send-configurations.js';
+import links from '../models/links.js';
+import tools from './tools.js';
+import htmlToText from 'html-to-text';
+import request from 'request-promise';
+import files from '../models/files.js';
+import blacklist from '../models/blacklist.js';
+import libmime from 'libmime';
+import senders from './senders.js';
+import shortid from './shortid.js';
 
 const MessageType = {
     REGULAR: 0,
@@ -88,7 +86,6 @@ class MessageSender {
                 this.useVerp = config.verp.enabled && this.sendConfiguration.verp_hostname;
                 this.useVerpSenderHeader = this.useVerp && !this.sendConfiguration.verp_disable_sender_header;
 
-
                 // These IFs are not mutually exclusive because there are situations when listId is provided, but we want to collect all lists of the campaign
                 // in order to support tags like LINK_PUBLIC_SUBSCRIBE, LIST_ID_<index>, PUBLIC_LIST_ID_<index>
                 if (settings.listId) {
@@ -124,7 +121,6 @@ class MessageSender {
             } else {
                 enforce(false);
             }
-
 
             if (settings.attachments) {
                 this.attachments = settings.attachments;
@@ -189,7 +185,6 @@ class MessageSender {
         let renderTags = false;
         const campaign = this.campaign;
 
-
         if (this.renderedHtml !== undefined) {
             html = this.renderedHtml;
             text = this.renderedText;
@@ -250,7 +245,6 @@ class MessageSender {
             });
         }
 
-
         if (renderTags) {
             if (campaign) {
                 html = await links.updateLinks(html, this.tagLanguage, mergeTags, campaign, this.listsById, list, subscriptionGrouped);
@@ -295,7 +289,6 @@ class MessageSender {
     async initByCampaignId(campaignId) {
         await this._init({type: MessageType.REGULAR, campaignId});
     }
-
 
     /*
         Accepted combinations of subData:
@@ -452,7 +445,6 @@ class MessageSender {
             encryptionKeys
         };
 
-
         let response;
         let responseId = null;
 
@@ -505,7 +497,6 @@ class MessageSender {
             response = info.response || info.messageId;
             responseId = response.split(/\s+/).pop();
         }
-
 
         const result = {
             response,
@@ -566,7 +557,6 @@ class MessageSender {
         await knex('campaigns').where('id', this.campaign.id).increment('delivered');
     }
 }
-
 
 async function sendQueuedMessage(queuedMessage) {
     const messageType = queuedMessage.type;
@@ -676,8 +666,6 @@ async function dropQueuedMessage(queuedMessage) {
         .where({id: queuedMessage.id})
         .del();
 }
-
-
 
 async function queueCampaignMessageTx(tx, sendConfigurationId, listId, subscriptionId, messageType, messageData) {
     enforce(messageType === MessageType.TRIGGERED || messageType === MessageType.TEST);
@@ -799,11 +787,22 @@ async function getMessage(campaignCid, listCid, subscriptionCid, settings, isTes
     return await cs._getMessage(mergeTags, list, subscriptionGrouped, false);
 }
 
-module.exports.MessageSender = MessageSender;
-module.exports.MessageType = MessageType;
-module.exports.sendQueuedMessage = sendQueuedMessage;
-module.exports.queueCampaignMessageTx = queueCampaignMessageTx;
-module.exports.queueSubscriptionMessage = queueSubscriptionMessage;
-module.exports.dropQueuedMessage = dropQueuedMessage;
-module.exports.getMessage = getMessage;
-module.exports.queueAPITransactionalMessageTx = queueAPITransactionalMessageTx;
+export { MessageSender };
+export { MessageType };
+export { sendQueuedMessage };
+export { queueCampaignMessageTx };
+export { queueSubscriptionMessage };
+export { dropQueuedMessage };
+export { getMessage };
+export { queueAPITransactionalMessageTx };
+
+export default {
+    MessageSender,
+    MessageType,
+    dropQueuedMessage,
+    getMessage,
+    queueAPITransactionalMessageTx,
+    queueCampaignMessageTx,
+    queueSubscriptionMessage,
+    sendQueuedMessage
+};

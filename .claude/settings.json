@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/rlemeill/Development/hcfmailer-plus/client/src -name \"*.jsx\" -exec sed -i '' 's/styles\\\\.\\\\\\([a-zA-Z0-9_]*\\\\\\)/\"\\\\1\"/g' {} \\\\;)",
+      "Bash(find /Users/rlemeill/Development/hcfmailer-plus/client/src -name \"*.jsx\" -exec sed -i '' 's/import \"\\\\\\(.*\\\\\\)\\\\/\"scss\"\";/import \"\\\\1\\\\/styles.scss\";/g' {} \\\\;)"
+    ]
+  }
+}

@@ -1,5 +1,3 @@
-'use strict';
-
 const ReplacementBehavior = {
     NONE: 1,
     REPLACE: 2,
@@ -131,7 +129,6 @@ for (const key in entityTypes) {
     }
 }
 
-
 function getEntityTypes() {
     return entityTypes;
 }
@@ -150,9 +147,16 @@ function getEntityType(entityTypeId) {
     return entityType
 }
 
-module.exports = {
+export {
     getEntityTypes,
     getEntityTypesWithPermissions,
     getEntityType,
-    ReplacementBehavior
-}
+    ReplacementBehavior,
+};
+
+export default {
+    ReplacementBehavior,
+    getEntityType,
+    getEntityTypes,
+    getEntityTypesWithPermissions
+};

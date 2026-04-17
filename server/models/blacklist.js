@@ -1,14 +1,11 @@
-'use strict';
+import knex from '../lib/knex.js';
+import * as dtHelpers from '../lib/dt-helpers.js';
+import shares from './shares.js';
+import * as tools from '../lib/tools.js';
+import { enforce } from '../lib/helpers.js';
 
-const knex = require('../lib/knex');
-const dtHelpers = require('../lib/dt-helpers');
-const shares = require('./shares');
-const tools = require('../lib/tools');
-const { enforce } = require('../lib/helpers');
-
-const {BlacklistActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
-
+import { BlacklistActivityType } from '../../shared/activity-log.js';
+import * as activityLog from '../lib/activity-log.js';
 
 async function listDTAjax(context, params) {
     shares.enforceGlobalPermission(context, 'manageBlacklist');
@@ -88,9 +85,5 @@ async function serverValidate(context, data) {
     return result;
 }
 
-module.exports.listDTAjax = listDTAjax;
-module.exports.add = add;
-module.exports.remove = remove;
-module.exports.search = search;
-module.exports.isBlacklisted = isBlacklisted;
-module.exports.serverValidate = serverValidate;
+export default { listDTAjax, add, remove, search, isBlacklisted, serverValidate };
+export { listDTAjax, add, remove, search, isBlacklisted, serverValidate };

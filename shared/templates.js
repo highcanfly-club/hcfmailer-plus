@@ -1,5 +1,3 @@
-'use strict';
-
 const TagLanguages = {
     SIMPLE: 'simple',
     HBS: 'hbs'
@@ -70,11 +68,20 @@ function unbase(text, tagLanguage, trustedBaseUrl, sandboxBaseUrl, publicBaseUrl
     return text;
 }
 
-module.exports = {
+export {
     base,
     unbase,
     getMergeTagsForBases,
     TagLanguages,
     allTagLanguages,
-    renderTag
+    renderTag,
+};
+
+export default {
+    TagLanguages,
+    allTagLanguages,
+    base,
+    getMergeTagsForBases,
+    renderTag,
+    unbase
 };

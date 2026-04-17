@@ -1,5 +1,3 @@
-'use strict';
-
 class InteroperableError extends Error {
     constructor(type, msg, data) {
         super(msg);
@@ -11,6 +9,7 @@ class InteroperableError extends Error {
 class NotLoggedInError extends InteroperableError {
     constructor(msg, data) {
         super('NotLoggedInError', msg, data);
+        this.status = 401;
     }
 }
 
@@ -145,6 +144,46 @@ function deserialize(errorObj) {
     }
 }
 
-module.exports = Object.assign({}, errorTypes, {
+export {
+    InteroperableError,
+    NotLoggedInError,
+    ChangedError,
+    NotFoundError,
+    LoopDetectedError,
+    DuplicitNameError,
+    DuplicitEmailError,
+    DuplicitKeyError,
+    IncorrectPasswordError,
+    InvalidTokenError,
+    DependencyNotFoundError,
+    NamespaceNotFoundError,
+    PermissionDeniedError,
+    InvalidConfirmationForSubscriptionError,
+    InvalidConfirmationForAddressChangeError,
+    InvalidConfirmationForUnsubscriptionError,
+    DependencyPresentError,
+    InvalidStateError,
+    deserialize,
+};
+
+export default {
+    ChangedError,
+    DependencyNotFoundError,
+    DependencyPresentError,
+    DuplicitEmailError,
+    DuplicitKeyError,
+    DuplicitNameError,
+    IncorrectPasswordError,
+    InteroperableError,
+    InvalidConfirmationForAddressChangeError,
+    InvalidConfirmationForSubscriptionError,
+    InvalidConfirmationForUnsubscriptionError,
+    InvalidStateError,
+    InvalidTokenError,
+    LoopDetectedError,
+    NamespaceNotFoundError,
+    NotFoundError,
+    NotLoggedInError,
+    PermissionDeniedError,
     deserialize
-});
+};

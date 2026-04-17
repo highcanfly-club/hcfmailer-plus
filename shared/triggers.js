@@ -1,5 +1,3 @@
-'use strict';
-
 const Entity = {
     SUBSCRIPTION: 'subscription',
     CAMPAIGN: 'campaign'
@@ -42,9 +40,11 @@ const EventVals = {
     }
 };
 
-module.exports = {
+export { Entity, Event, EntityVals, EventVals };
+
+export default {
     Entity,
-    Event,
     EntityVals,
+    Event,
     EventVals
 };

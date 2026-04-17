@@ -1,9 +1,11 @@
-'use strict';
-
-let dbcheck = require('../../lib/dbcheck');
-let log = require('npmlog');
-let path = require('path');
-let fs = require('fs');
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import dbcheck from '../../lib/dbcheck.js';
+import log from 'npmlog';
+import path from 'path';
+import fs from 'fs';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 log.level = 'verbose';
 

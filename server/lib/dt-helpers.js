@@ -1,9 +1,7 @@
-'use strict';
-
-const knex = require('./knex');
-const entitySettings = require('./entity-settings');
-const { enforce } = require('./helpers');
-const shares = require('../models/shares');
+import knex from './knex.js';
+import { getEntityType } from './entity-settings.js';
+import { enforce } from './helpers.js';
+import shares from '../models/shares.js';
 
 async function ajaxListTx(tx, params, queryFun, columns, options) {
     options = options || {};
@@ -117,7 +115,7 @@ async function ajaxListWithPermissionsTx(tx, context, fetchSpecs, params, queryF
 
     const permCols = [];
     for (const fetchSpec of fetchSpecs) {
-        const entityType = entitySettings.getEntityType(fetchSpec.entityTypeId);
+        const entityType = getEntityType(fetchSpec.entityTypeId);
         const entityIdColumn = fetchSpec.column ? fetchSpec.column : entityType.entitiesTable + '.id';
 
         permCols.push({
@@ -138,7 +136,7 @@ async function ajaxListWithPermissionsTx(tx, context, fetchSpecs, params, queryF
             let query = queryFun(builder);
 
             for (const fetchSpec of fetchSpecs) {
-                const entityType = entitySettings.getEntityType(fetchSpec.entityTypeId);
+                const entityType = getEntityType(fetchSpec.entityTypeId);
 
                 if (fetchSpec.requiredOperations) {
                     const requiredOperations = shares.filterPermissionsByRestrictedAccessHandler(context, fetchSpec.entityTypeId, null, fetchSpec.requiredOperations, 'ajaxListWithPermissionsTx');
@@ -194,7 +192,11 @@ async function ajaxListWithPermissions(context, fetchSpecs, params, queryFun, co
     });
 }
 
-module.exports.ajaxListTx = ajaxListTx;
-module.exports.ajaxList = ajaxList;
-module.exports.ajaxListWithPermissionsTx = ajaxListWithPermissionsTx;
-module.exports.ajaxListWithPermissions = ajaxListWithPermissions;
+export { ajaxListTx, ajaxList, ajaxListWithPermissionsTx, ajaxListWithPermissions };
+
+export default {
+    ajaxList,
+    ajaxListTx,
+    ajaxListWithPermissions,
+    ajaxListWithPermissionsTx
+};

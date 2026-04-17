@@ -1,5 +1,3 @@
-'use strict';
-
 const EntityActivityType = {
     CREATE: 1,
     UPDATE: 2,
@@ -43,9 +41,18 @@ const BlacklistActivityType = {
     REMOVE: 2
 };
 
+export {
+    EntityActivityType,
+    BlacklistActivityType,
+    CampaignActivityType,
+    ListActivityType,
+    CampaignTrackerActivityType,
+};
 
-module.exports.EntityActivityType = EntityActivityType;
-module.exports.BlacklistActivityType = BlacklistActivityType;
-module.exports.CampaignActivityType = CampaignActivityType;
-module.exports.ListActivityType = ListActivityType;
-module.exports.CampaignTrackerActivityType = CampaignTrackerActivityType;
+export default {
+    BlacklistActivityType,
+    CampaignActivityType,
+    CampaignTrackerActivityType,
+    EntityActivityType,
+    ListActivityType
+};

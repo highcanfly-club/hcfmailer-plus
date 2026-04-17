@@ -1,8 +1,6 @@
-'use strict';
-
-const { enforce } = require('./helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('../models/shares');
+import { enforce } from './helpers.js';
+import * as interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from '../models/shares.js';
 
 async function validateEntity(tx, entity) {
     enforce(entity.namespace, 'Entity namespace not set');
@@ -18,7 +16,9 @@ async function validateMoveTx(tx, context, entity, existing, entityTypeId, creat
     }
 }
 
-module.exports = {
+export { validateEntity, validateMoveTx };
+
+export default {
     validateEntity,
     validateMoveTx
 };

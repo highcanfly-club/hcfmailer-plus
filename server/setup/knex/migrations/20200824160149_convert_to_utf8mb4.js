@@ -1,5 +1,5 @@
 
-exports.up = function(knex, Promise) {
+export const up = function(knex, Promise) {
   return knex.raw('SELECT LOWER(table_name) as table_name FROM information_schema.tables WHERE table_schema = ?', [knex.client.database()])
     .then(function(tablas) {
        let sql="";
@@ -12,6 +12,6 @@ exports.up = function(knex, Promise) {
     });
 };
 
-exports.down = function(knex, Promise) {
+export const down = function(knex, Promise) {
   
 };

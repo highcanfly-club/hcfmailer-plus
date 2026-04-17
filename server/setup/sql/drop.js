@@ -1,10 +1,13 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import config from 'config';
+import spawn from 'child_process';
+import log from 'npmlog';
+import path from 'path';
+import fs from 'fs';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-let config = require('config');
-let spawn = require('child_process').spawn;
-let log = require('npmlog');
-let path = require('path');
-let fs = require('fs');
 
 log.level = 'verbose';
 

@@ -1,32 +1,31 @@
-'use strict';
+import knex from '../lib/knex.js';
+import hasherLib from 'node-object-hash';
+const hasher = hasherLib();
+import * as dtHelpers from '../lib/dt-helpers.js';
+import * as interoperableErrors from '../../shared/interoperable-errors.js';
+import * as shortid from '../lib/shortid.js';
+import { enforce, filterObject } from '../lib/helpers.js';
+import shares from './shares.js';
+import * as namespaceHelpers from '../lib/namespace-helpers.js';
+import files from './files.js';
+import templates from './templates.js';
+import { allTagLanguages } from '../../shared/templates.js';
+import { CampaignMessageStatus, CampaignStatus, CampaignSource, CampaignType, getSendConfigurationPermissionRequiredForSend } from '../../shared/campaigns.js';
+import sendConfigurations from './send-configurations.js';
+import triggers from './triggers.js';
+import { SubscriptionStatus } from '../../shared/lists.js';
+import subscriptions from './subscriptions.js';
+import segments from './segments.js';
+import * as senders from '../lib/senders.js';
+import links from './links.js';
+import * as feedcheck from '../lib/feedcheck.js';
+import * as contextHelpers from '../lib/context-helpers.js';
+import { convertFileURLs } from '../lib/campaign-content.js';
+import * as messageSender from '../lib/message-sender.js';
+import lists from './lists.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shortid = require('../lib/shortid');
-const { enforce, filterObject } = require('../lib/helpers');
-const shares = require('./shares');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const files = require('./files');
-const templates = require('./templates');
-const { allTagLanguages } = require('../../shared/templates');
-const { CampaignMessageStatus, CampaignStatus, CampaignSource, CampaignType, getSendConfigurationPermissionRequiredForSend } = require('../../shared/campaigns');
-const sendConfigurations = require('./send-configurations');
-const triggers = require('./triggers');
-const {SubscriptionStatus} = require('../../shared/lists');
-const subscriptions = require('./subscriptions');
-const segments = require('./segments');
-const senders = require('../lib/senders');
-const links = require('./links');
-const feedcheck = require('../lib/feedcheck');
-const contextHelpers = require('../lib/context-helpers');
-const {convertFileURLs} = require('../lib/campaign-content');
-const messageSender = require('../lib/message-sender');
-const lists = require('./lists');
-
-const {EntityActivityType, CampaignActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
+import { EntityActivityType, CampaignActivityType } from '../../shared/activity-log.js';
+import * as activityLog from '../lib/activity-log.js';
 
 const allowedKeysCommon = ['name', 'description', 'namespace', 'channel',
     'send_configuration', 'from_name_override', 'from_email_override', 'reply_to_override', 'subject', 'data', 'click_tracking_disabled', 'open_tracking_disabled', 'unsubscribe_url'];
@@ -112,7 +111,6 @@ async function listChildrenDTAjax(context, campaignId, params) {
         ['campaigns.id', 'campaigns.name', 'campaigns.cid', 'campaigns.description', 'campaigns.type', 'campaigns.status', 'campaigns.scheduled', 'campaigns.source', 'campaigns.created', 'namespaces.name']
     );
 }
-
 
 async function listWithContentDTAjax(context, params) {
     return await dtHelpers.ajaxListWithPermissions(
@@ -275,7 +273,6 @@ async function _listSubscriberResultsDTAjax(context, campaignId, getSubsQrys, co
     });
 }
 
-
 async function listSentByStatusDTAjax(context, campaignId, status, params) {
     return await _listSubscriberResultsDTAjax(
         context,
@@ -331,7 +328,6 @@ async function listLinkClicksDTAjax(context, campaignId, params) {
         );
     });
 }
-
 
 async function getTrackingSettingsByCidTx(tx, cid) {
     const entity = await tx('campaigns').where('campaigns.cid', cid)
@@ -676,7 +672,6 @@ async function _removeTx(tx, context, id, existing = null, overrideTypeCheck = f
     await activityLog.logEntityActivity('campaign', EntityActivityType.REMOVE, id);
 }
 
-
 async function remove(context, id) {
     await knex.transaction(async tx => {
         await _removeTx(tx, context, id);
@@ -710,7 +705,6 @@ async function enforceSendPermissionTx(tx, context, campaignOrCampaignId, isToTe
         }
     }
 }
-
 
 // Message API
 
@@ -800,7 +794,6 @@ async function changeStatusByCampaignCidAndSubscriptionIdTx(tx, context, campaig
         await _changeStatusByMessageTx(tx, context, message, campaignMessageStatus);
     }
 }
-
 
 const campaignMessageStatusToSubscriptionStatusMapping = new Map();
 campaignMessageStatusToSubscriptionStatusMapping.set(CampaignMessageStatus.BOUNCED, SubscriptionStatus.BOUNCED);
@@ -915,7 +908,6 @@ async function _changeStatus(context, campaignId, permittedCurrentStates, newSta
     senders.scheduleCheck();
 }
 
-
 async function start(context, campaignId, extraData) {
     await _changeStatus(context, campaignId, [CampaignStatus.IDLE, CampaignStatus.SCHEDULED, CampaignStatus.PAUSED, CampaignStatus.FINISHED], CampaignStatus.SCHEDULED, 'Cannot start campaign until it is in IDLE, PAUSED, or FINISHED state', extraData);
 }
@@ -962,7 +954,6 @@ async function enable(context, campaignId) {
 async function disable(context, campaignId) {
     await _changeStatus(context, campaignId, [CampaignStatus.ACTIVE], CampaignStatus.INACTIVE, 'Cannot disable campaign unless it is in ACTIVE state');
 }
-
 
 async function getStatisticsOpened(context, id) {
     return await knex.transaction(async tx => {
@@ -1038,7 +1029,6 @@ async function testSend(context, data) {
                     id: attachment.id
                 });
             }
-
 
             let listId = data.listId;
             if (!listId && data.listCid) {
@@ -1116,51 +1106,81 @@ async function getRssPreview(context, campaignCid, listCid, subscriptionCid) {
 }
 
 
-module.exports.Content = Content;
-module.exports.hash = hash;
-
-module.exports.listDTAjax = listDTAjax;
-module.exports.listByChannelDTAjax = listByChannelDTAjax;
-module.exports.listByNamespaceDTAjax = listByNamespaceDTAjax;
-module.exports.listChildrenDTAjax = listChildrenDTAjax;
-module.exports.listWithContentDTAjax = listWithContentDTAjax;
-module.exports.listOthersWhoseListsAreIncludedDTAjax = listOthersWhoseListsAreIncludedDTAjax;
-module.exports.listTestUsersDTAjax = listTestUsersDTAjax;
-module.exports.listSentByStatusDTAjax = listSentByStatusDTAjax;
-module.exports.listOpensDTAjax = listOpensDTAjax;
-module.exports.listLinkClicksDTAjax = listLinkClicksDTAjax;
 
 
-module.exports.getByIdTx = getByIdTx;
-module.exports.getById = getById;
-module.exports.getByCid = getByCid;
-module.exports.create = create;
-module.exports.createRssTx = createRssTx;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.enforceSendPermissionTx = enforceSendPermissionTx;
 
-module.exports.getMessageCid = getMessageCid;
-module.exports.getMessageByCid = getMessageByCid;
-module.exports.getMessageByResponseId = getMessageByResponseId;
+export {
+    Content,
+    hash,
+    listDTAjax,
+    listByNamespaceDTAjax,
+    listByChannelDTAjax,
+    listChildrenDTAjax,
+    listWithContentDTAjax,
+    listOthersWhoseListsAreIncludedDTAjax,
+    listTestUsersDTAjax,
+    getById,
+    getByIdTx,
+    getByCid,
+    create,
+    createRssTx,
+    updateWithConsistencyCheck,
+    remove,
+    enforceSendPermissionTx,
+    getMessageCid,
+    getMessageByCid,
+    getMessageByResponseId,
+    changeStatusByCampaignCidAndSubscriptionIdTx,
+    changeStatusByMessage,
+    updateMessageResponse,
+    prepareCampaignMessages,
+    start,
+    stop,
+    reset,
+    enable,
+    disable,
+    rawGetByTx,
+    getTrackingSettingsByCidTx,
+    getStatisticsOpened,
+    fetchRssCampaign,
+    testSend,
+    getRssPreview,
+};
 
-module.exports.changeStatusByCampaignCidAndSubscriptionIdTx = changeStatusByCampaignCidAndSubscriptionIdTx;
-module.exports.changeStatusByMessage = changeStatusByMessage;
-module.exports.updateMessageResponse = updateMessageResponse;
-
-module.exports.prepareCampaignMessages = prepareCampaignMessages;
-
-module.exports.start = start;
-module.exports.stop = stop;
-module.exports.reset = reset;
-module.exports.enable = enable;
-module.exports.disable = disable;
-
-module.exports.rawGetByTx = rawGetByTx;
-module.exports.getTrackingSettingsByCidTx = getTrackingSettingsByCidTx;
-module.exports.getStatisticsOpened = getStatisticsOpened;
-
-module.exports.fetchRssCampaign = fetchRssCampaign;
-
-module.exports.testSend = testSend;
-module.exports.getRssPreview = getRssPreview;
+export default {
+    Content,
+    hash,
+    listDTAjax,
+    listByNamespaceDTAjax,
+    listByChannelDTAjax,
+    listChildrenDTAjax,
+    listWithContentDTAjax,
+    listOthersWhoseListsAreIncludedDTAjax,
+    listTestUsersDTAjax,
+    getById,
+    getByIdTx,
+    getByCid,
+    create,
+    createRssTx,
+    updateWithConsistencyCheck,
+    remove,
+    enforceSendPermissionTx,
+    getMessageCid,
+    getMessageByCid,
+    getMessageByResponseId,
+    changeStatusByCampaignCidAndSubscriptionIdTx,
+    changeStatusByMessage,
+    updateMessageResponse,
+    prepareCampaignMessages,
+    start,
+    stop,
+    reset,
+    enable,
+    disable,
+    rawGetByTx,
+    getTrackingSettingsByCidTx,
+    getStatisticsOpened,
+    fetchRssCampaign,
+    testSend,
+    getRssPreview,
+};

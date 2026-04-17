@@ -1,13 +1,12 @@
-'use strict';
+import { castToInteger } from './helpers.js';
+import passport from './passport.js';
+import files from '../models/files.js';
+import path from 'path';
+import multerFactory from 'multer';
 
-const passport = require('./passport');
-const files = require('../models/files');
-
-const path = require('path');
 const uploadedFilesDir = path.join(files.filesDir, 'uploaded');
-const {castToInteger} = require('./helpers');
 
-const multer = require('multer')({
+const multer = multerFactory({
     dest: uploadedFilesDir
 });
 
@@ -17,7 +16,9 @@ function installUploadHandler(router, url, replacementBehavior, type, subType, t
     });
 }
 
-module.exports = {
+export { installUploadHandler, uploadedFilesDir };
+
+export default {
     installUploadHandler,
     uploadedFilesDir
 };

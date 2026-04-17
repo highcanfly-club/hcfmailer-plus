@@ -1,24 +1,21 @@
-'use strict';
-
-const isemail = require('isemail');
-const path = require('path');
-const {getPublicUrl} = require('./urls');
-const {enforce} = require('./helpers');
-const hasher = require('node-object-hash')();
-
-const mjml2html = require('mjml');
-
-const hbs = require('hbs');
-const juice = require('juice');
-const he = require('he');
-const htmlToText = require('html-to-text');
-
-const fs = require('fs-extra');
-
-const { JSDOM } = require('jsdom');
-const { tUI, tLog, getLangCodeFromExpressLocale } = require('./translate');
-
-const {TagLanguages} = require('../../shared/templates');
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { getPublicUrl } from './urls.js';
+import { enforce } from './helpers.js';
+import { JSDOM } from 'jsdom';
+import { tUI, tLog, getLangCodeFromExpressLocale } from './translate.js';
+import { TagLanguages } from '../../shared/templates.js';
+import isemail from 'isemail';
+import path from 'path';
+import hasher from 'node-object-hash';
+import mjml2html from 'mjml';
+import hbs from 'hbs';
+import juice from 'juice';
+import he from 'he';
+import htmlToText from 'html-to-text';
+import fs from 'fs-extra';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 
 const templates = new Map();
@@ -89,7 +86,6 @@ async function getTemplate(template, locale) {
 
     return localizedRenderer;
 }
-
 
 async function mergeTemplateIntoLayout(template, layout, locale) {
     layout = layout || '{{{body}}}';
@@ -269,13 +265,14 @@ function getMessageLinks(campaign, campaignListsById, list, subscription) {
     return result;
 }
 
-module.exports = {
-    validateEmail,
-    validateEmailGetMessage,
+export { validateEmail, validateEmailGetMessage, getTemplate, prepareHtml, getMessageLinks, formatCampaignTemplate, formatTemplate };
+
+export default {
+    formatCampaignTemplate,
+    formatTemplate,
+    getMessageLinks,
     getTemplate,
     prepareHtml,
-    getMessageLinks,
-    formatCampaignTemplate,
-    formatTemplate
+    validateEmail,
+    validateEmailGetMessage
 };
-

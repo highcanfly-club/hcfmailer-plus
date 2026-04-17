@@ -1,11 +1,9 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const subscriptions = require('../../models/subscriptions');
-const { SubscriptionSource } = require('../../../shared/lists');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { SubscriptionSource } from '../../../shared/lists.js';
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import subscriptions from '../../models/subscriptions.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/subscriptions-table/:listId/:segmentId?', passport.loggedIn, async (req, res) => {
@@ -48,5 +46,4 @@ router.postAsync('/subscriptions-unsubscribe/:listId/:subscriptionId', passport.
     return res.json();
 });
 
-
-module.exports = router;
+export default router;

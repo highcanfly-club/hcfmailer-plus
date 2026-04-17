@@ -1,9 +1,7 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const settings = require('../../models/settings');
-
-const router = require('../../lib/router-async').create();
+import passport from '../../lib/passport.js';
+import settings from '../../models/settings.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/settings', passport.loggedIn, async (req, res) => {
@@ -18,5 +16,4 @@ router.putAsync('/settings', passport.loggedIn, passport.csrfProtection, async (
     return res.json();
 });
 
-
-module.exports = router;
+export default router;

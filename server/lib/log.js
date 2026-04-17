@@ -1,8 +1,6 @@
-'use strict';
-
-const config = require('./config');
-const log = require('npmlog');
+import config from './config.js';
+import log from 'npmlog';
 
 log.level = config.log.level;
 
-module.exports = log;
+export default log;

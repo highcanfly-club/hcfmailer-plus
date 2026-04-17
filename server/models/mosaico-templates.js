@@ -1,15 +1,15 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { allTagLanguages } from '../../shared/templates.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import shares from './shares.js';
+import files from './files.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const shares = require('./shares');
-const files = require('./files');
-const dependencyHelpers = require('../lib/dependency-helpers');
-const { allTagLanguages } = require('../../shared/templates');
 
 const allowedKeys = new Set(['name', 'description', 'type', 'tag_language', 'data', 'namespace']);
 
@@ -130,10 +130,20 @@ async function remove(context, id) {
     });
 }
 
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listByTagLanguageDTAjax = listByTagLanguageDTAjax;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
+export { hash };
+export { getById };
+export { listDTAjax };
+export { listByTagLanguageDTAjax };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+
+export default {
+    create,
+    getById,
+    hash,
+    listByTagLanguageDTAjax,
+    listDTAjax,
+    remove,
+    updateWithConsistencyCheck
+};

@@ -2,7 +2,7 @@
 @import "bootstrap/scss/variables";
 @import "../scss/variables.scss";
 @import "../scss/mixins";
-@import "~react-day-picker/dist/style.css";
+@import "react-day-picker/dist/style.css";
 
 .toolbar {
   float: right;
@@ -12,23 +12,23 @@
 .form {
 
   // This is here to give the styles below higher priority than Bootstrap has
-  :global .DayPicker {
+  .DayPicker {
     border: $input-border-width solid $input-border-color;
     border-radius: $input-border-radius;
     padding: $input-padding-y $input-padding-x;
   }
 
-  :global .form-horizontal .control-label {
+  .form-horizontal .control-label {
     display: block;
   }
 
-  :global .form-control[disabled] {
+  .form-control[disabled] {
     cursor: default;
     background-color: #eeeeee;
     opacity: 1;
   }
 
-  :global .ace_editor {
+  .ace_editor {
     border: 1px solid #ccc;
   }
 
@@ -95,7 +95,7 @@
   background-color: white;
 }
 
-:global h3.legend {
+h3.legend {
   font-size: 21px;
   margin-bottom: 20px;
 }
@@ -108,7 +108,7 @@
   margin-left: 5px;
   margin-right: 5px;
 
-  :global .nav-item .nav-link {
+  .nav-item .nav-link {
     padding: 3px 10px;
   }
 }
@@ -290,7 +290,7 @@
 }
 
 
-:global .modal-dialog {
+.modal-dialog {
   @media (min-width: 768px) {
     max-width: 700px;
   }

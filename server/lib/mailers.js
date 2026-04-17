@@ -1,21 +1,15 @@
-'use strict';
+import { SES } from '@aws-sdk/client-ses';
+import { ZoneMTAType, MailerType } from '../../shared/send-configurations.js';
+import log from './log.js';
+import config from './config.js';
+import nodemailer from 'nodemailer';
+import openpgpEncrypt from 'nodemailer-openpgp';
+import sendConfigurations from '../models/send-configurations.js';
+import builtinZoneMta from './builtin-zone-mta.js';
+import contextHelpers from './context-helpers.js';
+import settings from '../models/settings.js';
+import bluebird from 'bluebird';
 
-const log = require('./log');
-const config = require('./config');
-
-const nodemailer = require('nodemailer');
-const {
-    SES
-} = require("@aws-sdk/client-ses");
-const openpgpEncrypt = require('nodemailer-openpgp').openpgpEncrypt;
-const sendConfigurations = require('../models/send-configurations');
-const { ZoneMTAType, MailerType } = require('../../shared/send-configurations');
-const builtinZoneMta = require('./builtin-zone-mta');
-
-const contextHelpers = require('./context-helpers');
-const settings = require('../models/settings');
-
-const bluebird = require('bluebird');
 
 const transports = new Map();
 
@@ -26,8 +20,6 @@ class SendConfigurationError extends Error {
         Error.captureStackTrace(this, SendConfigurationError);
     }
 }
-
-
 
 async function getOrCreateMailer(sendConfigurationId) {
     let sendConfiguration;
@@ -45,8 +37,6 @@ async function getOrCreateMailer(sendConfigurationId) {
 function invalidateMailer(sendConfigurationId) {
     transports.delete(sendConfigurationId);
 }
-
-
 
 function _addDkimKeys(transport, mail) {
     const sendConfiguration = transport.mailer.sendConfiguration;
@@ -76,7 +66,6 @@ function _addDkimKeys(transport, mail) {
         }
     }
 }
-
 
 async function _sendMail(transport, mail, template) {
     _addDkimKeys(transport, mail);
@@ -193,7 +182,6 @@ async function _createTransport(sendConfiguration) {
         args.unshift('Mail');
         log[level](...args);
     };
-
 
     let transportOptions;
 
@@ -352,7 +340,14 @@ class MailerError extends Error {
     }
 }
 
-module.exports.getOrCreateMailer = getOrCreateMailer;
-module.exports.invalidateMailer = invalidateMailer;
-module.exports.MailerError = MailerError;
-module.exports.SendConfigurationError = SendConfigurationError;
+export { getOrCreateMailer };
+export { invalidateMailer };
+export { MailerError };
+export { SendConfigurationError };
+
+export default {
+    MailerError,
+    SendConfigurationError,
+    getOrCreateMailer,
+    invalidateMailer
+};

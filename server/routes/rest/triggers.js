@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const triggers = require('../../models/triggers');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import triggers from '../../models/triggers.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/triggers-by-campaign-table/:campaignId', passport.loggedIn, async (req, res) => {
@@ -38,4 +36,4 @@ router.deleteAsync('/triggers/:campaignId/:triggerId', passport.loggedIn, passpo
     return res.json();
 });
 
-module.exports = router;
+export default router;

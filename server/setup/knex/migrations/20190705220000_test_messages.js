@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.raw('CREATE TABLE `test_messages` (\n' +
         '  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n' +
         '  `campaign` int(10) unsigned NOT NULL,\n' +
@@ -10,5 +10,5 @@ exports.up = (knex, Promise) => (async() => {
         ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n');
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

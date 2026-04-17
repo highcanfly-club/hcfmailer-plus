@@ -1,6 +1,4 @@
-'use strict';
-
-const knex = require('./knex');
+import knex from './knex.js';
 
 function getRequestContext(req) {
     const context = {
@@ -24,7 +22,9 @@ function getAdminContext() {
     return adminContext;
 }
 
-module.exports = {
-    getRequestContext,
-    getAdminContext
+export { getRequestContext, getAdminContext };
+
+export default {
+    getAdminContext,
+    getRequestContext
 };

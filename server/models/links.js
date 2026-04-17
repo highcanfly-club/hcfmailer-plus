@@ -1,17 +1,15 @@
-'use strict';
-
-const knex = require('../lib/knex');
-const campaigns = require('./campaigns');
-const lists = require('./lists');
-const subscriptions = require('./subscriptions');
-const contextHelpers = require('../lib/context-helpers');
-const geoip = require('geoip-ultralight');
-const uaParser = require('device');
-const he = require('he');
-const { getPublicUrl } = require('../lib/urls');
-const tools = require('../lib/tools');
-const shortid = require('../lib/shortid');
-const {enforce} = require('../lib/helpers');
+import { getPublicUrl } from '../lib/urls.js';
+import { enforce } from '../lib/helpers.js';
+import knex from '../lib/knex.js';
+import campaigns from './campaigns.js';
+import lists from './lists.js';
+import subscriptions from './subscriptions.js';
+import contextHelpers from '../lib/context-helpers.js';
+import geoip from 'geoip-ultralight';
+import uaParser from 'device';
+import he from 'he';
+import tools from '../lib/tools.js';
+import shortid from '../lib/shortid.js';
 
 const LinkId = {
     OPEN: -1,
@@ -65,7 +63,6 @@ async function countLink(remoteIp, userAgent, campaignCid, listCid, subscription
             }
         };
 
-
         // Update opened and click timestamps
         const latestUpdates = {};
 
@@ -92,7 +89,6 @@ async function countLink(remoteIp, userAgent, campaignCid, listCid, subscription
                 }
             }
         }
-
 
         // Update opens. We count a click as an open too.
         if (!campaign.open_tracking_disabled) {
@@ -188,8 +184,16 @@ async function updateLinks(source, tagLanguage, mergeTags, campaign, campaignLis
     return source;
 }
 
-module.exports.LinkId = LinkId;
-module.exports.resolve = resolve;
-module.exports.countLink = countLink;
-module.exports.addOrGet = addOrGet;
-module.exports.updateLinks = updateLinks;
+export { LinkId };
+export { resolve };
+export { countLink };
+export { addOrGet };
+export { updateLinks };
+
+export default {
+    LinkId,
+    addOrGet,
+    countLink,
+    resolve,
+    updateLinks
+};

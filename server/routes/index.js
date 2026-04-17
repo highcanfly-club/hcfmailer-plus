@@ -1,11 +1,8 @@
-'use strict';
-
-const passport = require('../lib/passport');
-const clientHelpers = require('../lib/client-helpers');
-const { getTrustedUrl } = require('../lib/urls');
-const { AppType } = require('../../shared/app');
-
-const routerFactory = require('../lib/router-async');
+import { getTrustedUrl } from '../lib/urls.js';
+import { AppType } from '../../shared/app.js';
+import passport from '../lib/passport.js';
+import clientHelpers from '../lib/client-helpers.js';
+import routerFactory from '../lib/router-async.js';
 
 async function getRouter(appType) {
     const router = routerFactory.create();
@@ -17,12 +14,19 @@ async function getRouter(appType) {
                 Object.assign(mailtrainConfig, await clientHelpers.getAuthenticatedConfig(req.context));
             }
 
+            const isDev = process.env.NODE_ENV === 'development';
             res.render('root', {
                 reactCsrfToken: req.csrfToken(),
                 mailtrainConfig: JSON.stringify(mailtrainConfig),
-                scriptFiles: [
-                    getTrustedUrl('client/root.js')
-                ],
+                isDev,
+                scriptFiles: isDev
+                    ? [
+                        { src: getTrustedUrl('client/@vite/client'), type: 'module' },
+                        { src: getTrustedUrl('client/src/root.jsx'), type: 'module' }
+                    ]
+                    : [
+                        { src: getTrustedUrl('client/root.js'), type: 'module' }
+                    ],
                 publicPath: getTrustedUrl()
             });
         });
@@ -31,5 +35,8 @@ async function getRouter(appType) {
     return router;
 }
 
+export { getRouter };
 
-module.exports.getRouter = getRouter;
+export default {
+    getRouter
+};

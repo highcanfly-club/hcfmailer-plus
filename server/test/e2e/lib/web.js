@@ -1,11 +1,11 @@
-'use strict';
+import config from './config.js';
+import By from 'selenium-webdriver';
+import url from 'url';
+import UrlPattern from 'url-pattern';
+import driver from './mocha-e2e.js';
+import page from './page.js';
 
-const config = require('./config');
-const By = require('selenium-webdriver').By;
-const url = require('url');
-const UrlPattern = require('url-pattern');
-const driver = require('./mocha-e2e').driver;
-const page = require('./page');
+
 
 module.exports = (...extras) => page({
 

@@ -1,7 +1,7 @@
-'use strict';
-
 const anonymousRestrictedAccessToken = 'anonymous';
 
-module.exports = {
+export { anonymousRestrictedAccessToken };
+
+export default {
     anonymousRestrictedAccessToken
 };

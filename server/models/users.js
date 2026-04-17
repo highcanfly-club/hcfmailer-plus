@@ -1,36 +1,32 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { getTrustedUrl } from '../lib/urls.js';
+import { tUI } from '../lib/translate.js';
+import { getSystemSendConfigurationId } from '../../shared/send-configurations.js';
+import config from '../lib/config.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import passwordValidator from '../../shared/password-validator.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import tools from '../lib/tools.js';
+import crypto from 'crypto';
+import settings from './settings.js';
+import messageSender from '../lib/message-sender.js';
+import bluebird from 'bluebird';
+import bcrypt from 'bcrypt-nodejs';
+import passport from '../lib/passport.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import shares from './shares.js';
+import contextHelpers from '../lib/context-helpers.js';
 
-const config = require('../lib/config');
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const passwordValidator = require('../../shared/password-validator')();
-const dtHelpers = require('../lib/dt-helpers');
-const tools = require('../lib/tools');
-const crypto = require('crypto');
-const settings = require('./settings');
-const {getTrustedUrl} = require('../lib/urls');
-const { tUI } = require('../lib/translate');
-const messageSender = require('../lib/message-sender');
-const {getSystemSendConfigurationId} = require('../../shared/send-configurations');
-
-const bluebird = require('bluebird');
-
-const bcrypt = require('bcrypt-nodejs');
 const bcryptHash = bluebird.promisify(bcrypt.hash.bind(bcrypt));
 const bcryptCompare = bluebird.promisify(bcrypt.compare.bind(bcrypt));
-
-const passport = require('../lib/passport');
-
-const namespaceHelpers = require('../lib/namespace-helpers');
 
 const allowedKeys = new Set(['username', 'name', 'email', 'password', 'namespace', 'role']);
 const ownAccountAllowedKeys = new Set(['name', 'email', 'password']);
 const allowedKeysExternal = new Set(['username', 'namespace', 'role', 'name', 'email']);
 const hashKeys = new Set(['username', 'name', 'email', 'namespace', 'role']);
-const shares = require('./shares');
-const contextHelpers = require('../lib/context-helpers');
 
 function hash(entity) {
     return hasher.hash(filterObject(entity, hashKeys));
@@ -133,7 +129,6 @@ async function _validateAndPreprocess(tx, entity, isCreate, isOwnAccount) {
     if (await otherUserWithSameEmailQuery.first()) {
         throw new interoperableErrors.DuplicitEmailError();
     }
-
 
     if (!isOwnAccount) {
         await namespaceHelpers.validateEntity(tx, entity);
@@ -375,8 +370,6 @@ async function resetPassword(username, resetToken, password) {
     });
 }
 
-
-
 const restrictedAccessTokenMethods = {};
 const restrictedAccessTokens = new Map();
 
@@ -432,23 +425,44 @@ async function getByRestrictedAccessToken(token) {
     }
 }
 
+export { listDTAjax };
+export { remove };
+export { updateWithConsistencyCheck };
+export { create };
+export { hash };
+export { getById };
+export { serverValidate };
+export { getByAccessToken };
+export { getByUsername };
+export { getByUsernameIfPasswordMatch };
+export { getAccessToken };
+export { resetAccessToken };
+export { sendPasswordReset };
+export { isPasswordResetTokenValid };
+export { resetPassword };
+export { getByRestrictedAccessToken };
+export { getRestrictedAccessToken };
+export { refreshRestrictedAccessToken };
+export { registerRestrictedAccessTokenMethod };
 
-module.exports.listDTAjax = listDTAjax;
-module.exports.remove = remove;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.create = create;
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.serverValidate = serverValidate;
-module.exports.getByAccessToken = getByAccessToken;
-module.exports.getByUsername = getByUsername;
-module.exports.getByUsernameIfPasswordMatch = getByUsernameIfPasswordMatch;
-module.exports.getAccessToken = getAccessToken;
-module.exports.resetAccessToken = resetAccessToken;
-module.exports.sendPasswordReset = sendPasswordReset;
-module.exports.isPasswordResetTokenValid = isPasswordResetTokenValid;
-module.exports.resetPassword = resetPassword;
-module.exports.getByRestrictedAccessToken = getByRestrictedAccessToken;
-module.exports.getRestrictedAccessToken = getRestrictedAccessToken;
-module.exports.refreshRestrictedAccessToken = refreshRestrictedAccessToken;
-module.exports.registerRestrictedAccessTokenMethod = registerRestrictedAccessTokenMethod;
+export default {
+    create,
+    getAccessToken,
+    getByAccessToken,
+    getById,
+    getByRestrictedAccessToken,
+    getByUsername,
+    getByUsernameIfPasswordMatch,
+    getRestrictedAccessToken,
+    hash,
+    isPasswordResetTokenValid,
+    listDTAjax,
+    refreshRestrictedAccessToken,
+    registerRestrictedAccessTokenMethod,
+    remove,
+    resetAccessToken,
+    resetPassword,
+    sendPasswordReset,
+    serverValidate,
+    updateWithConsistencyCheck
+};

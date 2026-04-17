@@ -1,14 +1,14 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import shares from './shares.js';
+import reports from './reports.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const shares = require('./shares');
-const reports = require('./reports');
-const dependencyHelpers = require('../lib/dependency-helpers');
 
 const allowedKeys = new Set(['name', 'description', 'mime_type', 'user_fields', 'js', 'hbs', 'namespace']);
 
@@ -94,10 +94,20 @@ async function getUserFieldsById(context, id) {
     });
 }
 
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.listDTAjax = listDTAjax;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.getUserFieldsById = getUserFieldsById;
+export { hash };
+export { getById };
+export { listDTAjax };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { getUserFieldsById };
+
+export default {
+    create,
+    getById,
+    getUserFieldsById,
+    hash,
+    listDTAjax,
+    remove,
+    updateWithConsistencyCheck
+};

@@ -1,15 +1,14 @@
-'use strict';
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import reports from '../../models/reports.js';
+import reportProcessor from '../../lib/report-processor.js';
+import reportHelpers from '../../lib/report-helpers.js';
+import shares from '../../models/shares.js';
+import contextHelpers from '../../lib/context-helpers.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
+import fs from 'fs-extra';
 
-const passport = require('../../lib/passport');
-const reports = require('../../models/reports');
-const reportProcessor = require('../../lib/report-processor');
-const reportHelpers = require('../../lib/report-helpers');
-const shares = require('../../models/shares');
-const contextHelpers = require('../../lib/context-helpers');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
-const fs = require('fs-extra');
 
 router.getAsync('/reports/:reportId', passport.loggedIn, async (req, res) => {
     const report = await reports.getByIdWithTemplate(req.context, castToInteger(req.params.reportId));
@@ -92,5 +91,4 @@ router.getAsync('/report-output/:id', async (req, res) => {
     }
 });
 
-
-module.exports = router;
+export default router;

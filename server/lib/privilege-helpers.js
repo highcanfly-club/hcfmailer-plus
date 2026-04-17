@@ -1,14 +1,11 @@
-'use strict';
+import log from './log.js';
+import config from './config.js';
+import fs from 'fs-extra-promise';
+import tryRequire from 'try-require';
 
-const log = require('./log');
-const config = require('./config');
-
-const fs = require('fs-extra-promise');
-
-const tryRequire = require('try-require');
 const posix = tryRequire('posix');
 
-// process.getuid and process.getgid are not supported on Windows 
+// process.getuid and process.getgid are not supported on Windows
 process.getuid = process.getuid || (() => 100);
 process.getgid = process.getuid || (() => 100);
 
@@ -85,10 +82,18 @@ function dropRootPrivileges() {
     }
 }
 
-module.exports = {
+export {
     dropRootPrivileges,
     ensureMailtrainOwner,
     ensureMailtrainDir,
     getConfigUidGid,
-    getConfigROUidGid
+    getConfigROUidGid,
+};
+
+export default {
+    dropRootPrivileges,
+    ensureMailtrainDir,
+    ensureMailtrainOwner,
+    getConfigROUidGid,
+    getConfigUidGid
 };

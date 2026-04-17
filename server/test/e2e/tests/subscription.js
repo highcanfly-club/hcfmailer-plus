@@ -1,14 +1,13 @@
-'use strict';
+import { useCase, step, precondition, driver } from '../lib/mocha-e2e.js';
+import config from '../lib/config.js';
+import shortid from '../lib/shortid.js';
+import expect from 'chai';
+import createPage from '../page-objects/subscription.js';
+import faker from 'faker';
+import request from 'request-promise';
 
 /* eslint-disable prefer-arrow-callback */
 
-const config = require('../lib/config');
-const { useCase, step, precondition, driver } = require('../lib/mocha-e2e');
-const shortid = require('../lib/shortid');
-const expect = require('chai').expect;
-const createPage = require('../page-objects/subscription');
-const faker = require('faker');
-const request = require('request-promise');
 
 function getPage(listConf) {
     return createPage(listConf);

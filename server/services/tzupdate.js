@@ -1,4 +1,6 @@
-'use strict';
+import moment from 'moment-timezone';
+import knex from '../lib/knex.js';
+import log from '../lib/log.js';
 
 // This script re-calculates timezone offsets once a day.
 // We need this to be able to send messages using subscriber's local time
@@ -8,9 +10,6 @@
 // JOIN with subscription table. Subscription table includes timezone name for
 // a subscriber and tzoffset table includes offset from UTC in minutes
 
-const moment = require('moment-timezone');
-const knex = require('../lib/knex');
-const log = require('../lib/log');
 let lastCheck = false;
 
 const timezone_timeout = 60 * 60 * 1000;
@@ -48,4 +47,8 @@ function start() {
     lastCheck = curUtcDate;
 }
 
-module.exports.start = start;
+export { start };
+
+export default {
+    start
+};

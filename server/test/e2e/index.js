@@ -1,8 +1,11 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import mocha from './lib/mocha-e2e.js';
+import path from 'path';
+import './lib/exit-unless-test.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-require('./lib/exit-unless-test');
-const mocha = require('./lib/mocha-e2e').mocha;
-const path = require('path');
 
 const only = 'only';
 const skip = 'skip';

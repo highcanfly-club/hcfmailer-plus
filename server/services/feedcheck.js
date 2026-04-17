@@ -1,17 +1,14 @@
-'use strict';
-
-const config = require('../lib/config');
-const process = require('process');
-const log = require('../lib/log');
-const knex = require('../lib/knex');
-const senders = require('../lib/senders');
-const { CampaignType, CampaignStatus, CampaignSource } = require('../../shared/campaigns');
-const campaigns = require('../models/campaigns');
-const contextHelpers = require('../lib/context-helpers');
-const {fetch} = require('../lib/feedcheck');
-require('../lib/fork');
-
-const { tLog } = require('../lib/translate');
+import { CampaignType, CampaignStatus, CampaignSource } from '../../shared/campaigns.js';
+import { fetch } from '../lib/feedcheck.js';
+import { tLog } from '../lib/translate.js';
+import config from '../lib/config.js';
+import process from 'process';
+import log from '../lib/log.js';
+import knex from '../lib/knex.js';
+import senders from '../lib/senders.js';
+import campaigns from '../models/campaigns.js';
+import contextHelpers from '../lib/context-helpers.js';
+import '../lib/fork.js';
 
 const feedCheckInterval = 10 * 60 * 1000;
 

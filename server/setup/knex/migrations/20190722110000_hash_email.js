@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.raw('ALTER TABLE `campaign_messages` ADD `hash_email` char(88) CHARACTER SET ascii');
     await knex.schema.raw('ALTER TABLE `campaign_messages` ADD UNIQUE KEY `campaign_hash_email` (`campaign`, `hash_email`)');
     await knex.schema.raw('ALTER TABLE `campaign_messages` DROP KEY `created`');
@@ -13,5 +13,5 @@ exports.up = (knex, Promise) => (async() => {
     await knex('campaign_messages').whereNull('hash_email').del();
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

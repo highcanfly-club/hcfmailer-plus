@@ -1,23 +1,23 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { formatDate, formatBirthday, parseDate, parseBirthday } from '../../shared/date.js';
+import { getFieldColumn } from '../../shared/lists.js';
+import { cleanupFromPost } from '../lib/helpers.js';
+import { getTrustedUrl, getSandboxUrl, getPublicUrl } from '../lib/urls.js';
+import { getMergeTagsForBases } from '../../shared/templates.js';
+import { ListActivityType } from '../../shared/activity-log.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import validators from '../../shared/validators.js';
+import shortid from '../lib/shortid.js';
+import slugify from 'slugify';
+import segments from './segments.js';
+import Handlebars from 'handlebars';
+import activityLog from '../lib/activity-log.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const validators = require('../../shared/validators');
-const shortid = require('../lib/shortid');
-const slugify = require('slugify');
-const segments = require('./segments');
-const { formatDate, formatBirthday, parseDate, parseBirthday } = require('../../shared/date');
-const { getFieldColumn } = require('../../shared/lists');
-const { cleanupFromPost } = require('../lib/helpers');
-const Handlebars = require('handlebars');
-const { getTrustedUrl, getSandboxUrl, getPublicUrl } = require('../lib/urls');
-const { getMergeTagsForBases } = require('../../shared/templates');
-const {ListActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
 
 const allowedKeysCreate = new Set(['name', 'help', 'key', 'default_value', 'required', 'type', 'group', 'settings']);
 const allowedKeysUpdate = new Set(['name', 'help', 'key', 'default_value', 'required', 'group', 'settings']);
@@ -744,7 +744,6 @@ function getMergeTags(fieldsGrouped, subscription, extraTags = {}) { // assumes 
     return mergeTags;
 }
 
-
 // Converts subscription data received via (1) POST request from subscription form, (2) via subscribe request to API v1 to subscription structure supported by subscriptions model,
 // or (3) from import.
 // If a field is not specified in the POST data, it is also omitted in the returned subscription
@@ -838,26 +837,52 @@ function fromImport(listId, flds, data) { // assumes ungrouped subscription and 
     return _fromText(listId, data, flds, true, 'column', false);
 }
 
-module.exports.Cardinality = Cardinality;
-module.exports.getFieldType = getFieldType;
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.list = list;
-module.exports.listTx = listTx;
-module.exports.listGrouped = listGrouped;
-module.exports.listGroupedTx = listGroupedTx;
-module.exports.listByOrderListTx = listByOrderListTx;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listGroupedDTAjax = listGroupedDTAjax;
-module.exports.create = create;
-module.exports.createTx = createTx;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.removeAllByListIdTx = removeAllByListIdTx;
-module.exports.serverValidate = serverValidate;
-module.exports.forHbs = forHbs;
-module.exports.forHbsWithFieldsGrouped = forHbsWithFieldsGrouped;
-module.exports.fromPost = fromPost;
-module.exports.fromAPI = fromAPI;
-module.exports.fromImport = fromImport;
-module.exports.getMergeTags = getMergeTags;
+export { Cardinality };
+export { getFieldType };
+export { hash };
+export { getById };
+export { list };
+export { listTx };
+export { listGrouped };
+export { listGroupedTx };
+export { listByOrderListTx };
+export { listDTAjax };
+export { listGroupedDTAjax };
+export { create };
+export { createTx };
+export { updateWithConsistencyCheck };
+export { remove };
+export { removeAllByListIdTx };
+export { serverValidate };
+export { forHbs };
+export { forHbsWithFieldsGrouped };
+export { fromPost };
+export { fromAPI };
+export { fromImport };
+export { getMergeTags };
+
+export default {
+    Cardinality,
+    create,
+    createTx,
+    forHbs,
+    forHbsWithFieldsGrouped,
+    fromAPI,
+    fromImport,
+    fromPost,
+    getById,
+    getFieldType,
+    getMergeTags,
+    hash,
+    list,
+    listByOrderListTx,
+    listDTAjax,
+    listGrouped,
+    listGroupedDTAjax,
+    listGroupedTx,
+    listTx,
+    remove,
+    removeAllByListIdTx,
+    serverValidate,
+    updateWithConsistencyCheck
+};

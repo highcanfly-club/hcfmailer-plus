@@ -1,18 +1,15 @@
-'use strict';
-
-const knex = require('../lib/knex');
-const config = require('../lib/config');
-const { enforce, castToInteger } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const entitySettings = require('../lib/entity-settings');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const log = require('../lib/log');
-const {getGlobalNamespaceId} = require('../../shared/namespaces');
-const {getAdminId} = require('../../shared/users');
+import { enforce, castToInteger } from '../lib/helpers.js';
+import { getGlobalNamespaceId } from '../../shared/namespaces.js';
+import { getAdminId } from '../../shared/users.js';
+import knex from '../lib/knex.js';
+import config from '../lib/config.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import entitySettings from '../lib/entity-settings.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import log from '../lib/log.js';
 
 // TODO: This would really benefit from some permission cache connected to rebuildPermissions
 // A bit of the problem is that the cache would have to expunged as the result of other processes modifying entites/permissions
-
 
 async function listByEntityDTAjax(context, entityTypeId, entityId, params) {
     return await knex.transaction(async (tx) => {
@@ -152,7 +149,6 @@ async function rebuildPermissionsTx(tx, restriction) {
         restrictedEntityTypes = entitySettings.getEntityTypesWithPermissions();
     }
 
-
     // To prevent users locking out themselves, we consider user with id 1 to be the admin and always assign it
     // the admin role. The admin role is a global role that has admin===true
     // If this behavior is not desired, it is enough to delete the user with id 1.
@@ -208,7 +204,6 @@ async function rebuildPermissionsTx(tx, restriction) {
             }
         }
     }
-
 
     // Build the map of all namespaces
     // nsMap is a map of namespaces - each of the following shape:
@@ -309,7 +304,6 @@ async function rebuildPermissionsTx(tx, restriction) {
         const extraColumns = entityType.dependentPermissions ? entityType.dependentPermissions.extraColumns : [];
         const entitiesQuery = tx(entityType.entitiesTable).select(['id', 'namespace', ...extraColumns]);
 
-
         const notToBeInserted = new Set();
         if (restriction.entityId) {
             if (restriction.parentId) {
@@ -346,7 +340,6 @@ async function rebuildPermissionsTx(tx, restriction) {
         } else {
             nonChildEntities = entities;
         }
-
 
         for (const entity of nonChildEntities) {
             const permsPerUser = new Map();
@@ -445,7 +438,6 @@ async function regenerateRoleNamesTable() {
         }
     });
 }
-
 
 function throwPermissionDenied() {
     throw new interoperableErrors.PermissionDeniedError('Permission denied');
@@ -702,27 +694,52 @@ function isAccessibleByRestrictedAccessHandler(context, entityTypeId, entityId, 
     return filterPermissionsByRestrictedAccessHandler(context, entityTypeId, entityId, permissions, operationMsg).length > 0;
 }
 
+export { listByEntityDTAjax };
+export { listByUserDTAjax };
+export { listUnassignedUsersDTAjax };
+export { listRolesDTAjax };
+export { assign };
+export { rebuildPermissionsTx };
+export { rebuildPermissions };
+export { removeDefaultShares };
+export { enforceEntityPermission };
+export { enforceEntityPermissionTx };
+export { enforceTypePermission };
+export { enforceTypePermissionTx };
+export { checkEntityPermissionTx };
+export { checkEntityPermission };
+export { checkTypePermission };
+export { enforceGlobalPermission };
+export { checkGlobalPermission };
+export { throwPermissionDenied };
+export { regenerateRoleNamesTable };
+export { getGlobalPermissions };
+export { getPermissionsTx };
+export { filterPermissionsByRestrictedAccessHandler };
+export { isAccessibleByRestrictedAccessHandler };
 
-module.exports.listByEntityDTAjax = listByEntityDTAjax;
-module.exports.listByUserDTAjax = listByUserDTAjax;
-module.exports.listUnassignedUsersDTAjax = listUnassignedUsersDTAjax;
-module.exports.listRolesDTAjax = listRolesDTAjax;
-module.exports.assign = assign;
-module.exports.rebuildPermissionsTx = rebuildPermissionsTx;
-module.exports.rebuildPermissions = rebuildPermissions;
-module.exports.removeDefaultShares = removeDefaultShares;
-module.exports.enforceEntityPermission = enforceEntityPermission;
-module.exports.enforceEntityPermissionTx = enforceEntityPermissionTx;
-module.exports.enforceTypePermission = enforceTypePermission;
-module.exports.enforceTypePermissionTx = enforceTypePermissionTx;
-module.exports.checkEntityPermissionTx = checkEntityPermissionTx;
-module.exports.checkEntityPermission = checkEntityPermission;
-module.exports.checkTypePermission = checkTypePermission;
-module.exports.enforceGlobalPermission = enforceGlobalPermission;
-module.exports.checkGlobalPermission = checkGlobalPermission;
-module.exports.throwPermissionDenied = throwPermissionDenied;
-module.exports.regenerateRoleNamesTable = regenerateRoleNamesTable;
-module.exports.getGlobalPermissions = getGlobalPermissions;
-module.exports.getPermissionsTx = getPermissionsTx;
-module.exports.filterPermissionsByRestrictedAccessHandler = filterPermissionsByRestrictedAccessHandler;
-module.exports.isAccessibleByRestrictedAccessHandler = isAccessibleByRestrictedAccessHandler;
+export default {
+    assign,
+    checkEntityPermission,
+    checkEntityPermissionTx,
+    checkGlobalPermission,
+    checkTypePermission,
+    enforceEntityPermission,
+    enforceEntityPermissionTx,
+    enforceGlobalPermission,
+    enforceTypePermission,
+    enforceTypePermissionTx,
+    filterPermissionsByRestrictedAccessHandler,
+    getGlobalPermissions,
+    getPermissionsTx,
+    isAccessibleByRestrictedAccessHandler,
+    listByEntityDTAjax,
+    listByUserDTAjax,
+    listRolesDTAjax,
+    listUnassignedUsersDTAjax,
+    rebuildPermissions,
+    rebuildPermissionsTx,
+    regenerateRoleNamesTable,
+    removeDefaultShares,
+    throwPermissionDenied
+};

@@ -1,5 +1,3 @@
-'use strict';
-
 // This implements a simple wrapper around an async function that prevents concurrent execution of the function from two asynchronous chains
 // It enforces that the running execution has to complete first before another one is started.
 function synchronized(asyncFn) {
@@ -23,4 +21,4 @@ function synchronized(asyncFn) {
     }
 }
 
-module.exports = synchronized;
+export default synchronized;

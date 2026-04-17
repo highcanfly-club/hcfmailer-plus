@@ -1,18 +1,16 @@
-'use strict';
-
-const reports = require('../../../models/reports');
-const lists = require('../../../models/lists');
-const subscriptions = require('../../../models/subscriptions');
-const { SubscriptionSource, SubscriptionStatus } = require('../../../../shared/lists');
-const campaigns = require('../../../models/campaigns');
-const handlebars = require('handlebars');
-const vm = require('vm');
-const log = require('../../../lib/log');
-const knex = require('../../../lib/knex');
-const contextHelpers = require('../../../lib/context-helpers');
-const {renderCsvFromStream} = require('../../../lib/report-helpers');
-const stream = require('stream');
-require('../../../lib/fork');
+import { SubscriptionSource, SubscriptionStatus } from '../../../../shared/lists.js';
+import { renderCsvFromStream } from '../../../lib/report-helpers.js';
+import reports from '../../../models/reports.js';
+import lists from '../../../models/lists.js';
+import subscriptions from '../../../models/subscriptions.js';
+import campaigns from '../../../models/campaigns.js';
+import handlebars from 'handlebars';
+import vm from 'vm';
+import log from '../../../lib/log.js';
+import knex from '../../../lib/knex.js';
+import contextHelpers from '../../../lib/context-helpers.js';
+import stream from 'stream';
+import '../../../lib/fork.js';
 
 async function main() {
     try {

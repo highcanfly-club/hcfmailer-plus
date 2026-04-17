@@ -1,9 +1,9 @@
-'use strict';
+import { filterObject } from '../lib/helpers.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import shares from './shares.js';
 
-const knex = require('../lib/knex');
-const { filterObject } = require('../lib/helpers');
-const hasher = require('node-object-hash')();
-const shares = require('./shares');
 
 const allowedKeys = new Set(['adminEmail', 'uaCode', 'mapsApiKey', 'shoutout', 'pgpPassphrase', 'pgpPrivateKey', 'defaultHomepage']);
 // defaultHomepage is used as a default to list.homepage - if the list.homepage is not filled in
@@ -55,7 +55,12 @@ async function set(context, data) {
     // FIXME - recreate mailers, notify senders to recreate the mailers
 }
 
-module.exports.hash = hash;
-module.exports.get = get;
-module.exports.set = set;
+export { hash };
+export { get };
+export { set };
 
+export default {
+    get,
+    hash,
+    set
+};

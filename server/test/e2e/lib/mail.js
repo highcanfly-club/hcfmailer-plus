@@ -1,8 +1,7 @@
-'use strict';
+import config from './config.js';
+import driver from './mocha-e2e.js';
+import page from './page.js';
 
-const config = require('./config');
-const driver = require('./mocha-e2e').driver;
-const page = require('./page');
 
 module.exports = (...extras) => page({
 

@@ -1,15 +1,4 @@
-'use strict';
-
-const crypto = require('crypto');
-
-module.exports = {
-    enforce,
-    cleanupFromPost,
-    filterObject,
-    castToInteger,
-    normalizeEmail,
-    hashEmail
-};
+import crypto from 'crypto';
 
 function enforce(condition, message) {
     if (!condition) {
@@ -59,3 +48,20 @@ function hashEmail(email) {
     return crypto.createHash('sha512').update(normalizeEmail(email)).digest("base64");
 }
 
+export {
+    enforce,
+    cleanupFromPost,
+    filterObject,
+    castToInteger,
+    normalizeEmail,
+    hashEmail,
+};
+
+export default {
+    castToInteger,
+    cleanupFromPost,
+    enforce,
+    filterObject,
+    hashEmail,
+    normalizeEmail
+};

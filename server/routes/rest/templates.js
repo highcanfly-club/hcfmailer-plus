@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const templates = require('../../models/templates');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import templates from '../../models/templates.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/templates/:templateId', passport.loggedIn, async (req, res) => {
@@ -38,4 +36,4 @@ router.postAsync('/templates-by-namespace-table/:namespaceId', passport.loggedIn
     return res.json(await templates.listByNamespaceDTAjax(req.context, castToInteger(req.params.namespaceId), req.body));
 });
 
-module.exports = router;
+export default router;

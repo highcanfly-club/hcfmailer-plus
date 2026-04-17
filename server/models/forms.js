@@ -1,19 +1,21 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { enforce, filterObject } from '../lib/helpers.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import fs from 'fs-extra';
+import path from 'path';
+import mjml2html from 'mjml';
+import lists from './lists.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const knex = require('../lib/knex');
-const { enforce, filterObject } = require('../lib/helpers');
-const hasher = require('node-object-hash')();
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const fs = require('fs-extra');
-const path = require('path');
-
-const mjml2html = require('mjml');
-
-const lists = require('./lists');
-const dependencyHelpers = require('../lib/dependency-helpers');
 
 const formAllowedKeys = new Set([
     'name',
@@ -69,7 +71,6 @@ async function listDTAjax(context, params) {
     );
 }
 
-
 async function _getByIdTx(tx, id) {
     const entity = await tx('custom_forms').where('id', id).first();
 
@@ -103,7 +104,6 @@ async function getById(context, id, withPermissions = true) {
     });
 }
 
-
 async function serverValidate(context, data) {
     const result = {};
 
@@ -119,7 +119,6 @@ async function serverValidate(context, data) {
 
     return result;
 }
-
 
 async function create(context, entity) {
     return await knex.transaction(async tx => {
@@ -202,7 +201,6 @@ async function remove(context, id) {
     });
 }
 
-
 // FIXME - add the ability of having multiple language variant of the same custom form
 async function getDefaultCustomFormValues() {
     const basePath = path.join(__dirname, '..');
@@ -230,7 +228,6 @@ async function getDefaultCustomFormValues() {
     return form;
 }
 
-
 // TODO - this could run in the browser too - move to shared
 function checkForMjmlErrors(form) {
     let testLayout = '<mjml><mj-body>{{{body}}}</mj-body></mjml>';
@@ -247,7 +244,6 @@ function checkForMjmlErrors(form) {
 
         return compiled.errors;
     };
-
 
     const errors = {};
     for (const key in form) {
@@ -294,12 +290,24 @@ function checkForMjmlErrors(form) {
     return errors;
 }
 
-module.exports.listDTAjax = listDTAjax;
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.getByIdTx = getByIdTx;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.getDefaultCustomFormValues = getDefaultCustomFormValues;
-module.exports.serverValidate = serverValidate;
+export { listDTAjax };
+export { hash };
+export { getById };
+export { getByIdTx };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { getDefaultCustomFormValues };
+export { serverValidate };
+
+export default {
+    create,
+    getById,
+    getByIdTx,
+    getDefaultCustomFormValues,
+    hash,
+    listDTAjax,
+    remove,
+    serverValidate,
+    updateWithConsistencyCheck
+};

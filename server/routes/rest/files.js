@@ -1,10 +1,10 @@
-'use strict';
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import files from '../../models/files.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
+import fileHelpers from '../../lib/file-helpers.js';
 
-const passport = require('../../lib/passport');
-const files = require('../../models/files');
-const router = require('../../lib/router-async').create();
-const fileHelpers = require('../../lib/file-helpers');
-const {castToInteger} = require('../../lib/helpers');
 
 router.postAsync('/files-table/:type/:subType/:entityId', passport.loggedIn, async (req, res) => {
     return res.json(await files.listDTAjax(req.context, req.params.type, req.params.subType, castToInteger(req.params.entityId), req.body));
@@ -13,7 +13,6 @@ router.postAsync('/files-table/:type/:subType/:entityId', passport.loggedIn, asy
 router.getAsync('/files-list/:type/:subType/:entityId', passport.loggedIn, async (req, res) => {
     return res.json(await files.list(req.context, req.params.type, req.params.subType, castToInteger(req.params.entityId)));
 });
-
 
 router.getAsync('/files/:type/:subType/:fileId', passport.loggedIn, async (req, res) => {
     const file = await files.getFileById(req.context, req.params.type, req.params.subType, castToInteger(req.params.fileId));
@@ -28,4 +27,4 @@ router.deleteAsync('/files/:type/:subType/:fileId', passport.loggedIn, async (re
 
 fileHelpers.installUploadHandler(router, '/files/:type/:subType/:entityId');
 
-module.exports = router;
+export default router;

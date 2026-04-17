@@ -1,12 +1,10 @@
-'use strict';
-
-const log = require('../lib/log');
-const config = require('../lib/config');
-const net = require('net');
-const campaigns = require('../models/campaigns');
-const contextHelpers = require('../lib/context-helpers');
-const { CampaignMessageStatus } = require('../../shared/campaigns');
-const bluebird = require('bluebird');
+import { CampaignMessageStatus } from '../../shared/campaigns.js';
+import log from '../lib/log.js';
+import config from '../lib/config.js';
+import net from 'net';
+import campaigns from '../models/campaigns.js';
+import contextHelpers from '../lib/context-helpers.js';
+import bluebird from 'bluebird';
 
 const seenIds = new Set();
 
@@ -83,7 +81,7 @@ async function readNextChunks(socket) {
     }
 }
 
-function start(callback) {
+function _start(callback) {
     if (!config.postfixBounce.enabled) {
         return setImmediate(callback);
     }
@@ -125,5 +123,6 @@ function start(callback) {
     });
 }
 
-module.exports.start = bluebird.promisify(start);
+const start = bluebird.promisify(_start);
+export default { start };
 

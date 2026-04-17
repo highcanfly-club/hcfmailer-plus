@@ -1,9 +1,7 @@
-'use strict';
+import config from '../lib/config.js';
+import web from '../lib/web.js';
 
-const config = require('../lib/config');
-const web = require('../lib/web');
-
-module.exports = web({
+export default web;({
     baseUrl: config.baseTrustedUrl,
     url: '/'
 });

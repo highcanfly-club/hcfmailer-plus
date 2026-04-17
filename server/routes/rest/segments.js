@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const segments = require('../../models/segments');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import segments from '../../models/segments.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/segments-table/:listId', passport.loggedIn, async (req, res) => {
@@ -38,5 +36,4 @@ router.deleteAsync('/segments/:listId/:segmentId', passport.loggedIn, passport.c
     return res.json();
 });
 
-
-module.exports = router;
+export default router;

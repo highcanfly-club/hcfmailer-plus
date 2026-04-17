@@ -1,17 +1,19 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { enforce } from '../lib/helpers.js';
+import { getPublicUrl } from '../lib/urls.js';
+import knex from '../lib/knex.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import shares from './shares.js';
+import fs from 'fs-extra-promise';
+import path from 'path';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import entitySettings from '../lib/entity-settings.js';
+import crypto from 'crypto';
+import bluebird from 'bluebird';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const knex = require('../lib/knex');
-const { enforce } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const shares = require('./shares');
-const fs = require('fs-extra-promise');
-const path = require('path');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const entitySettings = require('../lib/entity-settings');
-const {getPublicUrl} = require('../lib/urls');
-
-const crypto = require('crypto');
-const bluebird = require('bluebird');
 const cryptoPseudoRandomBytes = bluebird.promisify(crypto.pseudoRandomBytes.bind(crypto));
 
 const entityTypes = entitySettings.getEntityTypes();
@@ -164,7 +166,6 @@ async function createFiles(context, type, subType, entityId, files, replacementB
 
         // The processedNameSet holds originalnames of entries which have been already processed in the upload batch. It prevents uploading two files with the same originalname
         const processedNameSet = new Set();
-
 
         // Create entities for files
         for (const file of files) {
@@ -355,21 +356,40 @@ async function removeAllTx(tx, context, type, subType, entityId) {
     await tx(getFilesTable(type, subType)).where('entity', entityId).del();
 }
 
+export { filesDir };
+export { listDTAjax };
+export { listTx };
+export { list };
+export { getFileById };
+export { getFileByFilename };
+export { getFileByUrl };
+export { getFileByOriginalName };
+export { createFiles };
+export { removeFile };
+export { getFileUrl };
+export { getFilePath };
+export { copyAllTx };
+export { removeAllTx };
+export { lockTx };
+export { unlockTx };
+export { ReplacementBehavior };
 
-module.exports.filesDir = filesDir;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listTx = listTx;
-module.exports.list = list;
-module.exports.getFileById = getFileById;
-module.exports.getFileByFilename = getFileByFilename;
-module.exports.getFileByUrl = getFileByUrl;
-module.exports.getFileByOriginalName = getFileByOriginalName;
-module.exports.createFiles = createFiles;
-module.exports.removeFile = removeFile;
-module.exports.getFileUrl = getFileUrl;
-module.exports.getFilePath = getFilePath;
-module.exports.copyAllTx = copyAllTx;
-module.exports.removeAllTx = removeAllTx;
-module.exports.lockTx = lockTx;
-module.exports.unlockTx = unlockTx;
-module.exports.ReplacementBehavior = ReplacementBehavior;
+export default {
+    ReplacementBehavior,
+    copyAllTx,
+    createFiles,
+    filesDir,
+    getFileByFilename,
+    getFileById,
+    getFileByOriginalName,
+    getFileByUrl,
+    getFilePath,
+    getFileUrl,
+    list,
+    listDTAjax,
+    listTx,
+    lockTx,
+    removeAllTx,
+    removeFile,
+    unlockTx
+};

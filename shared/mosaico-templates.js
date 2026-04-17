@@ -1,6 +1,4 @@
-'use strict';
-
-const {renderTag} = require('./templates');
+import { renderTag } from './templates.js';
 
 function getVersafix(tagLanguage) {
     const tg = tag => renderTag(tagLanguage, tag);
@@ -1871,7 +1869,9 @@ function getMJMLSample(tagLanguage) {
     return mjmlSample;
 }
 
-module.exports = {
-    getVersafix,
-    getMJMLSample
+export { getVersafix, getMJMLSample };
+
+export default {
+    getMJMLSample,
+    getVersafix
 };

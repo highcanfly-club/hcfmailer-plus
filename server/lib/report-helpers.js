@@ -1,8 +1,12 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const path = require('path');
-const csvStringify = require('csv-stringify');
-const stream = require('stream');
+import path from 'path';
+import csvStringify from 'csv-stringify';
+import stream from 'stream';
+
 
 function nameToFileName(name) {
     return name.
@@ -67,11 +71,18 @@ async function renderCsvFromStream(readable, writable, opts, transform) {
     await finished;
 }
 
-
-module.exports = {
+export {
     getReportContentFile,
     getReportOutputFile,
     nameToFileName,
     reportFilesDir,
-    renderCsvFromStream
+    renderCsvFromStream,
+};
+
+export default {
+    getReportContentFile,
+    getReportOutputFile,
+    nameToFileName,
+    renderCsvFromStream,
+    reportFilesDir
 };

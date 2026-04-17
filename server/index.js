@@ -1,33 +1,30 @@
-'use strict';
-
-const config = require('./lib/config');
-const log = require('./lib/log');
-const appBuilder = require('./app-builder');
-const translate = require('./lib/translate');
-const http = require('http');
-const triggers = require('./services/triggers');
-const gdprCleanup = require('./services/gdpr-cleanup');
-const importer = require('./lib/importer');
-const feedcheck = require('./lib/feedcheck');
-const verpServer = require('./services/verp-server');
-const testServer = require('./services/test-server');
-const postfixBounceServer = require('./services/postfix-bounce-server');
-const tzupdate = require('./services/tzupdate');
-const dbcheck = require('./lib/dbcheck');
-const senders = require('./lib/senders');
-const reportProcessor = require('./lib/report-processor');
-const executor = require('./lib/executor');
-const privilegeHelpers = require('./lib/privilege-helpers');
-const knex = require('./lib/knex');
-const bluebird = require('bluebird');
-const shares = require('./models/shares');
-const { AppType } = require('../shared/app');
-const builtinZoneMta = require('./lib/builtin-zone-mta');
-const klawSync = require('klaw-sync');
-
-const { uploadedFilesDir } = require('./lib/file-helpers');
-const { reportFilesDir } = require('./lib/report-helpers');
-const { filesDir } = require('./models/files');
+import { AppType } from '../shared/app.js';
+import { uploadedFilesDir } from './lib/file-helpers.js';
+import { reportFilesDir } from './lib/report-helpers.js';
+import { filesDir } from './models/files.js';
+import config from './lib/config.js';
+import log from './lib/log.js';
+import appBuilder from './app-builder.js';
+import translate from './lib/translate.js';
+import http from 'http';
+import triggers from './services/triggers.js';
+import gdprCleanup from './services/gdpr-cleanup.js';
+import importer from './lib/importer.js';
+import feedcheck from './lib/feedcheck.js';
+import verpServer from './services/verp-server.js';
+import testServer from './services/test-server.js';
+import postfixBounceServer from './services/postfix-bounce-server.js';
+import tzupdate from './services/tzupdate.js';
+import dbcheck from './lib/dbcheck.js';
+import senders from './lib/senders.js';
+import reportProcessor from './lib/report-processor.js';
+import executor from './lib/executor.js';
+import privilegeHelpers from './lib/privilege-helpers.js';
+import knex from './lib/knex.js';
+import bluebird from 'bluebird';
+import shares from './models/shares.js';
+import builtinZoneMta from './lib/builtin-zone-mta.js';
+import klawSync from 'klaw-sync';
 
 const trustedPort = config.www.trustedPort;
 const sandboxPort = config.www.sandboxPort;
@@ -73,7 +70,6 @@ async function startHTTPServer(appType, appName, port) {
     const serverListenAsync = bluebird.promisify(server.listen.bind(server));
     await serverListenAsync({port, host});
 }
-
 
 // ---------------------------------------------------------------------------------------
 // Start the whole circus
@@ -126,5 +122,4 @@ async function init() {
 }
 
 init().catch(err => {log.error('', err); process.exit(1); });
-
 

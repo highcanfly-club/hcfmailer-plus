@@ -1,19 +1,19 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { ImportSource, MappingType, ImportStatus, RunStatus, prepFinished, prepFinishedAndNotInProgress, runInProgress } from '../../shared/imports.js';
+import { ListActivityType } from '../../shared/activity-log.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import fs from 'fs-extra-promise';
+import path from 'path';
+import importer from '../lib/importer.js';
+import activityLog from '../lib/activity-log.js';
+import files from './files.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const {ImportSource, MappingType, ImportStatus, RunStatus, prepFinished, prepFinishedAndNotInProgress, runInProgress} = require('../../shared/imports');
-const fs = require('fs-extra-promise');
-const path = require('path');
-const importer = require('../lib/importer');
-const {ListActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
 
-const files = require('./files');
 const filesDir = path.join(files.filesDir, 'imports');
 
 const allowedKeysCreate = new Set(['name', 'description', 'source', 'settings']);
@@ -251,14 +251,26 @@ async function stop(context, listId, id) {
     importer.scheduleCheck();
 }
 
+export { filesDir };
+export { hash };
+export { getById };
+export { listDTAjax };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { removeAllByListIdTx };
+export { start };
+export { stop };
 
-module.exports.filesDir = filesDir;
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.listDTAjax = listDTAjax;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.removeAllByListIdTx = removeAllByListIdTx;
-module.exports.start = start;
-module.exports.stop = stop;
+export default {
+    create,
+    filesDir,
+    getById,
+    hash,
+    listDTAjax,
+    remove,
+    removeAllByListIdTx,
+    start,
+    stop,
+    updateWithConsistencyCheck
+};

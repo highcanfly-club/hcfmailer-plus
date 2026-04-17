@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const fields = require('../../models/fields');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import fields from '../../models/fields.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/fields-table/:listId', passport.loggedIn, async (req, res) => {
@@ -52,5 +50,4 @@ router.postAsync('/fields-validate/:listId', passport.loggedIn, async (req, res)
     return res.json(await fields.serverValidate(req.context, castToInteger(req.params.listId), req.body));
 });
 
-
-module.exports = router;
+export default router;

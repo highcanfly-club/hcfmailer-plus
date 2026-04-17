@@ -1,12 +1,11 @@
-'use strict';
-
-let config = require('./config');
+import config from './config.js';
 
 config.mysql.charset="utf8mb4";
 config.mysql.multipleStatements=true;
 
+export { client, connection };
 
-module.exports = {
-    client: 'mysql2',
-    connection: config.mysql
+export default {
+    client,
+    connection
 };

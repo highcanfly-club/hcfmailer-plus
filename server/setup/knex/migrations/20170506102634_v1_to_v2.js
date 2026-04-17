@@ -1,18 +1,18 @@
-const { CampaignSource, CampaignType} = require('../../../../shared/campaigns');
-const files = require('../../../models/files');
-const contextHelpers = require('../../../lib/context-helpers');
-const mosaicoTemplates = require('../../../../shared/mosaico-templates');
-const {TagLanguages} = require('../../../../shared/templates');
-const {getGlobalNamespaceId} = require('../../../../shared/namespaces');
-const {getAdminId} = require('../../../../shared/users');
-const { MailerType, ZoneMTAType, getSystemSendConfigurationId, getSystemSendConfigurationCid } = require('../../../../shared/send-configurations');
-const { enforce, hashEmail} = require('../../../lib/helpers');
-const { EntityVals: TriggerEntityVals, EventVals: TriggerEventVals } = require('../../../../shared/triggers');
-const { SubscriptionSource } = require('../../../../shared/lists');
-const {DOMParser, XMLSerializer} = require('xmldom');
-const log = require('../../../lib/log');
-const shortid = require('../../../lib/shortid');
-const slugify = require('slugify');
+import { CampaignSource, CampaignType } from '../../../../shared/campaigns.js';
+import { TagLanguages } from '../../../../shared/templates.js';
+import { getGlobalNamespaceId } from '../../../../shared/namespaces.js';
+import { getAdminId } from '../../../../shared/users.js';
+import { MailerType, ZoneMTAType, getSystemSendConfigurationId, getSystemSendConfigurationCid } from '../../../../shared/send-configurations.js';
+import { enforce, hashEmail } from '../../../lib/helpers.js';
+import { EntityVals: TriggerEntityVals, EventVals: TriggerEventVals } from '../../../../shared/triggers.js';
+import { SubscriptionSource } from '../../../../shared/lists.js';
+import { DOMParser, XMLSerializer } from 'xmldom';
+import files from '../../../models/files.js';
+import contextHelpers from '../../../lib/context-helpers.js';
+import mosaicoTemplates from '../../../../shared/mosaico-templates.js';
+import log from '../../../lib/log.js';
+import shortid from '../../../lib/shortid.js';
+import slugify from 'slugify';
 
 const entityTypesAddNamespace = ['list', 'custom_form', 'template', 'campaign', 'report', 'report_template', 'user'];
 const shareableEntityTypes = ['list', 'custom_form', 'template', 'campaign', 'report', 'report_template', 'namespace', 'send_configuration', 'mosaico_template'];
@@ -162,7 +162,6 @@ async function migrateBase(knex) {
 
         .raw('ALTER TABLE `users` MODIFY `id` int unsigned not null auto_increment');
 
-
 }
 
 async function addNamespaces(knex) {
@@ -255,7 +254,6 @@ async function shortenFieldColumnNames(knex, list) {
             table.renameColumn(oldName, newName);
         });
     }
-
 
     function processRule(rule) {
         if (rule.type === 'all' || rule.type === 'some' || rule.type === 'none') {
@@ -350,7 +348,6 @@ async function migrateCustomForms(knex) {
         table.string('data_key', 128).alter();
         table.primary(['form', 'data_key']);
     })
-
 
     // -----------------------------------------------------------------------------------------------------
     // Make custom forms independent of list
@@ -460,7 +457,6 @@ async function migrateCustomFields(knex) {
         table.dropColumn('visible');
     });
 
-
     // -----------------------------------------------------------------------------------------------------
     // Upgrade custom fields
     // -----------------------------------------------------------------------------------------------------
@@ -528,7 +524,6 @@ async function migrateSegments(knex) {
         table.dropForeign('list', 'segments_ibfk_1');
         table.foreign('list').references('lists.id');
     });
-
 
     const segments = await knex('segments');
 
@@ -1057,7 +1052,6 @@ async function migrateCampaigns(knex) {
         '  KEY `created_index` (`created`)\n' +
         ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n');
 
-
     await knex.schema.table('campaigns', table => {
         table.text('data', 'longtext');
         table.integer('source').unsigned().notNullable();
@@ -1139,7 +1133,6 @@ async function migrateCampaigns(knex) {
         table.renameColumn('reply_to', 'reply_to_override');
         table.renameColumn('subject', 'subject_override');
         table.renameColumn('unsubscribe', 'unsubscribe_url');
-
 
         // Remove the default value
         table.integer('send_configuration').unsigned().notNullable().alter();
@@ -1275,8 +1268,7 @@ async function migrateImporter(knex) {
     });
 }
 
-
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await migrateBase(knex);
     log.verbose('Migration', 'Base complete')
     await addNamespaces(knex);
@@ -1306,13 +1298,11 @@ exports.up = (knex, Promise) => (async() => {
     await migrateTemplates(knex);
     log.verbose('Migration', 'Templates complete')
 
-
     await addMosaicoTemplates(knex);
     log.verbose('Migration', 'Mosaico templates complete')
 
     await migrateCampaigns(knex);
     log.verbose('Migration', 'Campaigns complete')
-
 
     await addPermissions(knex);
     log.verbose('Migration', 'Permissions complete')
@@ -1320,18 +1310,15 @@ exports.up = (knex, Promise) => (async() => {
     await addFiles(knex);
     log.verbose('Migration', 'Files complete')
 
-
     await migrateAttachments(knex);
     log.verbose('Migration', 'Attachments complete')
 
-
     await migrateTriggers(knex);
     log.verbose('Migration', 'Trigger complete')
-
 
     await migrateImporter(knex);
     log.verbose('Migration', 'Importer complete')
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

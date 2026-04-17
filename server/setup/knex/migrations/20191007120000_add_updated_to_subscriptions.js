@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     const lists = await knex('lists');
     for (const list of lists) {
         await knex.schema.raw('ALTER TABLE `subscription__' + list.id + '` ADD COLUMN `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `created`');
@@ -6,5 +6,5 @@ exports.up = (knex, Promise) => (async() => {
     }
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

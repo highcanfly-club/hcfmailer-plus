@@ -1,11 +1,10 @@
-'use strict';
+import { getAdminId } from '../../shared/users.js';
+import log from '../lib/log.js';
+import dbcheck from '../lib/dbcheck.js';
+import knex from '../lib/knex.js';
+import bluebird from 'bluebird';
+import bcrypt from 'bcrypt-nodejs';
 
-const log = require('../lib/log');
-const dbcheck = require('../lib/dbcheck');
-const knex = require('../lib/knex');
-const {getAdminId} = require("../../shared/users");
-const bluebird = require('bluebird');
-const bcrypt = require('bcrypt-nodejs');
 const bcryptHash = bluebird.promisify(bcrypt.hash.bind(bcrypt));
 
 async function init() {
@@ -22,7 +21,6 @@ async function init() {
     await dbcheck();
     await knex.migrate.latest();
 
-
     const hashedPasswd = await bcryptHash(passwd, null, null);
     await knex('users').where({id: getAdminId()}).update({password: hashedPasswd});
 
@@ -34,5 +32,4 @@ async function init() {
 }
 
 init().catch(err => {log.error('', err); process.exit(1); });
-
 

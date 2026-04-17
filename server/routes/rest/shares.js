@@ -1,10 +1,9 @@
-'use strict';
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import shares from '../../models/shares.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
-const passport = require('../../lib/passport');
-const shares = require('../../models/shares');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
 
 router.postAsync('/shares-table-by-entity/:entityTypeId/:entityId', passport.loggedIn, async (req, res) => {
     return res.json(await shares.listByEntityDTAjax(req.context, req.params.entityTypeId, castToInteger(req.params.entityId), req.body));
@@ -73,6 +72,4 @@ router.postAsync('/permissions-rebuild', passport.loggedIn, async (req, res) => 
     return res.json(result);
 });
 
-
-
-module.exports = router;
+export default router;

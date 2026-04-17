@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const users = require('../../models/users');
-const contextHelpers = require('../../lib/context-helpers');
-
-const router = require('../../lib/router-async').create();
+import passport from '../../lib/passport.js';
+import users from '../../models/users.js';
+import contextHelpers from '../../lib/context-helpers.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/account', passport.loggedIn, async (req, res) => {
@@ -39,7 +37,6 @@ router.postAsync('/access-token-reset', passport.loggedIn, passport.csrfProtecti
     return res.json(accessToken);
 });
 
-
 router.post('/login', passport.csrfProtection, passport.restLogin);
 router.post('/logout', passport.csrfProtection, passport.restLogout);
 
@@ -69,4 +66,4 @@ router.putAsync('/restricted-access-token', passport.loggedIn, async (req, res) 
     return res.json();
 });
 
-module.exports = router;
+export default router;

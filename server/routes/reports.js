@@ -1,13 +1,12 @@
-'use strict';
+import { castToInteger } from '../lib/helpers.js';
+import passport from '../lib/passport.js';
+import reports from '../models/reports.js';
+import reportHelpers from '../lib/report-helpers.js';
+import shares from '../models/shares.js';
+import contextHelpers from '../lib/context-helpers.js';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
 
-const passport = require('../lib/passport');
-const reports = require('../models/reports');
-const reportHelpers = require('../lib/report-helpers');
-const shares = require('../models/shares');
-const contextHelpers = require('../lib/context-helpers');
-const {castToInteger} = require('../lib/helpers');
-
-const router = require('../lib/router-async').create();
 
 const fileSuffixes = {
     'text/html': '.html',
@@ -33,4 +32,4 @@ router.getAsync('/:id/download', passport.loggedIn, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

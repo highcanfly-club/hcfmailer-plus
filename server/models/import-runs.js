@@ -1,10 +1,8 @@
-'use strict';
-
-const knex = require('../lib/knex');
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
+import { enforce, filterObject } from '../lib/helpers.js';
+import knex from '../lib/knex.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
 
 async function getById(context, listId, importId, id) {
     return await knex.transaction(async tx => {
@@ -60,8 +58,12 @@ async function listFailedDTAjax(context, listId, importId, importRunId, params) 
     });
 }
 
+export { getById };
+export { listDTAjax };
+export { listFailedDTAjax };
 
-
-module.exports.getById = getById;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listFailedDTAjax = listFailedDTAjax;
+export default {
+    getById,
+    listDTAjax,
+    listFailedDTAjax
+};

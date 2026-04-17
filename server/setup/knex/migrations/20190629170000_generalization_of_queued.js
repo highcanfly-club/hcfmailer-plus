@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     const queued = await knex('queued');
 
     for (const queuedEntry of queued) {
@@ -21,5 +21,5 @@ exports.up = (knex, Promise) => (async() => {
 
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

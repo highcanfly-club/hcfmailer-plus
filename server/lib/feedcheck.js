@@ -1,12 +1,16 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const fork = require('./fork').fork;
-const log = require('./log');
-const path = require('path');
-const senders = require('./senders');
-const bluebird = require('bluebird');
-const feedparser = require('feedparser-promised');
-const {getPublicUrl} = require('./urls');
+import { fork } from './fork.js';
+import log from './log.js';
+import path from 'path';
+import * as senders from './senders.js';
+import bluebird from 'bluebird';
+import feedparser from 'feedparser-promised';
+import { getPublicUrl } from './urls.js';
+
 
 let messageTid = 0;
 let feedcheckProcess;
@@ -121,7 +125,14 @@ async function getEntryForPreview(url) {
     return entry;
 }
 
-module.exports.spawn = bluebird.promisify(spawn);
-module.exports.scheduleCheck = scheduleCheck;
-module.exports.fetch = fetch;
-module.exports.getEntryForPreview = getEntryForPreview;
+const spawnAsync = bluebird.promisify(spawn);
+
+export { spawnAsync as spawn, scheduleCheck, fetch, getEntryForPreview };
+
+export default {
+    fetch,
+    getEntryForPreview,
+    scheduleCheck,
+    spawn: spawnAsync,
+    spawnAsync
+};

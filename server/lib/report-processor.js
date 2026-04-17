@@ -1,9 +1,7 @@
-'use strict';
-
-const log = require('./log');
-const reports = require('../models/reports');
-const executor = require('./executor');
-const contextHelpers = require('./context-helpers');
+import log from './log.js';
+import reports from '../models/reports.js';
+import executor from './executor.js';
+import contextHelpers from './context-helpers.js';
 
 let runningWorkersCount = 0;
 let maxWorkersCount = 1;
@@ -100,7 +98,7 @@ async function tryStartWorkers() {
     isStartingWorkers = false;
 }
 
-module.exports.start = async (reportId) => {
+const start = async (reportId) => {
     if (!workers[reportId]) {
         log.info('ReportProcessor', 'Scheduling report id: %s', reportId);
         await reports.updateFields(reportId, { state: reports.ReportState.SCHEDULED, last_run: null});
@@ -110,7 +108,7 @@ module.exports.start = async (reportId) => {
     }
 };
 
-module.exports.stop = async reportId => {
+const stop = async reportId => {
     const tid = workers[reportId];
     if (tid) {
         log.info('ReportProcessor', 'Killing worker for report id: %s', reportId);
@@ -122,11 +120,19 @@ module.exports.stop = async reportId => {
     }
 };
 
-module.exports.init = async () => {
+const init = async () => {
     try {
         await reports.bulkChangeState(reports.ReportState.PROCESSING, reports.ReportState.SCHEDULED);
         await tryStartWorkers();
     } catch (err) {
         log.error('ReportProcessor', err);
     }
+};
+
+export { start, stop, init };
+
+export default {
+    init,
+    start,
+    stop
 };

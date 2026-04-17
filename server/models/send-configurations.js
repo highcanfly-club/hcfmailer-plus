@@ -1,18 +1,18 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { MailerType, getSystemSendConfigurationId } from '../../shared/send-configurations.js';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import shortid from '../lib/shortid.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import contextHelpers from '../lib/context-helpers.js';
+import mailers from '../lib/mailers.js';
+import senders from '../lib/senders.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const dtHelpers = require('../lib/dt-helpers');
-const shortid = require('../lib/shortid');
-const { enforce, filterObject } = require('../lib/helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const {MailerType, getSystemSendConfigurationId} = require('../../shared/send-configurations');
-const contextHelpers = require('../lib/context-helpers');
-const mailers = require('../lib/mailers');
-const senders = require('../lib/senders');
-const dependencyHelpers = require('../lib/dependency-helpers');
 
 const allowedKeys = new Set(['name', 'description', 'from_email', 'from_email_overridable', 'from_name', 'from_name_overridable', 'reply_to', 'reply_to_overridable', 'x_mailer', 'verp_hostname', 'verp_disable_sender_header', 'mailer_type', 'mailer_settings', 'namespace']);
 
@@ -117,8 +117,6 @@ async function _validateAndPreprocess(tx, entity, isCreate) {
     entity.mailer_settings = JSON.stringify(entity.mailer_settings);
 }
 
-
-
 async function create(context, entity) {
     return await knex.transaction(async tx => {
         await shares.enforceEntityPermissionTx(tx, context, 'namespace', entity.namespace, 'createSendConfiguration');
@@ -187,14 +185,28 @@ async function getSystemSendConfiguration() {
     return await getById(contextHelpers.getAdminContext(), getSystemSendConfigurationId(), false);
 }
 
-module.exports.hash = hash;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listByNamespaceDTAjax = listByNamespaceDTAjax;
-module.exports.listWithSendPermissionDTAjax = listWithSendPermissionDTAjax;
-module.exports.getByIdTx = getByIdTx;
-module.exports.getById = getById;
-module.exports.getByCid = getByCid;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.getSystemSendConfiguration = getSystemSendConfiguration;
+export { hash };
+export { listDTAjax };
+export { listByNamespaceDTAjax };
+export { listWithSendPermissionDTAjax };
+export { getByIdTx };
+export { getById };
+export { getByCid };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { getSystemSendConfiguration };
+
+export default {
+    create,
+    getByCid,
+    getById,
+    getByIdTx,
+    getSystemSendConfiguration,
+    hash,
+    listByNamespaceDTAjax,
+    listDTAjax,
+    listWithSendPermissionDTAjax,
+    remove,
+    updateWithConsistencyCheck
+};

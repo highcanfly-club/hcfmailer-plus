@@ -1,11 +1,12 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import config from './config.js';
+import path from 'path';
+import knexConstructor from 'knex';
 
-const config = require('./config');
-const path = require('path');
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const knexConstructor = require('knex');
-
-const knex = require('knex')({
+const knex = knexConstructor({
     client: 'mysql2',
     connection: {
         ...config.mysql,
@@ -32,6 +33,4 @@ SET GLOBAL general_log = 'ON';
 SET GLOBAL general_log_file = '/tmp/mysql-all.log';
 */
 
-
-
-module.exports = knex;
+export default knex;

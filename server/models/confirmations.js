@@ -1,7 +1,5 @@
-'use strict';
-
-const knex = require('../lib/knex');
-const shortid = require('../lib/shortid');
+import knex from '../lib/knex.js';
+import shortid from '../lib/shortid.js';
 
 async function addConfirmation(listId, action, ip, data) {
     const cid = shortid.generate();
@@ -45,5 +43,10 @@ async function takeConfirmation(cid) {
     });
 }
 
-module.exports.addConfirmation = addConfirmation;
-module.exports.takeConfirmation = takeConfirmation;
+export { addConfirmation };
+export { takeConfirmation };
+
+export default {
+    addConfirmation,
+    takeConfirmation
+};

@@ -1,6 +1,5 @@
-'use strict';
+import faker from 'faker';
 
-let faker = require('faker');
 let accounts = 1000 * 1000;
 
 let row = 0;

@@ -1,15 +1,20 @@
-'use strict';
+import nodeify from 'nodeify';
 
-const nodeify = require('nodeify');
+const nodeifyPromise = nodeify;
 
-module.exports.nodeifyPromise = nodeify;
-
-module.exports.nodeifyFunction = (asyncFun) => {
+const nodeifyFunction = (asyncFun) => {
     return (...args) => {
         const callback = args.pop();
 
         const promise = asyncFun(...args);
 
-        return module.exports.nodeifyPromise(promise, callback);
+        return nodeifyPromise(promise, callback);
     };
+};
+
+export { nodeifyPromise, nodeifyFunction };
+
+export default {
+    nodeifyFunction,
+    nodeifyPromise
 };

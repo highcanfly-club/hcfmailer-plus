@@ -1,24 +1,24 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { LinkId } from './links.js';
+import { Readable } from 'stream';
+import knex from '../lib/knex.js';
+import hasherFactory from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import fields from './fields.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import shares from './shares.js';
+import reportHelpers from '../lib/report-helpers.js';
+import fs from 'fs-extra-promise';
+import contextHelpers from '../lib/context-helpers.js';
+import subscriptions from './subscriptions.js';
+import { ReportState } from '../../shared/reports.js';
+import reportProcessor from '../lib/report-processor.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const fields = require('./fields');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const shares = require('./shares');
-const reportHelpers = require('../lib/report-helpers');
-const fs = require('fs-extra-promise');
-const contextHelpers = require('../lib/context-helpers');
-const {LinkId} = require('./links');
-const subscriptions = require('./subscriptions');
-const {Readable} = require('stream');
 
-const ReportState = require('../../shared/reports').ReportState;
 
 const allowedKeys = new Set(['name', 'description', 'report_template', 'params', 'namespace']);
-
 
 function hash(entity) {
     return hasher.hash(filterObject(entity, allowedKeys));
@@ -79,7 +79,7 @@ async function create(context, entity) {
         await shares.rebuildPermissionsTx(tx, { entityTypeId: 'report', entityId: id });
     });
 
-    const reportProcessor = require('../lib/report-processor');
+    
     await reportProcessor.start(id);
     return id;
 }
@@ -115,7 +115,7 @@ async function updateWithConsistencyCheck(context, entity) {
     });
 
     // This require is here to avoid cyclic dependency
-    const reportProcessor = require('../lib/report-processor');
+    
     await reportProcessor.start(entity.id);
 }
 
@@ -246,7 +246,6 @@ async function _getCampaignStatistics(campaign, select, joins, unionQryFn, listQ
         }
     }
 
-
     const listsFields = {};
     const permittedListFields = new Set();
     let firstIteration = true;
@@ -297,7 +296,6 @@ async function _getCampaignStatistics(campaign, select, joins, unionQryFn, listQ
             }
         }
     }
-
 
     for (const cpgList of campaign.lists) {
         const cpgListId = cpgList.list;
@@ -501,25 +499,44 @@ async function getCampaignLinkClickStatisticsStream(campaign, select, unionQryFn
     return await _getCampaignLinkClickStatistics(campaign, select, unionQryFn, listQryFn, true);
 }
 
+export { ReportState };
+export { hash };
+export { getByIdWithTemplate };
+export { listDTAjax };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { updateFields };
+export { listByState };
+export { bulkChangeState };
+export { getCampaignCommonListFields };
+export { getCampaignStatistics };
+export { getCampaignStatisticsStream };
+export { getCampaignOpenStatistics };
+export { getCampaignClickStatistics };
+export { getCampaignLinkClickStatistics };
+export { getCampaignOpenStatisticsStream };
+export { getCampaignClickStatisticsStream };
+export { getCampaignLinkClickStatisticsStream };
 
-
-
-module.exports.ReportState = ReportState;
-module.exports.hash = hash;
-module.exports.getByIdWithTemplate = getByIdWithTemplate;
-module.exports.listDTAjax = listDTAjax;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.updateFields = updateFields;
-module.exports.listByState = listByState;
-module.exports.bulkChangeState = bulkChangeState;
-module.exports.getCampaignCommonListFields = getCampaignCommonListFields;
-module.exports.getCampaignStatistics = getCampaignStatistics;
-module.exports.getCampaignStatisticsStream = getCampaignStatisticsStream;
-module.exports.getCampaignOpenStatistics = getCampaignOpenStatistics;
-module.exports.getCampaignClickStatistics = getCampaignClickStatistics;
-module.exports.getCampaignLinkClickStatistics = getCampaignLinkClickStatistics;
-module.exports.getCampaignOpenStatisticsStream = getCampaignOpenStatisticsStream;
-module.exports.getCampaignClickStatisticsStream = getCampaignClickStatisticsStream;
-module.exports.getCampaignLinkClickStatisticsStream = getCampaignLinkClickStatisticsStream;
+export default {
+    ReportState,
+    bulkChangeState,
+    create,
+    getByIdWithTemplate,
+    getCampaignClickStatistics,
+    getCampaignClickStatisticsStream,
+    getCampaignCommonListFields,
+    getCampaignLinkClickStatistics,
+    getCampaignLinkClickStatisticsStream,
+    getCampaignOpenStatistics,
+    getCampaignOpenStatisticsStream,
+    getCampaignStatistics,
+    getCampaignStatisticsStream,
+    hash,
+    listByState,
+    listDTAjax,
+    remove,
+    updateFields,
+    updateWithConsistencyCheck
+};

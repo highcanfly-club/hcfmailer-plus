@@ -1,14 +1,14 @@
-'use strict';
+import { castToInteger } from '../lib/helpers.js';
+import { SubscriptionStatus } from '../../shared/lists.js';
+import passport from '../lib/passport.js';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
+import subscriptions from '../models/subscriptions.js';
+import stringify from 'csv-stringify';
+import fields from '../models/fields.js';
+import lists from '../models/lists.js';
+import moment from 'moment';
 
-const passport = require('../lib/passport');
-const router = require('../lib/router-async').create();
-const subscriptions = require('../models/subscriptions');
-const {castToInteger} = require('../lib/helpers');
-const stringify = require('csv-stringify')
-const fields = require('../models/fields');
-const lists = require('../models/lists');
-const moment = require('moment');
-const {SubscriptionStatus} = require('../../shared/lists');
 
 router.getAsync('/export/:listId/:segmentId', passport.loggedIn, async (req, res) => {
     const statusStrings = {
@@ -65,4 +65,4 @@ router.getAsync('/export/:listId/:segmentId', passport.loggedIn, async (req, res
     stringifier.end();
 });
 
-module.exports = router;
+export default router;

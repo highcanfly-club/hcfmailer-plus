@@ -1,12 +1,16 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const fork = require('./fork').fork;
-const log = require('./log');
-const path = require('path');
-const knex = require('./knex');
-const {CampaignStatus} = require('../../shared/campaigns');
-const builtinZoneMta = require('./builtin-zone-mta');
-const bluebird = require('bluebird');
+import { fork } from './fork.js';
+import log from './log.js';
+import path from 'path';
+import knex from './knex.js';
+import { CampaignStatus } from '../../shared/campaigns.js';
+import builtinZoneMta from './builtin-zone-mta.js';
+import bluebird from 'bluebird';
+
 
 let messageTid = 0;
 let senderProcess;
@@ -61,6 +65,13 @@ function reloadConfig(sendConfigurationId) {
     messageTid++;
 }
 
-module.exports.spawn = bluebird.promisify(spawn);
-module.exports.scheduleCheck = scheduleCheck;
-module.exports.reloadConfig = reloadConfig;
+const spawnAsync = bluebird.promisify(spawn);
+
+export { spawnAsync as spawn, scheduleCheck, reloadConfig };
+
+export default {
+    reloadConfig,
+    scheduleCheck,
+    spawn: spawnAsync,
+    spawnAsync
+};
