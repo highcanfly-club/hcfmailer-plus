@@ -18,7 +18,8 @@
     "dev:restore:s3": "set -a && source .env.dev && set +a && npx tsx scripts/dev-restore-s3.ts",
     "build": "npm run build --workspace=client",
     "build:all": "npm run build --workspaces",
-    "install:all": "npm install --workspaces --include-workspace-root"
+    "install:all": "npm install --workspaces --include-workspace-root",
+    "install:all:deep": "find . -name 'node_modules' | xargs rm -rf && npm run install:all && npm run build"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1032.0",
