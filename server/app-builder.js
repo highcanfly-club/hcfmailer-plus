@@ -124,7 +124,7 @@ async function createApp(appType) {
             next(new interoperableErrors.NotFoundError());
         });
 
-        app.use(url + '/*', (req, res, next) => {
+        app.use(url + '/*rest', (req, res, next) => {
             next(new interoperableErrors.NotFoundError());
         });
     }
@@ -165,10 +165,11 @@ async function createApp(appType) {
     if (config.redis.enabled) {
         let redisClient = createClient({
             legacyMode: false,
-            url: `redis://${config.redis.host}:${config.redis.port}` })
+            url: `redis://${config.redis.host}:${config.redis.port}`
+        })
         redisClient.connect().catch(console.error)
         app.use(session({
-            store: new RedisStore({client: redisClient, ...config.redis}),
+            store: new RedisStore({ client: redisClient, ...config.redis }),
             secret: config.www.secret,
             saveUninitialized: false,
             resave: false
@@ -228,14 +229,15 @@ async function createApp(appType) {
 
     if (appType === AppType.TRUSTED || appType === AppType.SANDBOXED) {
         // Endpoint under /api are authenticated by access token
-        app.all('/api/*', passport.authByAccessToken);
+        app.all('/api', passport.authByAccessToken);
+        app.all('/api/*rest', passport.authByAccessToken);
     }
 
     useWith404Fallback('/static', express.static(path.join(__dirname, '..', 'client', 'static')));
 
     // In development, proxy to Vite dev server; in production, serve webpack dist
     if (process.env.NODE_ENV === 'development') {
-        
+
 
         const viteProxy = createProxyMiddleware({
             target: 'http://localhost:8080',
@@ -277,12 +279,20 @@ async function createApp(appType) {
     });
 
     // Marks the following endpoint to return JSON object when error occurs
-    app.all('/api/*', (req, res, next) => {
+    app.all('/api', (req, res, next) => {
+        req.needsAPIJSONResponse = true;
+        next();
+    });
+    app.all('/api/*rest', (req, res, next) => {
         req.needsAPIJSONResponse = true;
         next();
     });
 
-    app.all('/rest/*', (req, res, next) => {
+    app.all('/rest', (req, res, next) => {
+        req.needsRESTJSONResponse = true;
+        next();
+    });
+    app.all('/rest/*rest', (req, res, next) => {
         req.needsRESTJSONResponse = true;
         next();
     });
@@ -349,12 +359,12 @@ async function createApp(appType) {
         }
         install404Fallback('/rest');
         if (config.cas && config.cas.enabled === true) {
-          app.get('/cas/login',
-            passport.authenticateCas,
-            function(req, res) {
-                res.redirect('/?cas-login-success');
-          });
-          app.get('/cas/logout', passport.logoutCas);
+            app.get('/cas/login',
+                passport.authenticateCas,
+                function (req, res) {
+                    res.redirect('/?cas-login-success');
+                });
+            app.get('/cas/logout', passport.logoutCas);
         }
     }
 

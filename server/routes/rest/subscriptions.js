@@ -6,8 +6,12 @@ import routerFactory from '../../lib/router-async.js'
 const router = routerFactory.create();
 
 
-router.postAsync('/subscriptions-table/:listId/:segmentId?', passport.loggedIn, async (req, res) => {
-    return res.json(await subscriptions.listDTAjax(req.context, castToInteger(req.params.listId), req.params.segmentId ? castToInteger(req.params.segmentId) : null, req.body));
+router.postAsync('/subscriptions-table/:listId', passport.loggedIn, async (req, res) => {
+    return res.json(await subscriptions.listDTAjax(req.context, castToInteger(req.params.listId), null, req.body));
+});
+
+router.postAsync('/subscriptions-table/:listId/:segmentId', passport.loggedIn, async (req, res) => {
+    return res.json(await subscriptions.listDTAjax(req.context, castToInteger(req.params.listId), castToInteger(req.params.segmentId), req.body));
 });
 
 router.postAsync('/subscriptions-test-user-table/:listCid', passport.loggedIn, async (req, res) => {

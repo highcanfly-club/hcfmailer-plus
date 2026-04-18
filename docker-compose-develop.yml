@@ -60,7 +60,7 @@ services:
   fake-smtp:
     image: haravich/fake-smtp-server
     ports:
-      - 25:25
+      - 1025:1025
       - 1080:1080
     deploy:
       resources:
