@@ -145,8 +145,10 @@ const setupRegularAuth = (app) => {
 };
 
 const restLogout = (req, res) => {
-    req.logout({}, () => { log.info(`User logged out`); });
-    res.json();
+    req.logout({}, () => {
+        log.info(`User logged out`);
+        res.json();
+    });
 };
 
 const restLogin = (req, res, next) => {

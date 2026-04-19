@@ -58,7 +58,7 @@ export default function Login({ location }) {
             const submitSuccessful = await formState.validateAndSendFormValuesToURL(FormSendMethod.POST, 'rest/login');
 
             if (submitSuccessful) {
-                const unsafeUrl = qs.parse(location.search).next;
+                const unsafeUrl = qs.parse(location.search).next || '';
                 const safeUrl = unsafeUrl.replace(/[^a-zA-Z0-9/\-]/g, '');
                 const nextUrl = safeUrl || getUrl();
                 window.location = nextUrl;
