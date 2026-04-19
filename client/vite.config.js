@@ -50,23 +50,28 @@ export default defineConfig({
       targets: [
         {
           src: 'node_modules/jquery/dist/jquery.min.js',
-          dest: ''
+          dest: '',
+          rename: { stripBase: 3 }
         },
         {
           src: 'node_modules/@popperjs/core/dist/umd/popper.min.js',
-          dest: ''
+          dest: '',
+          rename: { stripBase: 5 }
         },
         {
           src: 'node_modules/bootstrap/dist/js/bootstrap.min.js',
-          dest: ''
+          dest: '',
+          rename: { stripBase: 4 } 
         },
         {
           src: 'node_modules/@coreui/coreui/dist/js/coreui.min.js',
-          dest: ''
+          dest: '',
+          rename: { stripBase: 5 }
         },
         {
           src: 'node_modules/@fortawesome/fontawesome-free/webfonts',
-          dest: ''
+          dest: '',
+          rename: { stripBase: 3 }
         }
       ]
     })
