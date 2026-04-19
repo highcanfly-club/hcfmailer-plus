@@ -56,6 +56,22 @@ assert_file() {
     fi
 }
 
+format_number_fr() {
+    local number="$1"
+    local sign=""
+    if [ "${number:0:1}" = "-" ]; then
+        sign="-"
+        number="${number:1}"
+    fi
+    local formatted=""
+    while [ "${#number}" -gt 3 ]; do
+        formatted=" ${number: -3}${formatted}"
+        number="${number:0:${#number}-3}"
+    done
+    formatted="${number}${formatted}"
+    printf '%s%s' "$sign" "$formatted"
+}
+
 send_mail() {
     local from="$1"
     local to="$2"
@@ -99,6 +115,9 @@ send_backup_email() {
     local mailuser="$7"
     local mailpasswd="$8"
     local mailserver="$9"
+    local split_files="${10}"
+    local archive_kb="${11}"
+    local sql_size_bytes="${12}"
 
     MAILUSER="$mailuser"
     MAILPASSWD="$mailpasswd"
@@ -107,6 +126,13 @@ send_backup_email() {
     local subject="Sauvegarde HCFMailer+ du ${now} (${count}/${total})"
     local body="Voici la sauvegarde du ${now}
 Partie ${count} sur ${total}
+
+Fichier actuel : $(basename "$file")
+Fichiers du split :
+${split_files}
+
+Taille totale du fichier avant split : ${archive_kb} Ko
+Taille de /app/server/files/backup.sql : ${sql_size_bytes} octets
 
 HCFMailer+ team"
 
@@ -131,13 +157,22 @@ send_admin_error() {
 }
 
 load_expected_tables() {
-    local schema_file="/app/server/setup/sql/mailtrain.sql"
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
+    local schema_file="$script_dir/../server/setup/sql/mailtrain.sql"
+    if [ ! -r "$schema_file" ]; then
+        schema_file="/app/server/setup/sql/mailtrain.sql"
+    fi
+
     if [ ! -r "$schema_file" ]; then
         echo "ERROR: expected schema file not found at $schema_file"
         return 1
     fi
 
-    mapfile -t EXPECTED_TABLES < <(grep -oE '^CREATE TABLE `[^`]+`' "$schema_file" | sed 's/^CREATE TABLE `\([^`]*\)`$/\1/' | sort -u)
+    EXPECTED_TABLES=()
+    while IFS= read -r line; do
+        EXPECTED_TABLES+=("$line")
+    done < <(grep -oE '^CREATE TABLE `[^`]+`' "$schema_file" | sed 's/^CREATE TABLE `\([^`]*\)`$/\1/' | sort -u)
     if [ ${#EXPECTED_TABLES[@]} -eq 0 ]; then
         echo "ERROR: no expected tables loaded from schema file"
         return 1
@@ -153,7 +188,7 @@ validate_dump_tables() {
     fi
 
     for table in "${EXPECTED_TABLES[@]}"; do
-        local pattern='^CREATE TABLE( IF NOT EXISTS)? \`'"$table"'\`'
+        local pattern='^CREATE TABLE( IF NOT EXISTS)? (`[^`]+`\.)?`'"$table"'`'
         if ! grep -qE "$pattern" "$sqlfile"; then
             missing+=("$table")
         fi
