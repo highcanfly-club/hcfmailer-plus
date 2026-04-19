@@ -27,11 +27,18 @@ export const withErrorHandling = createComponentMixin({
         /* Example of use:
            this.getFormValuesFromURL(....).catch(error => this.handleError(error));
 
-           It's equivalent to:
+           It's equivalent to the legacy decorator form:
 
            @withAsyncErrorHandler
            async loadFormValues() {
              await this.getFormValuesFromURL(...);
+           }
+
+           In current code, we prefer the explicit wrapper pattern:
+
+           constructor(props) {
+               super(props);
+               this.loadFormValues = wrapWithAsyncErrorHandler(this, this.loadFormValues);
            }
         */
 
@@ -67,6 +74,9 @@ export function withAsyncErrorHandler(target, name, descriptor) {
     return descriptor;
 }
 
+// Preferred non-decorator usage for classes that avoid legacy decorators.
+// Use in constructors as:
+//   this.someMethod = wrapWithAsyncErrorHandler(this, this.someMethod);
 export function wrapWithAsyncErrorHandler(self, fn) {
     return async function () {
         try {
