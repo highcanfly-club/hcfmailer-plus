@@ -235,8 +235,8 @@ async function createApp(appType) {
 
     useWith404Fallback('/static', express.static(path.join(__dirname, '..', 'client', 'static')));
 
-    // In development, proxy to Vite dev server; in production, serve webpack dist
-    if (process.env.NODE_ENV === 'development') {
+    // In development, proxy to Vite dev server; in production, serve vite dist
+    if (process.env.NODE_ENV === 'development' && !(process.env.VITE_PREVIEW==='true')) {
 
 
         const viteProxy = createProxyMiddleware({
@@ -261,7 +261,10 @@ async function createApp(appType) {
         useWith404Fallback('/static-npm/bootstrap.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'bootstrap.min.js')));
         useWith404Fallback('/static-npm/coreui.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'coreui.min.js')));
     } else {
-        // Production: serve webpack dist
+        if (process.env.VITE_PREVIEW==='true') {
+            console.warn('Running in preview mode: serving pre-built client. Make sure to run "npm run build" after any change to the client code.');
+        }
+        // Production: serve vite dist
         useWith404Fallback('/client', express.static(path.join(__dirname, '..', 'client', 'dist')));
 
         useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));

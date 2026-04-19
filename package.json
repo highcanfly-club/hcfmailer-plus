@@ -14,6 +14,7 @@
     "dev:infra": "set -a && source .env.dev && set +a && docker compose -f docker-compose-develop.yml up",
     "dev:client": "set -a && source .env.dev && set +a && npm run dev --workspace=client",
     "dev:server": "set -a && source .env.dev && set +a && npm run dev --workspace=server",
+    "dev:preview": "set -a && source .env.dev && set +a && npm run build && VITE_PREVIEW=true npm run dev --workspace=server",
     "dev:zone-mta": "set -a && source .env.dev && set +a && npm run start --workspace=zone-mta",
     "dev:restore:s3": "set -a && source .env.dev && set +a && npx tsx scripts/dev-restore-s3.ts",
     "build": "npm run build --workspace=client",
