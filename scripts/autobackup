@@ -51,17 +51,33 @@ if ! check_mariadb_dump "$LOCAL_DUMP" "$DUMP_RC"; then
   exit 1
 fi
 
+SQL_SIZE_BYTES=$(stat -c%s "$LOCAL_DUMP" 2>/dev/null || wc -c < "$LOCAL_DUMP" | tr -d ' ')
+
 if ! tar -cv "$LOCAL_DUMP" /app/server/files/campaign /app/server/files/certs /app/server/files/imports /app/server/files/reports /app/server/files/template /app/server/files/uploaded | xz -9 > "$BACKUP_ARCHIVE"; then
   send_admin_error "Backup archive failed" "Failed to create archive ${BACKUP_ARCHIVE}."
   exit 1
 fi
+BACKUP_ARCHIVE_KB=$(du -k "$BACKUP_ARCHIVE" 2>/dev/null | awk '{print $1}')
+BACKUP_ARCHIVE_KB_FR=$(format_number_fr "$BACKUP_ARCHIVE_KB")
+SQL_SIZE_BYTES_FR=$(format_number_fr "$SQL_SIZE_BYTES")
+
 rm -f "$LOCAL_DUMP"
 
 split -b 10m "$BACKUP_ARCHIVE" /tmp/backup.$NOW.tar.xz.
 TOTAL=$(ls /tmp/backup.$NOW.tar.xz.* 2>/dev/null | wc -l | tr -d ' ')
+SPLIT_FILES=""
+for SPLIT_FILE in /tmp/backup.$NOW.tar.xz.*; do
+  if [ -f "$SPLIT_FILE" ]; then
+    SPLIT_FILES="${SPLIT_FILES}$(basename "$SPLIT_FILE")"$'\n'
+  fi
+done
+
 COUNT=0
 for FILE in /tmp/backup.$NOW.tar.xz.*; do
+  if [ ! -f "$FILE" ]; then
+    continue
+  fi
   COUNT=$((COUNT+1))
-  send_backup_email "$NOW" "$COUNT" "$TOTAL" "$FILE" "$BACKUP_FROM" "$BACKUP_TO" "$MAILUSER" "$MAILPASSWD" '127.0.0.1:2525'
+  send_backup_email "$NOW" "$COUNT" "$TOTAL" "$FILE" "$BACKUP_FROM" "$BACKUP_TO" "$MAILUSER" "$MAILPASSWD" '127.0.0.1:2525' "$SPLIT_FILES" "$BACKUP_ARCHIVE_KB_FR" "$SQL_SIZE_BYTES_FR"
   rm -f "$FILE"
 done
