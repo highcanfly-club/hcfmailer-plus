@@ -78,12 +78,12 @@ hbs.registerPartials(__dirname + '/views/subscription/partials/');
  * in a situation where we consume a flash messages but then comes a redirect
  * and the message is never displayed
  */
-hbs.registerHelper('flash_messages', function () { // eslint-disable-line prefer-arrow-callback
-    if (typeof this.flash !== 'function') { // eslint-disable-line no-invalid-this
+hbs.registerHelper('flash_messages', function () {  
+    if (typeof this.flash !== 'function') {  
         return '';
     }
 
-    const messages = this.flash(); // eslint-disable-line no-invalid-this
+    const messages = this.flash();  
     const response = [];
 
     // group messages by type

@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import config from './config.js';
 import webdriver from 'selenium-webdriver';
 
-/* eslint-disable no-console */
+ 
 
 const color = Mocha.reporters.Base.color;
 

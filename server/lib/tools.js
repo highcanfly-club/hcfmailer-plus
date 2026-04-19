@@ -74,8 +74,8 @@ async function getTemplate(template, locale) {
             options.helpers = {};
         }
 
-        options.helpers.translate = function (opts) { // eslint-disable-line prefer-arrow-callback
-            const result = tUI(opts.fn(this), locale, opts.hash); // eslint-disable-line no-invalid-this
+        options.helpers.translate = function (opts) {  
+            const result = tUI(opts.fn(this), locale, opts.hash);  
             return new hbs.handlebars.SafeString(result);
         };
 

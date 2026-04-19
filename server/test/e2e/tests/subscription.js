@@ -6,7 +6,7 @@ import createPage from '../page-objects/subscription.js';
 import faker from 'faker';
 import request from 'request-promise';
 
-/* eslint-disable prefer-arrow-callback */
+ 
 
 
 function getPage(listConf) {

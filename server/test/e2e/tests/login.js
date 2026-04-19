@@ -4,7 +4,7 @@ import expect from 'chai';
 import page from '../page-objects/user.js';
 import home from '../page-objects/home.js';
 
-/* eslint-disable prefer-arrow-callback */
+ 
 
 
 suite('Login use-cases', () => {

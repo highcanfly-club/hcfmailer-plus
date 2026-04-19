@@ -30,6 +30,7 @@
     "node": ">=22.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "chai": "^4.2.0",
     "eslint": "^10.2.1",
     "http-proxy-middleware": "^3.0.5",
