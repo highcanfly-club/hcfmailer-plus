@@ -4,7 +4,6 @@
   "description": "Self hosted email newsletter app - client components",
   "main": "index.js",
   "scripts": {
-    "setdate": "sed -i.bak -E \"s/__BUILD_DATE__/`date -I`/g\" src/Home.jsx",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"

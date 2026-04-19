@@ -32,6 +32,9 @@ function loggerPlugin() {
 }
 
 export default defineConfig({
+  define: {
+    "import.meta.env.BUILD_DATE": JSON.stringify(new Date().toISOString())
+  },
   base: '/client/',
   plugins: [
     globalVirtualPlugin(),

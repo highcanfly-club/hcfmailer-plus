@@ -12,7 +12,7 @@ export default function Home() {
     return (
         <div>
             <h2>{t('mailtrain2')}</h2>
-            <div>{t('build') + ' __BUILD_DATE__'}</div>
+            <div>{t('build') +" : " + import.meta.env.BUILD_DATE}</div>
             <p>{mailtrainConfig.shoutout}</p>
         </div>
     );

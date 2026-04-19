@@ -44,9 +44,7 @@ COPY . /app
 RUN set -ex; \
     cd /app && \
     npm run install:all && \
-    npm run build && \
-    cd /app/client && \
-    npm run setdate
+    npm run build
    
 RUN set -ex; \
    cd /app/client && \
