@@ -6,7 +6,7 @@ COPY autocert/* ./
 RUN go mod tidy
 RUN go build -o autocert -ldflags="-s -w" main.go
 
-FROM node:22 AS builder
+FROM node:24 AS builder
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -21,24 +21,6 @@ RUN set -ex; \
     ./configure &&\
     make 
 
-# Copy package.json dependencies
-COPY server/package.json /app/server/package.json
-COPY server/package-lock.json /app/server/package-lock.json
-COPY client/package.json /app/client/package.json
-COPY client/package-lock.json /app/client/package-lock.json
-COPY shared/package.json /app/shared/package.json
-COPY shared/package-lock.json /app/shared/package-lock.json
-COPY zone-mta/package.json /app/zone-mta/package.json
-COPY zone-mta/package-lock.json /app/zone-mta/package-lock.json
-
-# Install dependencies in each directory
-RUN cd /app/client && npm install --legacy-peer-deps 
-RUN cd /app/shared && npm install  --legacy-peer-deps --production
-RUN cd /app/server && npm install --production
-RUN cd /app/zone-mta && npm install --production
-
-# Later, copy the app files. That improves development speed as building the Docker image will not have
-# to download and install all the NPM dependencies every time there's a change in the source code
 COPY . /app
 
 RUN set -ex; \
@@ -51,7 +33,7 @@ RUN set -ex; \
    rm -rf node_modules
 
 # Final Image
-FROM node:22
+FROM node:24-slim
 LABEL maintainer="Ronan Le Meillat <ronan@parapente.eu.org>"
 WORKDIR /app/
 
@@ -59,7 +41,7 @@ COPY --from=ismogroup/busybox:latest /busybox-1.37.0/busybox /usr/sbin/busybox
 RUN chmod +x /usr/sbin/busybox && ln -sf /usr/sbin/busybox /usr/sbin/sendmail
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    pwgen netcat-openbsd imagemagick curl xz-utils file cron && \
+    pwgen netcat-openbsd imagemagick curl xz-utils file cron ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     echo "23       20      *       *       0       /app/scripts/autobackup" >> /etc/cron.d/autobackup && \
     echo "23       43      *       *       *       /app/scripts/autobackup-s3" >> /etc/cron.d/autobackup-s3 && \
@@ -82,12 +64,13 @@ RUN chmod ugo+x /app/scripts/init-cloudflare.sh &&\
     chmod ugo+x /app/scripts/init-from-s3.sh &&\
     chmod ugo+x /app/scripts/backup-common.sh
 
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/package-lock.json /app/package-lock.json
 COPY --from=builder /app/docker-entrypoint.sh  /app/docker-entrypoint.sh 
 COPY --from=builder /app/client /app/client
 COPY --from=builder /app/locales /app/locales
 COPY --from=builder /app/mvis /app/mvis
 COPY --from=builder /app/proxy /app/proxy
-COPY --from=builder /app/scripts /app/scripts
 COPY --from=builder /app/server /app/server
 COPY --from=builder /app/setup /app/setup
 COPY --from=builder /app/shared /app/shared
