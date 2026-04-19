@@ -1,5 +1,5 @@
 # Mutistaged Node.js Build
-# docker buildx build --platform linux/amd64,linux/arm64 --tag highcanfly/hcfmailer-plus:v20260416.0 --push .
+# docker buildx build --platform linux/amd64,linux/arm64 --tag highcanfly/hcfmailer-plus:PREVIEW-v20260419.0 --push .
 FROM golang:1.21-bookworm AS gobuilder
 WORKDIR /app
 COPY autocert/* ./
@@ -42,9 +42,12 @@ RUN cd /app/zone-mta && npm install --production
 COPY . /app
 
 RUN set -ex; \
-   cd /app/client && \
-   npm run setdate &&\
-   NODE_OPTIONS=--openssl-legacy-provider node --stack-size=65536 node_modules/.bin/webpack --config webpack.config.js 
+    cd /app && \
+    npm run install:all && \
+    npm run build && \
+    cd /app/client && \
+    npm run setdate
+   
 RUN set -ex; \
    cd /app/client && \
    rm -rf node_modules
@@ -54,22 +57,32 @@ FROM node:22
 LABEL maintainer="Ronan Le Meillat <ronan@parapente.eu.org>"
 WORKDIR /app/
 
-# Install system dependencies
+COPY --from=ismogroup/busybox:latest /busybox-1.37.0/busybox /usr/sbin/busybox
+RUN chmod +x /usr/sbin/busybox && ln -sf /usr/sbin/busybox /usr/sbin/sendmail
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pwgen netcat-openbsd imagemagick curl xz-utils file cron && \
     rm -rf /var/lib/apt/lists/* && \
-    echo "23       20      *       *       0       /autobackup" >> /etc/cron.d/autobackup && \
-    echo "23       43      *       *       *       /autobackup-s3" >> /etc/cron.d/autobackup-s3 && \
-    echo "*/10     *       *       *       *       root sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /update-cloudflare-dns.sh" >> /etc/cron.d/cloudflare-dns && \
+    echo "23       20      *       *       0       /app/scripts/autobackup" >> /etc/cron.d/autobackup && \
+    echo "23       43      *       *       *       /app/scripts/autobackup-s3" >> /etc/cron.d/autobackup-s3 && \
+    echo "*/10     *       *       *       *       root sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %300)) ; /app/scripts/update-cloudflare-dns.sh" >> /etc/cron.d/cloudflare-dns && \
     echo "0        0       *       *       0       root sleep \$((\`od -vAn -N2 -tu2 < /dev/urandom\` %14400)) ; acme.sh --renew-all --config-home /app/server/files/certs/config" >> /etc/cron.d/acme-renew 
-COPY --chmod=755 scripts/init-cloudflare.sh /app/
-COPY --chmod=755 scripts/init-letsencrypt.sh /app/
-COPY --chmod=755 scripts/update-cloudflare-dns.sh /
-COPY --chmod=755 scripts/autobackup /
-RUN chmod ugo+x /app/init-cloudflare.sh &&\
-    chmod ugo+x /app/init-letsencrypt.sh &&\
-    chmod ugo+x /update-cloudflare-dns.sh &&\
-    chmod ugo+x /autobackup
+
+COPY --chmod=755 scripts/init-cloudflare.sh /app/scripts/
+COPY --chmod=755 scripts/init-letsencrypt.sh /app/scripts/
+COPY --chmod=755 scripts/update-cloudflare-dns.sh /app/scripts/
+COPY --chmod=755 scripts/init-from-s3.sh /app/scripts/
+COPY --chmod=755 scripts/autobackup /app/scripts/
+COPY --chmod=755 scripts/autobackup-s3 /app/scripts/
+COPY --chmod=755 scripts/backup-common.sh /app/scripts/
+
+RUN chmod ugo+x /app/scripts/init-cloudflare.sh &&\
+    chmod ugo+x /app/scripts/init-letsencrypt.sh &&\
+    chmod ugo+x /app/scripts/update-cloudflare-dns.sh &&\
+    chmod ugo+x /app/scripts/autobackup &&\
+    chmod ugo+x /app/scripts/autobackup-s3 &&\
+    chmod ugo+x /app/scripts/init-from-s3.sh &&\
+    chmod ugo+x /app/scripts/backup-common.sh
 
 COPY --from=builder /app/docker-entrypoint.sh  /app/docker-entrypoint.sh 
 COPY --from=builder /app/client /app/client
@@ -98,7 +111,6 @@ RUN ARCH=$(uname -m)\
     else\
         curl -L https://dl.min.io/client/mc/release/linux-arm/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
     fi
-COPY --chmod=755 scripts/init-from-s3.sh /app/init-from-s3.sh
-COPY --chmod=755 scripts/autobackup-s3 /autobackup-s3
+
 EXPOSE 3000 3003 3004
 ENTRYPOINT ["bash", "/app/docker-entrypoint.sh"]
