@@ -12,7 +12,8 @@
 
     <title>Mailtrain</title>
 
-    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/mailtrain.css">{{/unless}}
+    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/untrusted.css">{{/unless}}
+    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/sandboxed-ckeditor.css">{{/unless}}
 
     <script src="{{publicPath}}static-npm/jquery.min.js"></script>
     <script src="{{publicPath}}static-npm/popper.min.js"></script>

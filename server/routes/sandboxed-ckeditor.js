@@ -32,7 +32,7 @@ async function getRouter(appType) {
         router.getAsync('/editor', passport.csrfProtection, async (req, res) => {
             const mailtrainConfig = await clientHelpers.getAnonymousConfig(req.context, appType);
 
-            const isDev = process.env.NODE_ENV === 'development';
+            const isDev = process.env.NODE_ENV === 'development' && process.env.VITE_PREVIEW !== 'true';
             res.render('ckeditor/root', {
                 layout: 'ckeditor/layout',
                 reactCsrfToken: req.csrfToken(),
@@ -43,7 +43,7 @@ async function getRouter(appType) {
                         { src: getSandboxUrl('client/@vite/client'), type: 'module' },
                         { src: getSandboxUrl('client/src/lib/sandboxed-ckeditor-root.jsx'), type: 'module' }
                     ]
-                    : [getSandboxUrl('client/ckeditor-root.js')],
+                    : [{ src: getSandboxUrl('client/ckeditor-root.js'), type: 'module' }],
                 publicPath: getSandboxUrl()
             });
         });

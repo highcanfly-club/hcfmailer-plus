@@ -111,7 +111,11 @@ export default defineConfig({
       output: {
         entryFileNames: '[name].js',
         assetFileNames: (assetInfo) => {
-          if (/\.css$/.test(assetInfo.name)) return 'mailtrain.css';
+          if (/\.css$/.test(assetInfo.name)) {
+            // Keep the main entry CSS as mailtrain.css (expected by server/views/layout.hbs)
+            if (assetInfo.name === 'root.css') return 'mailtrain.css';
+            return '[name].css';
+          }
           return 'assets/[name][extname]';
         }
       }

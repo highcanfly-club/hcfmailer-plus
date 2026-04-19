@@ -14,7 +14,7 @@ async function getRouter(appType) {
                 Object.assign(mailtrainConfig, await clientHelpers.getAuthenticatedConfig(req.context));
             }
 
-            const isDev = process.env.NODE_ENV === 'development';
+            const isDev = process.env.NODE_ENV === 'development' && process.env.VITE_PREVIEW !== 'true';
             res.render('root', {
                 reactCsrfToken: req.csrfToken(),
                 mailtrainConfig: JSON.stringify(mailtrainConfig),
