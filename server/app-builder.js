@@ -58,7 +58,7 @@ import filesRest from './routes/rest/files.js';
 import settingsRest from './routes/rest/settings.js';
 import index from './routes/index.js';
 import interoperableErrors from '../shared/interoperable-errors.js';
-import RedisStore from 'connect-redis';
+import { RedisStore } from 'connect-redis';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -78,12 +78,12 @@ hbs.registerPartials(__dirname + '/views/subscription/partials/');
  * in a situation where we consume a flash messages but then comes a redirect
  * and the message is never displayed
  */
-hbs.registerHelper('flash_messages', function () {  
-    if (typeof this.flash !== 'function') {  
+hbs.registerHelper('flash_messages', function () {
+    if (typeof this.flash !== 'function') {
         return '';
     }
 
-    const messages = this.flash();  
+    const messages = this.flash();
     const response = [];
 
     // group messages by type
@@ -236,7 +236,7 @@ async function createApp(appType) {
     useWith404Fallback('/static', express.static(path.join(__dirname, '..', 'client', 'static')));
 
     // In development, proxy to Vite dev server; in production, serve vite dist
-    if (process.env.NODE_ENV === 'development' && !(process.env.VITE_PREVIEW==='true')) {
+    if (process.env.NODE_ENV === 'development' && !(process.env.VITE_PREVIEW === 'true')) {
 
 
         const viteProxy = createProxyMiddleware({
@@ -261,7 +261,7 @@ async function createApp(appType) {
         useWith404Fallback('/static-npm/bootstrap.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'bootstrap.min.js')));
         useWith404Fallback('/static-npm/coreui.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'coreui.min.js')));
     } else {
-        if (process.env.VITE_PREVIEW==='true') {
+        if (process.env.VITE_PREVIEW === 'true') {
             console.warn('Running in preview mode: serving pre-built client. Make sure to run "npm run build" after any change to the client code.');
         }
         // Production: serve vite dist
