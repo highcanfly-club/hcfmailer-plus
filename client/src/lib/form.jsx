@@ -3,7 +3,7 @@
 import React, {Component, useState, useRef, useCallback, useEffect, forwardRef, useImperativeHandle} from 'react';
 import {useTranslation, shortLanguage} from './i18n';
 import axios, {HTTPMethod} from './axios';
-import Immutable from 'immutable';
+import * as Immutable from 'immutable';
 import PropTypes from 'prop-types';
 import interoperableErrors from '../../../shared/interoperable-errors';
 import {TreeSelectMode, TreeTable} from './tree';
@@ -66,6 +66,12 @@ export function withFormErrorHandlers(target, name, descriptor) {
     };
 
     return descriptor;
+}
+
+export function wrapWithFormErrorHandlers(self, fn) {
+    return async function(...args) {
+        await self.formHandleErrors(async () => await fn.apply(self, args));
+    };
 }
 
 function Form({ stateOwner, onSubmitAsync, format, noStatus, children }) {

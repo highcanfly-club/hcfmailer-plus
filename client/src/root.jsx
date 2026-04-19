@@ -5,7 +5,7 @@ import './scss/mailtrain.scss';
 
 import React, { Component } from 'react';
 import { createRoot } from 'react-dom/client';
-import { TranslationRoot, withTranslation } from './lib/i18n';
+import { TranslationRoot, TranslationContext } from './lib/i18n';
 import account from './account/root';
 import login from './login/root';
 import blacklist from './blacklist/root';
@@ -37,16 +37,15 @@ if (mailtrainConfig.reportsEnabled) {
 }
 
 
-@withComponentMixins([
-    withTranslation
-])
 class Root extends Component {
+    static contextType = TranslationContext;
+
     constructor(props) {
         super(props);
     }
 
     render() {
-        const t = this.props.t;
+        const t = this.context;
 
         let structure;
 

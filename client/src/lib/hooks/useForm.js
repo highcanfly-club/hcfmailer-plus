@@ -1,7 +1,7 @@
 'use strict';
 
 import { useReducer, useRef, useCallback, useEffect } from 'react';
-import Immutable from 'immutable';
+import * as Immutable from 'immutable';
 import axios from '../axios';
 import { getUrl } from '../urls';
 import interoperableErrors from '../../../../shared/interoperable-errors';
