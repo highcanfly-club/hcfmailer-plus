@@ -1,5 +1,6 @@
 import { filesDir } from '../models/files.js';
-import { tmpName } from 'tmp-promise';
+import crypto from 'crypto';
+import os from 'os';
 import path from 'path';
 import log from './log.js';
 import knex from './knex.js';
@@ -94,11 +95,9 @@ async function _fileCache(typeId, cacheConfig, keyGen) {
 
             const ensureFileStream = callback => {
                 if (!fileStream) {
-                    tmpName().then(tmp => {
-                        tmpFilePath = tmp;
-                        fileStream = fs.createWriteStream(tmpFilePath);
-                        setTimeout(callback, 5000);
-                    })
+                    tmpFilePath = path.join(os.tmpdir(), `mailtrain-${crypto.randomUUID()}`);
+                    fileStream = fs.createWriteStream(tmpFilePath, { flags: 'wx' });
+                    fileStream.once('open', callback);
                 } else {
                     callback();
                 }
