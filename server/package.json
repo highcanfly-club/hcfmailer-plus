@@ -1,7 +1,7 @@
 {
-  "name": "mailtrain",
+  "name": "hcfmailer-plus-server",
   "private": true,
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Self hosted email newsletter app - server",
   "main": "index.js",
   "type": "module",
