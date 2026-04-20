@@ -17,6 +17,7 @@ function globalVirtualPlugin() {
   };
 }
 
+// Vite plugin to log all incoming requests to the dev server (for debugging proxy issues)
 function loggerPlugin() {
   return {
     name: "requestLogger",
@@ -52,6 +53,42 @@ function resolveNodeModulesDir(packageName) {
   let dir = pkgAbsDir;
   for (let i = 0; i < depth; i++) dir = path.dirname(dir);
   return dir;
+}
+
+/**
+ * PostCSS plugin: FontAwesome v7 uses @use with namespaced $font-path which
+ * cannot be overridden from outside the module. Its compiled output always
+ * contains url('../webfonts/fa-*.woff2'). In Vite dev mode, CSS is injected
+ * as <style> tags whose url() resolves relative to the current PAGE URL —
+ * so the relative path breaks at any depth beyond one segment. Rewrite to an
+ * absolute server-root path '/webfonts/' which the Node server always serves.
+ */
+const fixFaFontUrls = {
+  postcssPlugin: 'fix-fa-font-urls',
+  Declaration(decl) {
+    if (decl.prop === 'src' && decl.value.includes('../webfonts/')) {
+      decl.value = decl.value.replace(/url\((['"]?)\.\.\/webfonts\//g, 'url($1/webfonts/');
+    }
+  }
+};
+
+/**
+ * Vite plugin: suppress the build-time warning that Rolldown emits when it
+ * tries to resolve FontAwesome's url('../webfonts/...') references before
+ * our PostCSS plugin has had a chance to rewrite them to '/webfonts/...'.
+ * The final output CSS is correct; this is a cosmetic warning only.
+ */
+function suppressFaFontWarning() {
+  return {
+    name: 'suppress-fa-font-urls-warning',
+    configResolved(config) {
+      const origWarn = config.logger.warn.bind(config.logger);
+      config.logger.warn = (msg, options) => {
+        if (typeof msg === 'string' && msg.includes('webfonts') && msg.includes("didn't resolve at build time")) return;
+        origWarn(msg, options);
+      };
+    }
+  };
 }
 
 // Computes the correct stripBase value for viteStaticCopy from a src path.
@@ -113,7 +150,6 @@ export default defineConfig({
   resolve: {
     alias: {
       'mailtrain-shared': path.resolve(__dirname, '../shared'),
-      'react-virtualized': path.resolve(__dirname, 'node_modules/react-sortable-tree/node_modules/react-virtualized/dist/commonjs/index.js'),
       // All jQuery imports (including plugins like DataTables) must use the
       // global instance loaded via <script> tag so plugins register correctly.
       'jquery': path.resolve(__dirname, 'src/lib/jquery-global.js')
@@ -123,6 +159,9 @@ export default defineConfig({
     exclude: ['mailtrainConfig', 'csrfToken']
   },
   css: {
+    postcss: {
+      plugins: [fixFaFontUrls]
+    },
     preprocessorOptions: {
       scss: {
         silenceDeprecations: ['legacy-js-api', 'import', 'global-builtin', 'color-functions', 'if-function']

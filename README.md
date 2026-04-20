@@ -7,7 +7,7 @@ For rapid development we also upgrade the development environment to Vite and us
 
 We also operated a full ESM migration, which is a huge change.
 
-Mailtrain is a self hosted newsletter application built on Node.js (v22+), Redis (v7+), MongoDB (v6+) and MySQL (v8+).
+HCF Mailer+ is a self hosted newsletter application built on Node.js (v22+), React (v19), Bootstrap (v5), Redis (v7+), MongoDB (v6+) and MySQL (v8+).
 
 This is version 2 of Mailtrain. It mostly implements all features of v1 and add some more. It is a complete rewrite, so you will have to install it from scratch.
 

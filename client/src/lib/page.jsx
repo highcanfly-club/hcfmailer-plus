@@ -1,22 +1,112 @@
 'use strict';
 
-import React, { Component } from "react";
+import React, { Component, useEffect, useRef, useMemo, useCallback } from "react";
 import i18n, { withTranslation } from './i18n';
 import PropTypes from "prop-types";
-import { withRouter, BrowserRouter, Link, Switch, Route } from "react-router-dom";
-import { CompatRouter } from "react-router-dom-v5-compat";
+import { BrowserRouter, Link, Routes, Route, useNavigate, useLocation, useParams, useNavigationType } from "react-router-dom";
 import { withErrorHandling } from "./error-handling";
 import interoperableErrors from "../../../shared/interoperable-errors";
 import { ActionLink, Button, DismissibleAlert, DropdownActionLink, Icon } from "./bootstrap-components";
 import mailtrainConfig from "mailtrainConfig";
 import "./styles.scss";
-import { getRoutes, renderRoute, Resolver, SectionContentContext, withPageHelpers } from "./page-common";
+import { getRoutes, renderRoute, Resolver, RouteElementWrapper, SectionContentContext, toV7Path, withPageHelpers } from "./page-common";
 import { getBaseDir, getUrl } from "./urls";
 import { createComponentMixin, withComponentMixins } from "./decorator-helpers";
 import { getLang } from "../../../shared/langs";
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 export { withPageHelpers };
+
+/**
+ * React Router v7 compatible withRouter HOC.
+ * Provides v5-like history/location/match props to class components.
+ * history.block() uses a guarded navigate approach (no data-router required).
+ */
+function withRouter(WrappedComponent) {
+  function WithRouter(props) {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const params = useParams();
+    const navigationType = useNavigationType();
+
+    const listenersRef = useRef([]);
+    const prevLocationRef = useRef(null);
+    const blockMessageRef = useRef(null);
+    const beforeUnloadCheckRef = useRef(null);
+    const isBlockedRef = useRef(false);
+
+    // Call history.listen() listeners when navigation occurs
+    useEffect(() => {
+      if (prevLocationRef.current !== null) {
+        for (const listener of listenersRef.current) {
+          listener(location, navigationType);
+        }
+      }
+      prevLocationRef.current = location;
+    }, [location, navigationType]);
+
+    // Guarded navigate: checks dirty-state before proceeding
+    const guardedNavigate = useCallback(async (path, opts) => {
+      if (isBlockedRef.current) {
+        const check = beforeUnloadCheckRef.current;
+        if (check) {
+          const shouldCancel = await check();
+          if (shouldCancel) {
+            const allow = window.confirm(blockMessageRef.current);
+            if (!allow) return;
+          }
+        }
+      }
+      navigate(path, opts);
+    }, [navigate]);
+
+    // Build stable history object; navigate-based methods updated each render
+    const historyRef = useRef(null);
+    if (!historyRef.current) {
+      historyRef.current = {
+        push: null,
+        replace: null,
+        goBack: null,
+        listen: (fn) => {
+          listenersRef.current.push(fn);
+          return () => {
+            listenersRef.current = listenersRef.current.filter(l => l !== fn);
+          };
+        },
+        block: (message) => {
+          blockMessageRef.current = message;
+          isBlockedRef.current = true;
+          return () => { isBlockedRef.current = false; };
+        },
+        /** Allow the wrapped class component to supply an async dirty-check function */
+        _setBeforeUnloadCheck: (fn) => {
+          beforeUnloadCheckRef.current = fn;
+        },
+      };
+    }
+    historyRef.current.push = (path, state) => guardedNavigate(path, { state });
+    historyRef.current.replace = (path, state) => guardedNavigate(path, { replace: true, state });
+    historyRef.current.goBack = () => navigate(-1);
+
+    const match = useMemo(
+      () => ({ params, url: location.pathname, isExact: true }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [params, location.pathname]
+    );
+
+    return (
+      <WrappedComponent
+        {...props}
+        history={historyRef.current}
+        location={location}
+        match={match}
+      />
+    );
+  }
+
+  WithRouter.displayName = `withRouter(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+  return WithRouter;
+}
 
 class Breadcrumb extends Component {
   constructor(props) {
@@ -423,6 +513,9 @@ SectionContent extends Component {
 
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.historyUnblock = this.props.history.block(t('alertQuitPage'));
+    // Wire up dirty-form check so the router blocker can ask for confirmation
+    // only when there are actually unsaved changes.
+    this.props.history._setBeforeUnloadCheck(() => this.beforeUnloadListeners.shouldUnloadBeCancelledAsync());
   }
 
   componentWillUnmount() {
@@ -492,7 +585,7 @@ SectionContent extends Component {
   renderRoute(route) {
     const t = this.props.t;
 
-    const render = (props) => {
+    const renderFn = (props) => {
       let flashMessage;
       if (this.state.flashMessageText) {
         flashMessage = <DismissibleAlert severity={this.state.flashMessageSeverity} onCloseAsync={(...args) => this.closeFlashMessage(...args)}>{this.state.flashMessageText}</DismissibleAlert>;
@@ -507,7 +600,8 @@ SectionContent extends Component {
       );
     };
 
-    return <Route key={route.path} exact={route.exact} path={route.path} render={render} />;
+    const v7Path = toV7Path(route.exact ? route.path : route.path + '/*');
+    return <Route key={route.path} path={v7Path} element={<RouteElementWrapper key={route.path} renderFn={renderFn} />} />;
   }
 
   render() {
@@ -515,7 +609,7 @@ SectionContent extends Component {
 
     return (
       <SectionContentContext.Provider value={this}>
-                <Switch>{routes.map((x) => this.renderRoute(x))}</Switch>
+                <Routes>{routes.map((x) => this.renderRoute(x))}</Routes>
             </SectionContentContext.Provider>);
 
   }
@@ -527,18 +621,12 @@ withTranslation]
 Section extends Component {
   constructor(props) {
     super(props);
-    this.getUserConfirmationHandler = (...args) => this.onGetUserConfirmation(...args);
-    this.sectionContent = null;
   }
 
   static propTypes = {
     structure: PropTypes.oneOfType([PropTypes.object, PropTypes.func]).isRequired,
     root: PropTypes.string.isRequired
   };
-
-  onGetUserConfirmation(message, callback) {
-    this.sectionContent.onNavigationConfirmationDialog(message, callback);
-  }
 
   render() {
     let structure = this.props.structure;
@@ -547,10 +635,8 @@ Section extends Component {
     }
 
     return (
-      <BrowserRouter basename={getBaseDir()} getUserConfirmation={this.getUserConfirmationHandler}>
-                <CompatRouter>
-                    <SectionContent wrappedComponentRef={(node) => this.sectionContent = node} root={this.props.root} structure={structure} />
-                </CompatRouter>
+      <BrowserRouter basename={getBaseDir()}>
+                    <SectionContent root={this.props.root} structure={structure} />
             </BrowserRouter>);
 
   }

@@ -1,8 +1,8 @@
 'use strict';
 
-import React, { Component } from "react";
+import React, { Component, useMemo } from "react";
 import PropTypes from "prop-types";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { wrapWithAsyncErrorHandler, withErrorHandling } from "./error-handling";
 import axios from "../lib/axios";
 import { getUrl } from "./urls";
@@ -10,6 +10,15 @@ import { createComponentMixin, withComponentMixins } from "./decorator-helpers";
 import { withTranslation } from "./i18n";
 import shallowEqual from "shallowequal";
 import { checkPermissions } from "./permissions";
+
+/**
+ * React Router v7 does not support v5-style regex constraints in path params
+ * (e.g. :id([0-9]+), :action(edit|delete)). This function strips them so that
+ * :paramName(regex) becomes :paramName.
+ */
+export function toV7Path(path) {
+  return path.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)\([^)]*\)/g, ':$1');
+}
 
 async function resolve(route, match, prevResolverState) {
   const resolved = {};
@@ -352,7 +361,7 @@ class RedirectRoute extends Component {
 
   render() {
     const route = this.props.route;
-    const params = this.props.match.params;
+    const params = this.props.match ? this.props.match.params : {};
 
     let link;
     if (typeof route.link === 'function') {
@@ -361,8 +370,34 @@ class RedirectRoute extends Component {
       link = route.link;
     }
 
-    return <Redirect to={link} />;
+    return <Navigate to={link} replace />;
   }
+}
+
+/**
+ * Provides v5-compatible route props (location, match, history) to render functions
+ * using React Router v7 hooks. Used as the element inside <Route> components.
+ */
+export function RouteElementWrapper({ renderFn }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+
+  const history = useMemo(() => ({
+    push: (path, state) => navigate(path, { state }),
+    replace: (path, state) => navigate(path, { replace: true, state }),
+    goBack: () => navigate(-1),
+    listen: () => () => {},
+    block: () => () => {},
+  }), [navigate]);
+
+  const match = useMemo(
+    () => ({ params, url: location.pathname, isExact: true }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [params, location.pathname]
+  );
+
+  return renderFn({ match, location, history });
 }const SubRoute =
 
 
@@ -390,12 +425,13 @@ SubRoute extends Component {
         const routes = getRoutes(subStructure, route);
 
         const _renderRoute = (route) => {
-          const render = (props) => renderRoute(route, this.props.panelRouteCtor, this.props.loadingMessageFn, this.props.flashMessage, props);
-          return <Route key={route.path} exact={route.exact} path={route.path} render={render} />;
+          const renderFn = (props) => renderRoute(route, this.props.panelRouteCtor, this.props.loadingMessageFn, this.props.flashMessage, props);
+          const v7Path = toV7Path(route.exact ? route.path : route.path + '/*');
+          return <Route key={route.path} path={v7Path} element={<RouteElementWrapper key={route.path} renderFn={renderFn} />} />;
         };
 
         return (
-          <Switch>{routes.map((x) => _renderRoute(x))}</Switch>);
+          <Routes>{routes.map((x) => _renderRoute(x))}</Routes>);
 
 
       } else {

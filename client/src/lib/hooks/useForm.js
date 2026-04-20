@@ -215,14 +215,20 @@ export function useForm(settings = {}) {
     });
   }, [scheduleValidateForm]);
 
-  const updateForm = useCallback((data) => {
+  const updateForm = useCallback((dataOrMutator) => {
     dispatch({
       type: 'MUTATE',
       mutator: (mutState) => {
         mutState.update('data', stateData =>
           stateData.withMutations(mutStateData => {
-            for (const key in data) {
-              mutStateData.setIn([key, 'value'], data[key]);
+            if (typeof dataOrMutator === 'function') {
+              // Class-based API: updateForm(mutStateData => { mutStateData.setIn(...) })
+              // mutStateData is the Immutable data sub-tree (fields keyed by name)
+              dataOrMutator(mutStateData);
+            } else {
+              for (const key in dataOrMutator) {
+                mutStateData.setIn([key, 'value'], dataOrMutator[key]);
+              }
             }
           })
         );

@@ -22,8 +22,7 @@ import "./CUD.scss";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
-import SortableTree from "react-sortable-tree";
-import 'react-sortable-tree/style.css';
+import { SortableTreeWithoutDndContext } from "@nosferatu500/react-sortable-tree";
 import { ActionLink, Button, Icon } from "../../lib/bootstrap-components";
 import { getRuleHelpers } from "./helpers";
 import RuleSettingsPane from "./RuleSettingsPane";
@@ -278,11 +277,10 @@ export default function CUD({ action, list, fields, entity }) {
 
                             <div className="clearfix"/>
 
-                            <div className={"ruleTree"}>
-                                <SortableTree
+                            <div className={"ruleTree"} style={{minHeight: 100}}>
+                                <SortableTreeWithoutDndContext
                                     treeData={rulesTree}
                                     onChange={newRulesTree => onRulesChanged(newRulesTree)}
-                                    isVirtualized={false}
                                     canDrop={ data => !data.nextParent || (ruleHelpers.isCompositeRuleType(data.nextParent.rule.type)) }
                                     generateNodeProps={data => ({
                                         buttons: [
