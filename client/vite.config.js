@@ -108,14 +108,6 @@ export default defineConfig({
     globalVirtualPlugin(),
     loggerPlugin(),
     react({
-      babel: {
-        plugins: [
-          ['@babel/plugin-proposal-decorators', { version: 'legacy' }],
-          ['@babel/plugin-proposal-class-properties', { loose: true }],
-          ['@babel/plugin-proposal-private-methods', { loose: true }],
-          ['@babel/plugin-proposal-private-property-in-object', { loose: true }],
-        ]
-      }
     }),
     viteStaticCopy({
       targets: [
