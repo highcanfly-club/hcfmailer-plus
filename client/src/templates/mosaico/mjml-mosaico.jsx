@@ -1,8 +1,8 @@
 'use strict';
 
-import * as htmlparser from 'htmlparser2' 
+import { Parser } from 'htmlparser2'
 import min from 'lodash/min';
-import {BodyComponent, HeadComponent, MJML} from "../../lib/mjml";
+import { BodyComponent, HeadComponent, MJML } from "../../lib/mjml";
 import shortid from "shortid";
 
 function getId() {
@@ -30,13 +30,13 @@ function handleMosaicoAttributes(block, src) {
     let newSrc = src;
     let offset = 0;
 
-    const parser = new htmlparser.Parser(
+    const parser = new Parser(
         {
             onopentag: (name, attrs) => {
                 const fragment = src.substring(parser.startIndex, parser.endIndex);
 
                 const tagAttrsRe = RegExp(`(<\\s*${name})((?:\\s+[a-z0-9-_]+\\s*=\\s*"[^"]*")*)`, 'i');
-                const [ , tagStr, attrsStr] = fragment.match(tagAttrsRe);
+                const [, tagStr, attrsStr] = fragment.match(tagAttrsRe);
 
                 const attrsRe = new RegExp(/([a-z0-9-_]+)\s*=\s*"([^"]*)"/g);
                 const attrsMatches = attrsStr.matchAll(attrsRe);
@@ -49,9 +49,9 @@ function handleMosaicoAttributes(block, src) {
                         block.addMosaicoProperty(propertyId);
                         newFragment += ` data-ko-editable="${propertyId}"`;
                     } else if (attrMatch[1] === 'mj-mosaico-display') {
-                            const propertyId = attrMatch[2];
-                            block.addMosaicoProperty(propertyId);
-                            newFragment += ` data-ko-display="${propertyId}"`;
+                        const propertyId = attrMatch[2];
+                        block.addMosaicoProperty(propertyId);
+                        newFragment += ` data-ko-display="${propertyId}"`;
                     } else {
                         newFragment += ` ${attrMatch[0]}`;
                     }
@@ -160,46 +160,46 @@ class MjMosaicoConditionalDisplay extends BodyComponent {
         return `
             <div
                 ${this.htmlAttributes({
-                    "data-ko-display": this.propertyId,
-                    class: this.getAttribute('css-class'),
-                    'data-ko-block': this.blockId
-                })}
+            "data-ko-display": this.propertyId,
+            class: this.getAttribute('css-class'),
+            'data-ko-block': this.blockId
+        })}
             >
                 <table
                     ${this.htmlAttributes({
-                        border: '0',
-                        cellpadding: '0',
-                        cellspacing: '0',
-                        role: 'presentation',
-                        style: 'table',
-                        width: '100%',
-                    })}
+            border: '0',
+            cellpadding: '0',
+            cellspacing: '0',
+            role: 'presentation',
+            style: 'table',
+            width: '100%',
+        })}
                 >
                     ${this.renderChildren(children, {
-                        renderer: component => component.constructor.isRawElement() ? component.render() : `
+            renderer: component => component.constructor.isRawElement() ? component.render() : `
                             <tr>
                                 <td
                                     ${component.htmlAttributes({
-                                        align: component.getAttribute('align'),
-                                        'vertical-align': component.getAttribute('vertical-align'),
-                                        class: component.getAttribute('css-class'),
-                                        style: {
-                                            background: component.getAttribute('container-background-color'),
-                                            'font-size': '0px',
-                                            padding: component.getAttribute('padding'),
-                                            'padding-top': component.getAttribute('padding-top'),
-                                            'padding-right': component.getAttribute('padding-right'),
-                                            'padding-bottom': component.getAttribute('padding-bottom'),
-                                            'padding-left': component.getAttribute('padding-left'),
-                                            'word-break': 'break-word',
-                                        },
-                                    })}
+                align: component.getAttribute('align'),
+                'vertical-align': component.getAttribute('vertical-align'),
+                class: component.getAttribute('css-class'),
+                style: {
+                    background: component.getAttribute('container-background-color'),
+                    'font-size': '0px',
+                    padding: component.getAttribute('padding'),
+                    'padding-top': component.getAttribute('padding-top'),
+                    'padding-right': component.getAttribute('padding-right'),
+                    'padding-bottom': component.getAttribute('padding-bottom'),
+                    'padding-left': component.getAttribute('padding-left'),
+                    'word-break': 'break-word',
+                },
+            })}
                                 >
                                     ${component.render()}
                                 </td>
                             </tr>
                         `
-                    })}
+        })}
                 </table>                        
             </div>
         `;
@@ -217,7 +217,7 @@ class MjMosaicoBlock extends BodyComponent {
     }
 
     componentHeadStyle = breakpoint => {
-        const propertiesOut = this.mosaicoProperties.length > 0 ? `; properties: ${this.mosaicoProperties.join(' ')}`: '';
+        const propertiesOut = this.mosaicoProperties.length > 0 ? `; properties: ${this.mosaicoProperties.join(' ')}` : '';
 
         return `
             @supports -ko-blockdefs {
@@ -242,9 +242,9 @@ class MjMosaicoBlock extends BodyComponent {
         const result = `
             <div
                 ${this.htmlAttributes({
-                    class: this.getAttribute('css-class'),
-                    'data-ko-block': this.blockId
-                })}
+            class: this.getAttribute('css-class'),
+            'data-ko-block': this.blockId
+        })}
             >
                 ${this.renderChildren()}
             </div>
@@ -266,7 +266,7 @@ class MjMosaicoInnerBlock extends BodyComponent {
     }
 
     componentHeadStyle = breakpoint => {
-        const propertiesOut = this.mosaicoProperties.length > 0 ? `; properties: ${this.mosaicoProperties.join(' ')}`: '';
+        const propertiesOut = this.mosaicoProperties.length > 0 ? `; properties: ${this.mosaicoProperties.join(' ')}` : '';
 
         return `
             @supports -ko-blockdefs {
@@ -293,45 +293,45 @@ class MjMosaicoInnerBlock extends BodyComponent {
         const result = `
             <div
                 ${this.htmlAttributes({
-                    class: this.getAttribute('css-class'),
-                    'data-ko-block': this.blockId
-                })}
+            class: this.getAttribute('css-class'),
+            'data-ko-block': this.blockId
+        })}
             >
                 <table
                     ${this.htmlAttributes({
-                        border: '0',
-                        cellpadding: '0',
-                        cellspacing: '0',
-                        role: 'presentation',
-                        style: 'table',
-                        width: '100%',
-                    })}
+            border: '0',
+            cellpadding: '0',
+            cellspacing: '0',
+            role: 'presentation',
+            style: 'table',
+            width: '100%',
+        })}
                 >
                     ${this.renderChildren(children, {
-                        renderer: component => component.constructor.isRawElement() ? component.render() : `
+            renderer: component => component.constructor.isRawElement() ? component.render() : `
                             <tr>
                                 <td
                                     ${component.htmlAttributes({
-                                        align: component.getAttribute('align'),
-                                        'vertical-align': component.getAttribute('vertical-align'),
-                                        class: component.getAttribute('css-class'),
-                                        style: {
-                                            background: component.getAttribute('container-background-color'),
-                                            'font-size': '0px',
-                                            padding: component.getAttribute('padding'),
-                                            'padding-top': component.getAttribute('padding-top'),
-                                            'padding-right': component.getAttribute('padding-right'),
-                                            'padding-bottom': component.getAttribute('padding-bottom'),
-                                            'padding-left': component.getAttribute('padding-left'),
-                                            'word-break': 'break-word',
-                                        },
-                                    })}
+                align: component.getAttribute('align'),
+                'vertical-align': component.getAttribute('vertical-align'),
+                class: component.getAttribute('css-class'),
+                style: {
+                    background: component.getAttribute('container-background-color'),
+                    'font-size': '0px',
+                    padding: component.getAttribute('padding'),
+                    'padding-top': component.getAttribute('padding-top'),
+                    'padding-right': component.getAttribute('padding-right'),
+                    'padding-bottom': component.getAttribute('padding-bottom'),
+                    'padding-left': component.getAttribute('padding-left'),
+                    'word-break': 'break-word',
+                },
+            })}
                                 >
                                     ${component.render()}
                                 </td>
                             </tr>
                         `
-                    })}
+        })}
                 </table>                        
             </div>
         `;
@@ -434,7 +434,7 @@ class MjMosaicoImage extends BodyComponent {
             ? parseInt(this.getAttribute('width'), 10)
             : Infinity;
 
-        const {box} = this.getBoxWidths();
+        const { box } = this.getBoxWidths();
 
         return min([box, width])
     }
@@ -445,16 +445,16 @@ class MjMosaicoImage extends BodyComponent {
         const img = `
             <img
                 ${this.htmlAttributes({
-                    alt: this.getAttribute('alt'),
-                    height: height && (height === 'auto' ? undefined : parseInt(height, 10)),
-                    style: 'img',
-                    title: this.getAttribute('title'),
-                    width: this.getContentWidth(),
-            
-                    'data-ko-editable': this.propertyId + '.src',
-                    'data-ko-placeholder-height': this.getAttribute('placeholder-height'),
-                    src: "[PLACEHOLDER]"
-                })}
+            alt: this.getAttribute('alt'),
+            height: height && (height === 'auto' ? undefined : parseInt(height, 10)),
+            style: 'img',
+            title: this.getAttribute('title'),
+            width: this.getContentWidth(),
+
+            'data-ko-editable': this.propertyId + '.src',
+            'data-ko-placeholder-height': this.getAttribute('placeholder-height'),
+            src: "[PLACEHOLDER]"
+        })}
             />
         `;
 
@@ -462,12 +462,12 @@ class MjMosaicoImage extends BodyComponent {
             return `
                 <a
                     ${this.htmlAttributes({
-                        'data-ko-link': this.propertyId + '.url',
-                        href: this.getAttribute('href') || '',
-                        target: this.getAttribute('target'),
-                        rel: this.getAttribute('rel'),
-                        name: this.getAttribute('name'),
-                    })}
+                'data-ko-link': this.propertyId + '.url',
+                href: this.getAttribute('href') || '',
+                target: this.getAttribute('target'),
+                rel: this.getAttribute('rel'),
+                name: this.getAttribute('name'),
+            })}
                 >
                     ${img}
                 </a>
@@ -476,11 +476,11 @@ class MjMosaicoImage extends BodyComponent {
             return `
                 <a
                     ${this.htmlAttributes({
-                        href: this.getAttribute('href'),
-                        target: this.getAttribute('target'),
-                        rel: this.getAttribute('rel'),
-                        name: this.getAttribute('name'),
-                    })}
+                href: this.getAttribute('href'),
+                target: this.getAttribute('target'),
+                rel: this.getAttribute('rel'),
+                name: this.getAttribute('name'),
+            })}
                 >
                     ${img}
                 </a>
@@ -501,26 +501,26 @@ class MjMosaicoImage extends BodyComponent {
         return `
             <table
                 ${this.htmlAttributes({
-                    border: '0',
-                    cellpadding: '0',
-                    cellspacing: '0',
-                    role: 'presentation',
-                    style: 'table',
-                    class:
-                        this.getAttribute('fluid-on-mobile')
-                            ? 'full-width-mobile'
-                            : null,
-                })}
+            border: '0',
+            cellpadding: '0',
+            cellspacing: '0',
+            role: 'presentation',
+            style: 'table',
+            class:
+                this.getAttribute('fluid-on-mobile')
+                    ? 'full-width-mobile'
+                    : null,
+        })}
             >
                 <tbody>
                     <tr>
                         <td ${this.htmlAttributes({
-                            style: 'td',
-                            class:
-                                this.getAttribute('fluid-on-mobile')
-                                ? 'full-width-mobile'
-                                : null,
-                        })}>
+            style: 'td',
+            class:
+                this.getAttribute('fluid-on-mobile')
+                    ? 'full-width-mobile'
+                    : null,
+        })}>
                             ${this.renderImage()}
                         </td>
                     </tr>
@@ -639,35 +639,35 @@ class MjMosaicoButton extends BodyComponent {
         return `
             <table
                 ${this.htmlAttributes({
-                    border: '0',
-                    cellpadding: '0',
-                    cellspacing: '0',
-                    role: 'presentation',
-                    style: 'table',
-                })}
+            border: '0',
+            cellpadding: '0',
+            cellspacing: '0',
+            role: 'presentation',
+            style: 'table',
+        })}
             >
                 <tr>
                     <td
                         ${this.htmlAttributes({
-                            align: 'center',
-                            bgcolor:
-                                this.getAttribute('background-color') === 'none'
-                                    ? undefined
-                                    : this.getAttribute('background-color'),
-                            role: 'presentation',
-                            style: 'td',
-                            valign: this.getAttribute('vertical-align'),
-                        })}
+            align: 'center',
+            bgcolor:
+                this.getAttribute('background-color') === 'none'
+                    ? undefined
+                    : this.getAttribute('background-color'),
+            role: 'presentation',
+            style: 'td',
+            valign: this.getAttribute('vertical-align'),
+        })}
                     >
                         <a
                             ${this.htmlAttributes({
-                                rel: this.getAttribute('rel'),
-                                name: this.getAttribute('name'),
-                                style: 'content',
-                                target: this.getAttribute('target'),
-                                'data-ko-editable': this.getAttribute('property-id') + '.text',
-                                'data-ko-link': this.getAttribute('property-id') + '.url'
-                            })}
+            rel: this.getAttribute('rel'),
+            name: this.getAttribute('name'),
+            style: 'content',
+            target: this.getAttribute('target'),
+            'data-ko-editable': this.getAttribute('property-id') + '.text',
+            'data-ko-link': this.getAttribute('property-id') + '.url'
+        })}
                         >
                             ${this.getContent()}
                         </a>
