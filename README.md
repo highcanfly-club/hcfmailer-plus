@@ -1,7 +1,13 @@
 # HCF Mailer+
 
-It is 99.999% same as Mailtrain. But we need some customization… So this is HCFMailer+  
-Mailtrain is a self hosted newsletter application built on Node.js (v18+), Redis (v7+), MongoDB (v6+) and MySQL (v8+).
+This is a customized version of Mailtrain. Because we need some customization… So this is HCFMailer+  
+This HCF Mailer+ is a huge dependency upgrade, and also adds some features like S3 backup and Cloudflare API integration for automatic Dynamic DNS record management. 
+
+For rapid development we also upgrade the development environment to Vite and use the latest versions of all dependencies. This is a huge upgrade, so we decided to make it a separate branch (called `hcf`) instead of merging it to the main branch.
+
+We also operated a full ESM migration, which is a huge change.
+
+Mailtrain is a self hosted newsletter application built on Node.js (v22+), Redis (v7+), MongoDB (v6+) and MySQL (v8+).
 
 This is version 2 of Mailtrain. It mostly implements all features of v1 and add some more. It is a complete rewrite, so you will have to install it from scratch.
 
