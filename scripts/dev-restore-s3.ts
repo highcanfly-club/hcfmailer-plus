@@ -2,8 +2,10 @@
 /// <reference types="node" />
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { createConnection } from "mariadb";
-import { parseTar } from "nanotar";
+import { parseTar, ParsedTarFileItem } from "nanotar";
 import { decompress } from "@napi-rs/lzma/xz";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { Readable } from "node:stream";
 
 const requiredEnv = [
@@ -202,15 +204,42 @@ async function main(): Promise<void> {
     }
   }
 
+  const shouldRestoreFiles = process.env.S3_RESTORE_FILES === "true" || process.env.S3_RESTORE_FILES === "1";
+  if (shouldRestoreFiles) {
+    console.log("ℹ️ S3_RESTORE_FILES enabled; restoring app/server/files/* to server/files/");
+    const fileEntries = parseTar(tarBuffer, {
+      metaOnly: false,
+      filter: (entry) => normalizeKey(entry.name).startsWith("app/server/files/"),
+    }) as ParsedTarFileItem[];
+
+    for (const entry of fileEntries) {
+      if (!entry.data) {
+        continue;
+      }
+      const normalizedName = normalizeKey(entry.name);
+      const relativePath = normalizedName.slice("app/server/files/".length);
+      const outputPath = join(process.cwd(), "server/files", relativePath);
+      mkdirSync(dirname(outputPath), { recursive: true });
+      writeFileSync(outputPath, Buffer.from(entry.data));
+      console.log(`✅ Restored file to ${outputPath}`);
+    }
+  }
+
   const backupFileEntries = parseTar(tarBuffer, {
+    metaOnly: false,
     filter: (entry) => normalizeKey(entry.name).endsWith("backup.sql"),
-  });
+  }) as ParsedTarFileItem[];
 
   if (backupFileEntries.length === 0 || !backupFileEntries[0].data) {
     throw new Error("Unable to read backup.sql content from archive");
   }
 
-  const backupContent = Buffer.from(backupFileEntries[0].data).toString("utf8");
+  const backupData = backupFileEntries[0].data;
+  if (!backupData) {
+    throw new Error("Unable to read backup.sql content from archive");
+  }
+
+  const backupContent = Buffer.from(backupData).toString("utf8");
   console.log("✅ backup.sql loaded into memory");
 
   const sectionSql = extractDatabaseSection(backupContent, MYSQL_DATABASE);
