@@ -43,10 +43,10 @@ export default function CUD({ action, entity, permissions }) {
     }
 
     const formState = useForm({
-        onChange: {
-            report_template: (state, key, oldVal, newVal) => {
+        onChangeBeforeValidation: {
+            report_template: (mutStateData, key, oldVal, newVal) => {
                 if (oldVal !== newVal) {
-                    state.formState = state.formState.setIn(['data', 'user_fields', 'value'], '');
+                    mutStateData.setIn(['user_fields', 'value'], '');
 
                     if (newVal) {
                         fetchUserFields(newVal);
