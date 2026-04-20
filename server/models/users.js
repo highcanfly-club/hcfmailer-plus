@@ -13,15 +13,18 @@ import tools from '../lib/tools.js';
 import crypto from 'crypto';
 import settings from './settings.js';
 import messageSender from '../lib/message-sender.js';
-import bluebird from 'bluebird';
 import bcrypt from 'bcryptjs';
 import passport from '../lib/passport.js';
 import namespaceHelpers from '../lib/namespace-helpers.js';
 import shares from './shares.js';
 import contextHelpers from '../lib/context-helpers.js';
 
-const bcryptHash = bluebird.promisify(bcrypt.hash.bind(bcrypt));
-const bcryptCompare = bluebird.promisify(bcrypt.compare.bind(bcrypt));
+const bcryptHash = password => new Promise((resolve, reject) => {
+    bcrypt.hash(password, 10, (err, hash) => err ? reject(err) : resolve(hash));
+});
+const bcryptCompare = (password, hash) => new Promise((resolve, reject) => {
+    bcrypt.compare(password, hash, (err, result) => err ? reject(err) : resolve(result));
+});
 
 const allowedKeys = new Set(['username', 'name', 'email', 'password', 'namespace', 'role']);
 const ownAccountAllowedKeys = new Set(['name', 'email', 'password']);
@@ -153,7 +156,7 @@ async function _validateAndPreprocess(tx, entity, isCreate, isOwnAccount) {
             throw new Error('Invalid password');
         }
 
-        entity.password = await bcryptHash(entity.password, null, null);
+        entity.password = await bcryptHash(entity.password);
     } else {
         delete entity.password;
     }
@@ -357,7 +360,7 @@ async function resetPassword(username, resetToken, password) {
                 throw new Error('Invalid password');
             }
 
-            password = await bcryptHash(password, null, null);
+            password = await bcryptHash(password);
 
             await tx('users').where({username}).update({
                 password,

@@ -2,10 +2,11 @@ import { getAdminId } from '../../shared/users.js';
 import log from '../lib/log.js';
 import dbcheck from '../lib/dbcheck.js';
 import knex from '../lib/knex.js';
-import bluebird from 'bluebird';
 import bcrypt from 'bcryptjs';
 
-const bcryptHash = bluebird.promisify(bcrypt.hash.bind(bcrypt));
+const bcryptHash = password => new Promise((resolve, reject) => {
+    bcrypt.hash(password, 10, (err, hash) => err ? reject(err) : resolve(hash));
+});
 
 async function init() {
     const args = process.argv.slice(2);
@@ -21,7 +22,7 @@ async function init() {
     await dbcheck();
     await knex.migrate.latest();
 
-    const hashedPasswd = await bcryptHash(passwd, null, null);
+    const hashedPasswd = await bcryptHash(passwd);
     await knex('users').where({id: getAdminId()}).update({password: hashedPasswd});
 
     if (accessToken !== '') {
