@@ -15,7 +15,7 @@ import contextHelpers from '../lib/context-helpers.js';
 import tools from '../lib/tools.js';
 import shares from '../models/shares.js';
 import activityLog from '../lib/activity-log.js';
-import csvparse from 'csv-parse';
+import { parse } from 'csv-parse';
 import fs from 'fs';
 import '../lib/fork.js';
 
@@ -40,7 +40,7 @@ function prepareCsv(impt) {
             error: msg + '\n' + err.message
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_FAILED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_FAILED });
 
         await fsExtra.removeAsync(filePath);
     };
@@ -57,7 +57,7 @@ function prepareCsv(impt) {
             error: null
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_FINISHED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_FINISHED });
 
         await fsExtra.removeAsync(filePath);
     };
@@ -85,7 +85,7 @@ function prepareCsv(impt) {
                 impt.settings.csv.columns = cols;
                 impt.settings.sourceTable = importTable;
 
-                await knex('imports').where({id: impt.id}).update({settings: JSON.stringify(impt.settings)});
+                await knex('imports').where({ id: impt.id }).update({ settings: JSON.stringify(impt.settings) });
 
                 await knex.schema.raw('CREATE TABLE `' + importTable + '` (\n' +
                     '  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n' +
@@ -114,7 +114,7 @@ function prepareCsv(impt) {
     };
 
     const inputStream = fs.createReadStream(filePath);
-    const parser = csvparse({
+    const parser = parse({
         comment: '#',
         delimiter: impt.settings.csv.delimiter
     });
@@ -124,7 +124,7 @@ function prepareCsv(impt) {
 
     const importProcessor = new Writable({
         write(chunk, encoding, callback) {
-            processRows([{chunk, encoding}]).then(() => callback());
+            processRows([{ chunk, encoding }]).then(() => callback());
         },
         writev(chunks, callback) {
             processRows(chunks).then(() => callback());
@@ -265,7 +265,7 @@ async function _execImportRun(impt, handlers) {
             status: ImportStatus.RUN_FINISHED
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.RUN_FINISHED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.RUN_FINISHED });
 
     } catch (err) {
         await knex('imports').where('id', impt.id).update({
@@ -274,7 +274,7 @@ async function _execImportRun(impt, handlers) {
             status: ImportStatus.RUN_FAILED
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_FAILED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_FAILED });
     }
 }
 
@@ -367,19 +367,19 @@ async function getTask() {
 
             if (impt.source === ImportSource.CSV_FILE && impt.status === ImportStatus.PREP_SCHEDULED) {
                 await tx('imports').where('id', impt.id).update('status', ImportStatus.PREP_RUNNING);
-                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_RUNNING});
+                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_RUNNING });
 
                 return () => prepareCsv(impt);
 
             } else if (impt.status === ImportStatus.RUN_SCHEDULED && impt.mapping_type === MappingType.BASIC_SUBSCRIBE) {
                 await tx('imports').where('id', impt.id).update('status', ImportStatus.RUN_RUNNING);
-                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.RUN_RUNNING});
+                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.RUN_RUNNING });
 
                 return () => basicSubscribe(impt);
 
             } else if (impt.status === ImportStatus.RUN_SCHEDULED && impt.mapping_type === MappingType.BASIC_UNSUBSCRIBE) {
                 await tx('imports').where('id', impt.id).update('status', ImportStatus.RUN_RUNNING);
-                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.RUN_RUNNING});
+                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.RUN_RUNNING });
 
                 return () => basicUnsubscribe(impt);
             }

@@ -26,14 +26,21 @@ const fileFields = [
     {name: 'csvFile', maxCount: 1}
 ];
 
+function parseEntity(req) {
+    if (req.body.entity !== undefined) {
+        return typeof req.body.entity === 'string' ? JSON.parse(req.body.entity) : req.body.entity;
+    }
+    return req.body;
+}
+
 router.postAsync('/imports/:listId', passport.loggedIn, passport.csrfProtection, multer.fields(fileFields), async (req, res) => {
-    const entity = JSON.parse(req.body.entity);
+    const entity = parseEntity(req);
 
     return res.json(await imports.create(req.context, castToInteger(req.params.listId), entity, req.files));
 });
 
 router.putAsync('/imports/:listId/:importId', passport.loggedIn, passport.csrfProtection, multer.fields(fileFields), async (req, res) => {
-    const entity = JSON.parse(req.body.entity);
+    const entity = parseEntity(req);
     entity.id = castToInteger(req.params.importId);
 
     await imports.updateWithConsistencyCheck(req.context, castToInteger(req.params.listId), entity, req.files);

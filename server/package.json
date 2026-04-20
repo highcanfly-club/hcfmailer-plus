@@ -31,11 +31,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "chai": "^4.2.0",
+    "chai": "^6.2.2",
     "eslint": "^10.2.1",
     "http-proxy-middleware": "^3.0.5",
     "lodash": "^4.18.1",
-    "mocha": "^5.2.0",
+    "mocha": "^11.7.5",
     "nodemon": "^3.1.14",
     "url-pattern": "^1.0.3"
   },
@@ -57,7 +57,7 @@
     "cors": "^2.8.6",
     "crypto": "^1.0.1",
     "csurf": "^1.11.0",
-    "csv-parse": "^4.8.3",
+    "csv-parse": "^6.2.1",
     "csv-stringify": "^5.3.6",
     "device": "^0.3.12",
     "escape-html": "^1.0.3",
