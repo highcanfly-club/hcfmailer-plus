@@ -55,11 +55,11 @@ services:
           cpus: "0.5"
           memory: "1G"
 
-  fake-smtp:
-    image: haravich/fake-smtp-server
+  mailpit:
+    image: axllent/mailpit:latest
     ports:
       - 1025:1025
-      - 1080:1080
+      - 1080:8025
     deploy:
       resources:
         limits:
