@@ -4,7 +4,7 @@ import passport from '../lib/passport.js';
 import routerFactory from '../lib/router-async.js'
 const router = routerFactory.create();
 import subscriptions from '../models/subscriptions.js';
-import stringify from 'csv-stringify';
+import { stringify } from 'csv-stringify';
 import fields from '../models/fields.js';
 import lists from '../models/lists.js';
 import moment from 'moment';
@@ -24,10 +24,10 @@ router.getAsync('/export/:listId/:segmentId', passport.loggedIn, async (req, res
     const flds = await fields.list(req.context, listId);
 
     const columns = [
-        {key: 'cid', header: 'cid'},
-        {key: 'status', header: 'status'},
-        {key: 'hash_email', header: 'HASH_EMAIL'},
-        {key: 'email', header: 'EMAIL'},
+        { key: 'cid', header: 'cid' },
+        { key: 'status', header: 'status' },
+        { key: 'hash_email', header: 'HASH_EMAIL' },
+        { key: 'email', header: 'EMAIL' },
     ];
 
     for (const fld of flds) {

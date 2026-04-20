@@ -4,7 +4,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 import path from 'path';
-import csvStringify from 'csv-stringify';
+import { stringify } from 'csv-stringify';
 import stream from 'stream';
 
 
@@ -35,7 +35,7 @@ async function renderCsvFromStream(readable, writable, opts, transform) {
     const finished = new Promise((success, fail) => {
         let lastReadable = readable;
 
-        const stringifier = csvStringify(opts);
+        const stringifier = stringify(opts);
 
         stringifier.on('finish', () => success());
         stringifier.on('error', err => fail(err));
