@@ -446,11 +446,11 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
         initialStyle={owner.getFormValue(prefix + 'grapesJSData').style}
         sourceType={owner.getFormValue(prefix + 'grapesJSSourceType')}
         title={t('grapesJsTemplateDesigner')}
-        onSave={(...args) => owner(...args).save}
+        onSave={(...args) => owner.save(...args)}
         canSave={owner.isFormWithoutErrors()}
-        onTestSend={(...args) => owner(...args).showTestSendModal}
-        onShowExport={(...args) => owner(...args).showExportModal}
-        onFullscreenAsync={(...args) => owner(...args).setElementInFullscreen} />
+        onTestSend={(...args) => owner.showTestSendModal(...args)}
+        onShowExport={(...args) => owner.showExportModal(...args)}
+        onFullscreenAsync={(...args) => owner.setElementInFullscreen(...args)} />
       
             </AlignedRow>,
     exportHTMLEditorData: async (owner) => {
@@ -515,11 +515,11 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
         initialSource={owner.getFormValue(prefix + 'ckeditor4Data').source}
         entityTypeId={entityTypeId}
         title={t('ckEditor4TemplateDesigner')}
-        onSave={(...args) => owner(...args).save}
+        onSave={(...args) => owner.save(...args)}
         canSave={owner.isFormWithoutErrors()}
-        onTestSend={(...args) => owner(...args).showTestSendModal}
-        onShowExport={(...args) => owner(...args).showExportModal}
-        onFullscreenAsync={(...args) => owner(...args).setElementInFullscreen} />
+        onTestSend={(...args) => owner.showTestSendModal(...args)}
+        onShowExport={(...args) => owner.showExportModal(...args)}
+        onFullscreenAsync={(...args) => owner.setElementInFullscreen(...args)} />
       
             </AlignedRow>,
     exportHTMLEditorData: async (owner) => {
@@ -598,11 +598,11 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
         initialSource={owner.getFormValue(prefix + 'codeEditorData').source}
         sourceType={owner.getFormValue(prefix + 'codeEditorSourceType')}
         title={t('codeEditorTemplateDesigner')}
-        onSave={(...args) => owner(...args).save}
+        onSave={(...args) => owner.save(...args)}
         canSave={owner.isFormWithoutErrors()}
-        onTestSend={(...args) => owner(...args).showTestSendModal}
-        onShowExport={(...args) => owner(...args).showExportModal}
-        onFullscreenAsync={(...args) => owner(...args).setElementInFullscreen} />
+        onTestSend={(...args) => owner.showTestSendModal(...args)}
+        onShowExport={(...args) => owner.showExportModal(...args)}
+        onFullscreenAsync={(...args) => owner.setElementInFullscreen(...args)} />
       
             </AlignedRow>,
     exportHTMLEditorData: async (owner) => {
@@ -696,7 +696,7 @@ export function getEditForm(owner, typeKey, prefix = '') {
             <AlignedRow>
                 <Button
           className="btn-secondary"
-          onClickAsync={(...args) => owner(...args).toggleMergeTagReference}
+          onClickAsync={(...args) => owner.toggleMergeTagReference(...args)}
           label={t('mergeTagReference')} />
                 {owner.state.showMergeTagReference &&
         <div style={{ marginTop: '15px' }}>
@@ -878,7 +878,7 @@ export function getEditForm(owner, typeKey, prefix = '') {
         height="400px"
         mode="text"
         label={t('templateContentPlainText')}
-        help={<Trans i18nKey="toExtractTheTextFromHtmlClickHerePlease">To extract the text from HTML click <ActionLink onClickAsync={(...args) => owner(...args).extractPlainText}>here</ActionLink>. Please note that your existing plaintext in the field above will be overwritten.</Trans>} />
+        help={<Trans i18nKey="toExtractTheTextFromHtmlClickHerePlease">To extract the text from HTML click <ActionLink onClickAsync={(...args) => owner.extractPlainText(...args)}>here</ActionLink>. Please note that your existing plaintext in the field above will be overwritten.</Trans>} />
       
         </div>);
 
