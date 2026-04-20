@@ -1,12 +1,12 @@
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 let accounts = 1000 * 1000;
 
 let row = 0;
 let getNext = () => {
 
-    let firstName = faker.name.firstName(); // Rowan Nikolaus
-    let lastName = faker.name.lastName(); // Rowan Nikolaus
+    let firstName = faker.person.firstName(); // Rowan Nikolaus
+    let lastName = faker.person.lastName(); // Rowan Nikolaus
     let email = faker.internet.email(firstName, lastName); // Kassandra.Haley@erich.biz
 
     let subscriber = {

@@ -3,7 +3,7 @@ import config from '../lib/config.js';
 import shortid from '../lib/shortid.js';
 import expect from 'chai';
 import createPage from '../page-objects/subscription.js';
-import faker from 'faker';
+import {faker} from '@faker-js/faker';
 import request from 'request-promise';
 
  
@@ -31,7 +31,7 @@ function generateCustomFieldValue(field) {
         case 'json':
             return `{"say":"${faker.lorem.word()}"}`;
         case 'number':
-            return faker.random.number().toString();
+            return faker.number.int().toString();
         case 'option':
             return Math.round(Math.random());
         case 'date-us':
@@ -50,9 +50,9 @@ function generateCustomFieldValue(field) {
 function generateSubscriptionData(listConf) {
     const data = {
         EMAIL: generateEmail(),
-        FIRST_NAME: faker.name.firstName(),
-        LAST_NAME: faker.name.lastName(),
-        TIMEZONE: 'Europe/Tallinn',
+        FIRST_NAME: faker.person.firstName(),
+        LAST_NAME: faker.person.lastName(),
+        TIMEZONE: 'Europe/Paris',
     };
 
     listConf.customFields.forEach(field => {
