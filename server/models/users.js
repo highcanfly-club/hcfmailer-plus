@@ -14,7 +14,7 @@ import crypto from 'crypto';
 import settings from './settings.js';
 import messageSender from '../lib/message-sender.js';
 import bluebird from 'bluebird';
-import bcrypt from 'bcrypt-nodejs';
+import bcrypt from 'bcryptjs';
 import passport from '../lib/passport.js';
 import namespaceHelpers from '../lib/namespace-helpers.js';
 import shares from './shares.js';

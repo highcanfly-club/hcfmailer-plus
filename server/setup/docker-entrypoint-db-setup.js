@@ -3,7 +3,7 @@ import log from '../lib/log.js';
 import dbcheck from '../lib/dbcheck.js';
 import knex from '../lib/knex.js';
 import bluebird from 'bluebird';
-import bcrypt from 'bcrypt-nodejs';
+import bcrypt from 'bcryptjs';
 
 const bcryptHash = bluebird.promisify(bcrypt.hash.bind(bcrypt));
 
