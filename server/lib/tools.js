@@ -12,7 +12,7 @@ import mjml2html from 'mjml';
 import hbs from 'hbs';
 import juice from 'juice';
 import he from 'he';
-import htmlToText from 'html-to-text';
+import { htmlToText } from 'html-to-text';
 import fs from 'fs-extra';
 const hasher = createHasher();
 const __filename = fileURLToPath(import.meta.url);
@@ -75,8 +75,8 @@ async function getTemplate(template, locale) {
             options.helpers = {};
         }
 
-        options.helpers.translate = function (opts) {  
-            const result = tUI(opts.fn(this), locale, opts.hash);  
+        options.helpers.translate = function (opts) {
+            const result = tUI(opts.fn(this), locale, opts.hash);
             return new hbs.handlebars.SafeString(result);
         };
 
@@ -130,20 +130,20 @@ function validateEmailGetMessage(result, address, language) {
     if (result !== 0) {
         switch (result) {
             case 5:
-                return t('invalidEmailAddressEmailMxRecordNotFound', {email: address});
+                return t('invalidEmailAddressEmailMxRecordNotFound', { email: address });
             case 6:
-                return t('invalidEmailAddressEmailAddressDomainNot', {email: address});
+                return t('invalidEmailAddressEmailAddressDomainNot', { email: address });
             case 12:
-                return t('invalidEmailAddressEmailAddressDomain', {email: address});
+                return t('invalidEmailAddressEmailAddressDomain', { email: address });
             default:
-                return t('invalidEmailAddressEmail', {email: address});
+                return t('invalidEmailAddressEmail', { email: address });
         }
     }
 }
 
 function formatCampaignTemplate(source, tagLanguage, mergeTags, isHTML, campaign, campaignListsById, list, subscription) {
     const links = getMessageLinks(campaign, campaignListsById, list, subscription);
-    mergeTags = {...mergeTags, ...links};
+    mergeTags = { ...mergeTags, ...links };
     return formatTemplate(source, tagLanguage, mergeTags, isHTML);
 }
 
@@ -163,7 +163,7 @@ function _formatTemplateSimple(source, mergeTags, isHTML) {
             }
         }
 
-        if (value === undefined || value===null) { // in RSS it may happen that the key is present, but the value is undefined
+        if (value === undefined || value === null) { // in RSS it may happen that the key is present, but the value is undefined
             return '';
         }
 
@@ -171,7 +171,7 @@ function _formatTemplateSimple(source, mergeTags, isHTML) {
         return isHTML ? he.encode((containsHTML ? value : value.replace(/(?:\r\n|\r|\n)/g, '<br/>')), {
             useNamedReferences: true,
             allowUnsafeSymbols: true
-        }) : (containsHTML ? htmlToText.fromString(value) : value);
+        }) : (containsHTML ? htmlToText(value) : value);
     };
 
     return source.replace(/\[([a-z0-9_.]+)(?:\/([^\]]+))?\]/ig, (match, identifier, fallback) => {

@@ -16,7 +16,7 @@ import fields from '../models/fields.js';
 import sendConfigurations from '../models/send-configurations.js';
 import links from '../models/links.js';
 import tools from './tools.js';
-import htmlToText from 'html-to-text';
+import { htmlToText } from 'html-to-text';
 import request from 'request-promise';
 import files from '../models/files.js';
 import blacklist from '../models/blacklist.js';
@@ -214,7 +214,7 @@ class MessageSender {
                 });
             } catch (exc) {
                 log.error('MessageSender', `Error pulling content from URL (${sourceUrl})`);
-                response = {statusCode: exc.message};
+                response = { statusCode: exc.message };
             }
 
             if (response.statusCode !== 200) {
@@ -256,7 +256,7 @@ class MessageSender {
 
         const generateText = !(text || '').trim();
         if (generateText) {
-            text = htmlToText.fromString(html, {wordwrap: 130});
+            text = htmlToText(html, { wordwrap: 130 });
         } else {
             // When no list and subscriptionGrouped is provided, formatCampaignTemplate works the same way as formatTemplate
             text = tools.formatCampaignTemplate(text, this.tagLanguage, mergeTags, false, campaign, this.listsById, list, subscriptionGrouped)
@@ -287,7 +287,7 @@ class MessageSender {
     }
 
     async initByCampaignId(campaignId) {
-        await this._init({type: MessageType.REGULAR, campaignId});
+        await this._init({ type: MessageType.REGULAR, campaignId });
     }
 
     /*
@@ -515,7 +515,7 @@ class MessageSender {
         // We set the campaign_message to SENT before the message is actually sent. This is to avoid multiple delivery
         // if by chance we run out of disk space and couldn't change status in the database after the message has been sent out
         await knex('campaign_messages')
-            .where({id: campaignMessage.id})
+            .where({ id: campaignMessage.id })
             .update({
                 status: CampaignMessageStatus.SENT,
                 updated: new Date()
@@ -523,22 +523,22 @@ class MessageSender {
 
         let result;
         try {
-            result = await this._sendMessage({listId: campaignMessage.list, subscriptionId: campaignMessage.subscription});
+            result = await this._sendMessage({ listId: campaignMessage.list, subscriptionId: campaignMessage.subscription });
         } catch (err) {
             if (err.campaignMessageErrorType === CampaignMessageErrorType.PERMANENT) {
-              await knex('campaign_messages')
-                .where({id: campaignMessage.id})
-                .update({
-                  status: CampaignMessageStatus.FAILED,
-                  updated: new Date()
-                });
+                await knex('campaign_messages')
+                    .where({ id: campaignMessage.id })
+                    .update({
+                        status: CampaignMessageStatus.FAILED,
+                        updated: new Date()
+                    });
             } else {
-              await knex('campaign_messages')
-                .where({id: campaignMessage.id})
-                .update({
-                    status: CampaignMessageStatus.SCHEDULED,
-                    updated: new Date()
-                });
+                await knex('campaign_messages')
+                    .where({ id: campaignMessage.id })
+                    .update({
+                        status: CampaignMessageStatus.SCHEDULED,
+                        updated: new Date()
+                    });
             }
             throw err;
         }
@@ -547,7 +547,7 @@ class MessageSender {
         enforce(result.subscriptionGrouped);
 
         await knex('campaign_messages')
-            .where({id: campaignMessage.id})
+            .where({ id: campaignMessage.id })
             .update({
                 response: result.response,
                 response_id: result.responseId,
@@ -584,7 +584,7 @@ async function sendQueuedMessage(queuedMessage) {
     const campaign = cs.campaign;
 
     await knex('queued')
-        .where({id: queuedMessage.id})
+        .where({ id: queuedMessage.id })
         .del();
 
     let result;
@@ -663,18 +663,18 @@ async function sendQueuedMessage(queuedMessage) {
 
 async function dropQueuedMessage(queuedMessage) {
     await knex('queued')
-        .where({id: queuedMessage.id})
+        .where({ id: queuedMessage.id })
         .del();
 }
 
 async function queueCampaignMessageTx(tx, sendConfigurationId, listId, subscriptionId, messageType, messageData) {
     enforce(messageType === MessageType.TRIGGERED || messageType === MessageType.TEST);
 
-    const msgData = {...messageData};
+    const msgData = { ...messageData };
 
     if (msgData.attachments) {
         for (const attachment of messageData.attachments) {
-            await files.lockTx(tx,'campaign', 'attachment', attachment.id);
+            await files.lockTx(tx, 'campaign', 'attachment', attachment.id);
         }
     }
 
@@ -724,7 +724,7 @@ async function queueSubscriptionMessage(sendConfigurationId, to, subject, encryp
     if (textRenderer) {
         text = textRenderer(template.data || {});
     } else if (html) {
-        text = htmlToText.fromString(html, {
+        text = htmlToText(html, {
             wordwrap: 130
         });
     }
@@ -748,7 +748,7 @@ async function queueSubscriptionMessage(sendConfigurationId, to, subject, encryp
 
 async function getMessage(campaignCid, listCid, subscriptionCid, settings, isTest = false) {
     const cs = new MessageSender();
-    await cs._init({type: MessageType.REGULAR, campaignCid, listCid, ...settings});
+    await cs._init({ type: MessageType.REGULAR, campaignCid, listCid, ...settings });
 
     const campaign = cs.campaign;
     const list = cs.listsByCid.get(listCid);
