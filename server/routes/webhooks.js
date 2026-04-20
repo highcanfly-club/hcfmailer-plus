@@ -1,8 +1,8 @@
+/* global fetch */
 import { CampaignMessageStatus } from '../../shared/campaigns.js';
 import { MailerType } from '../../shared/send-configurations.js';
 import routerFactory from '../lib/router-async.js'
 const router = routerFactory.create();
-import request from 'request-promise';
 import campaigns from '../models/campaigns.js';
 import sendConfigurations from '../models/send-configurations.js';
 import contextHelpers from '../lib/context-helpers.js';
@@ -21,7 +21,7 @@ router.postAsync('/aws', async (req, res) => {
 
         case 'SubscriptionConfirmation':
             if (req.body.SubscribeURL) {
-                await request(req.body.SubscribeURL);
+                await fetch(req.body.SubscribeURL);
                 break;
             } else {
                 const err = new Error('SubscribeURL not set');

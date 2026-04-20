@@ -104,8 +104,6 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "redis": "^5.12.1",
-    "request": "^2.88.2",
-    "request-promise": "^4.2.6",
     "serve-favicon": "^2.5.1",
     "slugify": "^1.6.9",
     "smtp-server": "^3.18.4",

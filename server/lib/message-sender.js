@@ -1,3 +1,4 @@
+/* global fetch */
 import { CampaignSource, CampaignType } from '../../shared/campaigns.js';
 import { toNameTagLangauge } from '../../shared/lists.js';
 import { CampaignMessageStatus, CampaignMessageErrorType } from '../../shared/campaigns.js';
@@ -17,7 +18,6 @@ import sendConfigurations from '../models/send-configurations.js';
 import links from '../models/links.js';
 import tools from './tools.js';
 import { htmlToText } from 'html-to-text';
-import request from 'request-promise';
 import files from '../models/files.js';
 import blacklist from '../models/blacklist.js';
 import libmime from 'libmime';
@@ -207,11 +207,17 @@ class MessageSender {
 
             let response;
             try {
-                response = await request.post({
-                    uri: sourceUrl,
-                    form,
-                    resolveWithFullResponse: true
+                const res = await fetch(sourceUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(form)
                 });
+                response = {
+                    statusCode: res.status,
+                    body: await res.text()
+                };
             } catch (exc) {
                 log.error('MessageSender', `Error pulling content from URL (${sourceUrl})`);
                 response = { statusCode: exc.message };

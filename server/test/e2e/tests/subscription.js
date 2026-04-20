@@ -1,10 +1,10 @@
+/* global fetch */
 import { useCase, step, precondition, driver } from '../lib/mocha-e2e.js';
 import config from '../lib/config.js';
 import shortid from '../lib/shortid.js';
 import expect from 'chai';
 import createPage from '../page-objects/subscription.js';
 import {faker} from '@faker-js/faker';
-import request from 'request-promise';
 
  
 
@@ -543,11 +543,14 @@ suite('Subscription use-cases', () => {
 
 async function apiSubscribe(listConf, subscription) {
     await step('Add subscription via API call.', async () => {
-        const response = await request({
-            uri: `${config.baseTrustedUrl}/api/subscribe/${listConf.cid}?access_token=${config.users.admin.accessToken}`,
+        const res = await fetch(`${config.baseTrustedUrl}/api/subscribe/${listConf.cid}?access_token=${config.users.admin.accessToken}`, {
             method: 'POST',
-            json: subscription
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subscription)
         });
+        const response = await res.json();
         expect(response.error).to.be.a('undefined');
         expect(response.data.id).to.be.a('string');
         subscription.ucid = response.data.id;
@@ -628,13 +631,16 @@ suite('API Subscription use-cases', () => {
         const subscription = await apiSubscribe(config.lists.l1, generateSubscriptionData(config.lists.l1));
 
         await step('Unsubsribe via API call.', async () => {
-            const response = await request({
-                uri: `${config.baseTrustedUrl}/api/unsubscribe/${config.lists.l1.cid}?access_token=${config.users.admin.accessToken}`,
+            const res = await fetch(`${config.baseTrustedUrl}/api/unsubscribe/${config.lists.l1.cid}?access_token=${config.users.admin.accessToken}`, {
                 method: 'POST',
-                json: {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
                     EMAIL: subscription.EMAIL
-                }
+                })
             });
+            const response = await res.json();
 
             expect(response.error).to.be.a('undefined');
             expect(response.data.id).to.be.a('number'); // FIXME Shouldn't data.id be the cid instead of the DB id?
