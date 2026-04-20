@@ -70,7 +70,7 @@
     "fs-extra": "^11.3.4",
     "fs-extra-promise": "^1.0.1",
     "geoip-ultralight": "^0.1.5",
-    "gm": "^1.25.1",
+    "gm": "^1.25.1", 
     "handlebars": "^4.7.9",
     "hbs": "^4.2.1",
     "he": "^1.2.0",
@@ -81,7 +81,7 @@
     "js-yaml": "4.1.1",
     "jsdom": "^21.1.0",
     "juice": "^8.1.0",
-    "klaw-sync": "^6.0.0",
+    "klaw-sync": "^7.0.0",
     "knex": "^3.2.9",
     "libmime": "^5.3.8",
     "mailparser": "^3.6.6",
@@ -112,6 +112,6 @@
     "tmp-promise": "^1.1.0",
     "toml": "^4.1.1",
     "try-require": "^1.2.1",
-    "xmldom": "^0.1.31"
+    "xmldom": "^0.6.0"
   }
 }
