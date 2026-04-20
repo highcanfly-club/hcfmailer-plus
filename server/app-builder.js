@@ -255,7 +255,8 @@ async function createApp(appType) {
         app.use(viteProxy);
 
         // Static npm files: fonts served directly from node_modules in dev (viteStaticCopy only runs on build)
-        useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'node_modules', '@fortawesome', 'fontawesome-free', 'webfonts')));
+        useWith404Fallback('/webfonts', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
+        useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
         useWith404Fallback('/static-npm/jquery.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'jquery.min.js')));
         useWith404Fallback('/static-npm/popper.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'popper.min.js')));
         useWith404Fallback('/static-npm/bootstrap.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'bootstrap.min.js')));
@@ -266,7 +267,7 @@ async function createApp(appType) {
         }
         // Production: serve vite dist
         useWith404Fallback('/client', express.static(path.join(__dirname, '..', 'client', 'dist')));
-
+        useWith404Fallback('/webfonts', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
         useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
         useWith404Fallback('/static-npm/jquery.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'jquery.min.js')));
         useWith404Fallback('/static-npm/popper.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'popper.min.js')));

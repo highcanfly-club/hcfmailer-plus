@@ -31,6 +31,37 @@ function loggerPlugin() {
   };
 }
 
+// Returns the relative path to the package installation directory (e.g. "../node_modules/@fortawesome/fontawesome-free")
+// Works whether the package is in client/node_modules or root node_modules (npm link, hoisting, etc.)
+function resolvePackagePath(packageName) {
+  try {
+    const pkgJson = require.resolve(packageName + '/package.json', { paths: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, '../node_modules')] });
+    return path.relative(__dirname, path.dirname(pkgJson));
+  } catch (err) {
+    console.error(`Failed to resolve package ${packageName}:`, err);
+    throw err;
+  }
+}
+
+// Returns the absolute path to the node_modules directory that contains packageName.
+// Used e.g. as a Sass loadPath so SCSS can import packages without hardcoded relative paths.
+function resolveNodeModulesDir(packageName) {
+  const pkgAbsDir = path.resolve(__dirname, resolvePackagePath(packageName));
+  // For scoped packages (@org/name) go up 2 levels, otherwise 1
+  const depth = packageName.split('/').length;
+  let dir = pkgAbsDir;
+  for (let i = 0; i < depth; i++) dir = path.dirname(dir);
+  return dir;
+}
+
+// Computes the correct stripBase value for viteStaticCopy from a src path.
+// stripBase = number of path segments to strip so that only the last component (file or directory) remains.
+// Works whether the package is in client/node_modules (e.g. "node_modules/pkg/dist/file.js")
+// or root node_modules (e.g. "../node_modules/pkg/dist/file.js").
+function computeStripBase(srcPath) {
+  return path.normalize(srcPath).split(path.sep).length - 1;
+} 
+
 export default defineConfig({
   define: {
     "import.meta.env.BUILD_DATE": JSON.stringify(new Date().toISOString())
@@ -52,29 +83,29 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'node_modules/jquery/dist/jquery.min.js',
+          src: resolvePackagePath('jquery') + '/dist/jquery.min.js',
           dest: '',
-          rename: { stripBase: 3 }
+          rename: { stripBase: computeStripBase(resolvePackagePath('jquery') + '/dist/jquery.min.js') }
         },
         {
-          src: 'node_modules/@popperjs/core/dist/umd/popper.min.js',
+          src: resolvePackagePath('@popperjs/core') + '/dist/umd/popper.min.js',
           dest: '',
-          rename: { stripBase: 5 }
+          rename: { stripBase: computeStripBase(resolvePackagePath('@popperjs/core') + '/dist/umd/popper.min.js') }
         },
         {
-          src: 'node_modules/bootstrap/dist/js/bootstrap.min.js',
+          src: resolvePackagePath('bootstrap') + '/dist/js/bootstrap.min.js',
           dest: '',
-          rename: { stripBase: 4 } 
+          rename: { stripBase: computeStripBase(resolvePackagePath('bootstrap') + '/dist/js/bootstrap.min.js') }
         },
         {
-          src: 'node_modules/@coreui/coreui/dist/js/coreui.min.js',
+          src: resolvePackagePath('@coreui/coreui') + '/dist/js/coreui.min.js',
           dest: '',
-          rename: { stripBase: 5 }
+          rename: { stripBase: computeStripBase(resolvePackagePath('@coreui/coreui') + '/dist/js/coreui.min.js') }
         },
         {
-          src: 'node_modules/@fortawesome/fontawesome-free/webfonts',
+          src: resolvePackagePath('@fortawesome/fontawesome-free') + '/webfonts',
           dest: '',
-          rename: { stripBase: 3 }
+          rename: { stripBase: computeStripBase(resolvePackagePath('@fortawesome/fontawesome-free') + '/webfonts') - 1 } // Keep the 'webfonts' directory in the destination path since FontAwesome CSS expects it (e.g. "../webfonts/fa-solid-900.woff2")
         }
       ]
     })
