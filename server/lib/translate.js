@@ -1,10 +1,12 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import config from './config.js';
+import i18n from 'i18next';
+import fs from 'fs';
+import path from 'path';
+import { convertToFake, getLang } from '../../shared/langs.js';
 
-const config = require('./config');
-const i18n = require("i18next");
-const fs = require('fs');
-const path = require('path');
-const {convertToFake, getLang} = require('../../shared/langs');
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const resourcesCommon = {};
 
@@ -41,8 +43,6 @@ i18n
         debug: false
     })
 
-
-
 function tLog(key, args) {
     if (!args) {
         args = {};
@@ -72,7 +72,11 @@ function getLangCodeFromExpressLocale(locale) {
     }
 }
 
-module.exports.tLog = tLog;
-module.exports.tUI = tUI;
-module.exports.tMark = tMark;
-module.exports.getLangCodeFromExpressLocale = getLangCodeFromExpressLocale;
+export { tLog, tUI, tMark, getLangCodeFromExpressLocale };
+
+export default {
+    getLangCodeFromExpressLocale,
+    tLog,
+    tMark,
+    tUI
+};

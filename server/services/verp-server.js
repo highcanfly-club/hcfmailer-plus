@@ -1,16 +1,14 @@
-'use strict';
+import { nodeifyFunction, nodeifyPromise } from '../lib/nodeify.js';
+import { MailerError } from '../lib/mailers.js';
+import { CampaignMessageStatus } from '../../shared/campaigns.js';
+import log from '../lib/log.js';
+import config from '../lib/config.js';
+import campaigns from '../models/campaigns.js';
+import contextHelpers from '../lib/context-helpers.js';
+import bluebird from 'bluebird';
+import BounceHandler from 'bounce-handler';
+import { SMTPServer } from 'smtp-server';
 
-const { nodeifyFunction, nodeifyPromise } = require('../lib/nodeify');
-const log = require('../lib/log');
-const config = require('../lib/config');
-const {MailerError} = require('../lib/mailers');
-const campaigns = require('../models/campaigns');
-const contextHelpers = require('../lib/context-helpers');
-const {CampaignMessageStatus} = require('../../shared/campaigns');
-const bluebird = require('bluebird');
-
-const BounceHandler = require('bounce-handler').BounceHandler;
-const SMTPServer = require('smtp-server').SMTPServer;
 
 async function onRcptTo(address, session) {
     const addrSplit = address.address.split('@');
@@ -86,7 +84,7 @@ const server = new SMTPServer({
     onData: onData
 });
 
-function start(callback) {
+function _start(callback) {
     if (!config.verp.enabled) {
         return setImmediate(callback);
     }
@@ -145,4 +143,5 @@ function start(callback) {
     startNextHost();
 }
 
-module.exports.start = bluebird.promisify(start);
+const start = bluebird.promisify(_start);
+export default { start };

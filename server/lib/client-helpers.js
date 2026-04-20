@@ -1,13 +1,10 @@
-'use strict';
-
-const passport = require('./passport');
-const config = require('./config');
-const forms = require('../models/forms');
-const shares = require('../models/shares');
-const urls = require('./urls');
-const settings = require('../models/settings');
-const contextHelpers = require('./context-helpers');
-
+import passport from './passport.js';
+import config from './config.js';
+import forms from '../models/forms.js';
+import shares from '../models/shares.js';
+import urls from './urls.js';
+import settings from '../models/settings.js';
+import contextHelpers from './context-helpers.js';
 
 async function getAnonymousConfig(context, appType) {
     return {
@@ -54,7 +51,10 @@ async function getAuthenticatedConfig(context) {
     }
 }
 
+export { getAuthenticatedConfig };
+export { getAnonymousConfig };
 
-module.exports.getAuthenticatedConfig = getAuthenticatedConfig;
-module.exports.getAnonymousConfig = getAnonymousConfig;
-
+export default {
+    getAnonymousConfig,
+    getAuthenticatedConfig
+};

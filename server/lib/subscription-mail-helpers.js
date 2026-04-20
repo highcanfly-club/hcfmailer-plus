@@ -1,24 +1,15 @@
-'use strict';
+import { getTrustedUrl, getPublicUrl } from './urls.js';
+import { tUI, tMark } from './translate.js';
+import { getFieldColumn, toNameTagLangauge } from '../../shared/lists.js';
+import log from 'npmlog';
+import fields from '../models/fields.js';
+import settings from '../models/settings.js';
+import contextHelpers from './context-helpers.js';
+import forms from '../models/forms.js';
+import messageSender from './message-sender.js';
+import tools from './tools.js';
 
-const log = require('npmlog');
-const fields = require('../models/fields');
-const settings = require('../models/settings');
-const {getTrustedUrl, getPublicUrl} = require('./urls');
-const { tUI, tMark } = require('./translate');
-const contextHelpers = require('./context-helpers');
-const {getFieldColumn, toNameTagLangauge} = require('../../shared/lists');
-const forms = require('../models/forms');
-const messageSender = require('./message-sender');
-const tools = require('./tools');
-
-module.exports = {
-    sendAlreadySubscribed,
-    sendConfirmAddressChange,
-    sendConfirmSubscription,
-    sendConfirmUnsubscription,
-    sendSubscriptionConfirmed,
-    sendUnsubscriptionConfirmed
-};
+export { sendAlreadySubscribed, sendConfirmAddressChange, sendConfirmSubscription, sendConfirmUnsubscription, sendSubscriptionConfirmed, sendUnsubscriptionConfirmed };
 
 async function sendSubscriptionConfirmed(locale, list, email, subscription) {
     const relativeUrls = {
@@ -137,3 +128,12 @@ async function _sendMail(list, email, template, locale, subjectKey, relativeUrls
         log.error('Subscription', err);
     }
 }
+
+export default {
+    sendAlreadySubscribed,
+    sendConfirmAddressChange,
+    sendConfirmSubscription,
+    sendConfirmUnsubscription,
+    sendSubscriptionConfirmed,
+    sendUnsubscriptionConfirmed
+};

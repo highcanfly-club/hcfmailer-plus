@@ -1,18 +1,17 @@
-'use strict';
+import { renderCsvFromStream } from '../lib/report-helpers.js';
+import { castToInteger } from '../lib/helpers.js';
+import { SubscriptionStatus } from '../../shared/lists.js';
+import { LinkId } from '../models/links.js';
+import passport from '../lib/passport.js';
+import shares from '../models/shares.js';
+import contextHelpers from '../lib/context-helpers.js';
+import reports from '../models/reports.js';
+import campaigns from '../models/campaigns.js';
+import knex from '../lib/knex.js';
+import moment from 'moment';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
 
-const passport = require('../lib/passport');
-const shares = require('../models/shares');
-const contextHelpers = require('../lib/context-helpers');
-const {renderCsvFromStream} = require('../lib/report-helpers');
-const reports = require('../models/reports');
-const campaigns = require('../models/campaigns');
-const {castToInteger} = require('../lib/helpers');
-const {SubscriptionStatus} = require('../../shared/lists');
-const knex = require('../lib/knex');
-const {LinkId} = require('../models/links');
-const moment = require('moment');
-
-const router = require('../lib/router-async').create();
 
 router.getAsync('/open-and-click-counts/:campaignId', passport.loggedIn, async (req, res) => {
     const campaignId = castToInteger(req.params.campaignId);
@@ -62,4 +61,4 @@ router.getAsync('/open-and-click-counts/:campaignId', passport.loggedIn, async (
     );
 });
 
-module.exports = router;
+export default router;

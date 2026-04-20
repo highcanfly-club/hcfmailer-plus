@@ -1,4 +1,3 @@
-'use strict';
 
 class WorkerCounter {
     constructor() {
@@ -30,4 +29,4 @@ class WorkerCounter {
     }
 }
 
-module.exports = WorkerCounter;
+export default WorkerCounter;

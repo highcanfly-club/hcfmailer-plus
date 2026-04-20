@@ -1,16 +1,19 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import config from '../lib/config.js';
+import reportHelpers from '../lib/report-helpers.js';
+import { fork } from '../lib/fork.js';
+import path from 'path';
+import log from '../lib/log.js';
+import fs from 'fs';
+import privilegeHelpers from '../lib/privilege-helpers.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /* Privileged executor. If Mailtrain is started as root, this process keeps the root privilege to be able to spawn workers
    that can chroot.
   */
 
-const config = require('../lib/config');
-const reportHelpers = require('../lib/report-helpers');
-const fork = require('../lib/fork').fork;
-const path = require('path');
-const log = require('../lib/log');
-const fs = require('fs');
-const privilegeHelpers = require('../lib/privilege-helpers');
 
 let processes = {};
 

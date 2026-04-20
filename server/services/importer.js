@@ -1,27 +1,23 @@
-'use strict';
-
-const config = require('../lib/config');
-const knex = require('../lib/knex');
-const path = require('path');
-const log = require('../lib/log');
-const fsExtra = require('fs-extra-promise');
-const {ImportSource, MappingType, ImportStatus, RunStatus} = require('../../shared/imports');
-const imports = require('../models/imports');
-const fields = require('../models/fields');
-const subscriptions = require('../models/subscriptions');
-const { Writable } = require('stream');
-const { cleanupFromPost, enforce } = require('../lib/helpers');
-const contextHelpers = require('../lib/context-helpers');
-const tools = require('../lib/tools');
-const shares = require('../models/shares');
-const { tLog } = require('../lib/translate');
-const {ListActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
-require('../lib/fork');
-
-
-const csvparse = require('csv-parse');
-const fs = require('fs');
+import { ImportSource, MappingType, ImportStatus, RunStatus } from '../../shared/imports.js';
+import { Writable } from 'stream';
+import { cleanupFromPost, enforce } from '../lib/helpers.js';
+import { tLog } from '../lib/translate.js';
+import { ListActivityType } from '../../shared/activity-log.js';
+import config from '../lib/config.js';
+import knex from '../lib/knex.js';
+import path from 'path';
+import log from '../lib/log.js';
+import fsExtra from 'fs-extra-promise';
+import imports from '../models/imports.js';
+import fields from '../models/fields.js';
+import subscriptions from '../models/subscriptions.js';
+import contextHelpers from '../lib/context-helpers.js';
+import tools from '../lib/tools.js';
+import shares from '../models/shares.js';
+import activityLog from '../lib/activity-log.js';
+import { parse } from 'csv-parse';
+import fs from 'fs';
+import '../lib/fork.js';
 
 let running = false;
 const maxPrepareBatchSize = 100;
@@ -44,7 +40,7 @@ function prepareCsv(impt) {
             error: msg + '\n' + err.message
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_FAILED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_FAILED });
 
         await fsExtra.removeAsync(filePath);
     };
@@ -61,7 +57,7 @@ function prepareCsv(impt) {
             error: null
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_FINISHED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_FINISHED });
 
         await fsExtra.removeAsync(filePath);
     };
@@ -89,7 +85,7 @@ function prepareCsv(impt) {
                 impt.settings.csv.columns = cols;
                 impt.settings.sourceTable = importTable;
 
-                await knex('imports').where({id: impt.id}).update({settings: JSON.stringify(impt.settings)});
+                await knex('imports').where({ id: impt.id }).update({ settings: JSON.stringify(impt.settings) });
 
                 await knex.schema.raw('CREATE TABLE `' + importTable + '` (\n' +
                     '  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n' +
@@ -117,9 +113,8 @@ function prepareCsv(impt) {
         }
     };
 
-
     const inputStream = fs.createReadStream(filePath);
-    const parser = csvparse({
+    const parser = parse({
         comment: '#',
         delimiter: impt.settings.csv.delimiter
     });
@@ -129,7 +124,7 @@ function prepareCsv(impt) {
 
     const importProcessor = new Writable({
         write(chunk, encoding, callback) {
-            processRows([{chunk, encoding}]).then(() => callback());
+            processRows([{ chunk, encoding }]).then(() => callback());
         },
         writev(chunks, callback) {
             processRows(chunks).then(() => callback());
@@ -270,7 +265,7 @@ async function _execImportRun(impt, handlers) {
             status: ImportStatus.RUN_FINISHED
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.RUN_FINISHED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.RUN_FINISHED });
 
     } catch (err) {
         await knex('imports').where('id', impt.id).update({
@@ -279,7 +274,7 @@ async function _execImportRun(impt, handlers) {
             status: ImportStatus.RUN_FAILED
         });
 
-        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_FAILED});
+        await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_FAILED });
     }
 }
 
@@ -372,19 +367,19 @@ async function getTask() {
 
             if (impt.source === ImportSource.CSV_FILE && impt.status === ImportStatus.PREP_SCHEDULED) {
                 await tx('imports').where('id', impt.id).update('status', ImportStatus.PREP_RUNNING);
-                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.PREP_RUNNING});
+                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.PREP_RUNNING });
 
                 return () => prepareCsv(impt);
 
             } else if (impt.status === ImportStatus.RUN_SCHEDULED && impt.mapping_type === MappingType.BASIC_SUBSCRIBE) {
                 await tx('imports').where('id', impt.id).update('status', ImportStatus.RUN_RUNNING);
-                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.RUN_RUNNING});
+                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.RUN_RUNNING });
 
                 return () => basicSubscribe(impt);
 
             } else if (impt.status === ImportStatus.RUN_SCHEDULED && impt.mapping_type === MappingType.BASIC_UNSUBSCRIBE) {
                 await tx('imports').where('id', impt.id).update('status', ImportStatus.RUN_RUNNING);
-                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, {importId: impt.id, importStatus: ImportStatus.RUN_RUNNING});
+                await activityLog.logEntityActivity('list', ListActivityType.IMPORT_STATUS_CHANGE, impt.list, { importId: impt.id, importStatus: ImportStatus.RUN_RUNNING });
 
                 return () => basicUnsubscribe(impt);
             }

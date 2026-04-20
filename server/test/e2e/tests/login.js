@@ -1,13 +1,11 @@
-'use strict';
+import { useCase, step, driver } from '../lib/mocha-e2e.js';
+import config from '../lib/config.js';
+import expect from 'chai';
+import page from '../page-objects/user.js';
+import home from '../page-objects/home.js';
 
-/* eslint-disable prefer-arrow-callback */
+ 
 
-const config = require('../lib/config');
-const { useCase, step, driver } = require('../lib/mocha-e2e');
-const expect = require('chai').expect;
-
-const page = require('../page-objects/user');
-const home = require('../page-objects/home');
 
 suite('Login use-cases', () => {
     before(() => driver.manage().deleteAllCookies());

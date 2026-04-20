@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const sendConfigurations = require('../../models/send-configurations');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import sendConfigurations from '../../models/send-configurations.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/send-configurations-private/:sendConfigurationId', passport.loggedIn, async (req, res) => {
@@ -48,4 +46,4 @@ router.postAsync('/send-configurations-with-send-permission-table', passport.log
     return res.json(await sendConfigurations.listWithSendPermissionDTAjax(req.context, req.body));
 });
 
-module.exports = router;
+export default router;

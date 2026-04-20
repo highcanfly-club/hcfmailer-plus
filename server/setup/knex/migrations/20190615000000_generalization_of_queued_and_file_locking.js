@@ -12,7 +12,7 @@ const entityTypesWithFiles = {
     }
 };
 
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.table('queued', table => {
         table.integer('send_configuration').unsigned().notNullable();
         table.integer('type').unsigned().notNullable(); // The values come from message-sender.js:MessageType
@@ -44,7 +44,6 @@ exports.up = (knex, Promise) => (async() => {
         table.dropColumn('campaign');
     });
 
-
     for (const type in entityTypesWithFiles) {
         const typeEntry = entityTypesWithFiles[type];
 
@@ -59,5 +58,5 @@ exports.up = (knex, Promise) => (async() => {
     }
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

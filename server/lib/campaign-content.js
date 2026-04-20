@@ -1,6 +1,4 @@
-'use strict';
-
-const {renderTag} = require('../../shared/templates');
+import { renderTag } from '../../shared/templates.js';
 
 function convertFileURLs(sourceCustom, fromEntityType, fromEntityId, toEntityType, toEntityId) {
 
@@ -33,4 +31,8 @@ function convertFileURLs(sourceCustom, fromEntityType, fromEntityId, toEntityTyp
     }
 }
 
-module.exports.convertFileURLs = convertFileURLs;
+export { convertFileURLs };
+
+export default {
+    convertFileURLs
+};

@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const reportTemplates = require('../../models/report-templates');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import reportTemplates from '../../models/report-templates.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/report-templates/:reportTemplateId', passport.loggedIn, async (req, res) => {
@@ -39,4 +37,4 @@ router.getAsync('/report-template-user-fields/:reportTemplateId', passport.logge
     return res.json(userFields);
 });
 
-module.exports = router;
+export default router;

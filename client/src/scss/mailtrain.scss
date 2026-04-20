@@ -3,18 +3,20 @@
 $font-family-sans-serif: 'Ubuntu', sans-serif;
 $font-family-monospace: 'Ubuntu Mono', monospace;
 
-$fa-font-path: "../static-npm/fontawesome";
 $enable-print-styles: false;
-@import "../../node_modules/@coreui/coreui/scss/_functions.scss";
+@import "@coreui/coreui/scss/_functions.scss";
 @import "./variables.scss";
-@import "../../node_modules/@coreui/coreui/scss/coreui.scss";
-@import "../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss";
-@import "../../node_modules/@fortawesome/fontawesome-free/scss/regular.scss";
-@import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
+@import "@coreui/coreui/scss/coreui.scss";
+@import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "@fortawesome/fontawesome-free/scss/regular.scss";
+@import "@fortawesome/fontawesome-free/scss/solid.scss";
+@import "../lib/styles.scss";
 
 
 .custom-select {
+  appearance: none;
   -webkit-appearance: none; // This is a fix for Chrome
+  -moz-appearance: none;
 }
 
 body.mailtrain {

@@ -20,3 +20,7 @@ dev-values.yaml
 _sensitive_datas/_sensitive_datas.tar.xz
 
 start-dev.sh
+.env.dev
+server/config/local.yaml
+server/config/local-*.yaml
+app/

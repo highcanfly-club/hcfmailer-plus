@@ -1,11 +1,9 @@
-'use strict';
-
-const config = require('../lib/config');
-const log = require('../lib/log');
-const knex = require('../lib/knex');
-const subscriptions = require('../models/subscriptions');
-const { SubscriptionStatus } = require('../../shared/lists');
-const contextHelpers = require('../lib/context-helpers');
+import { SubscriptionStatus } from '../../shared/lists.js';
+import config from '../lib/config.js';
+import log from '../lib/log.js';
+import knex from '../lib/knex.js';
+import subscriptions from '../models/subscriptions.js';
+import contextHelpers from '../lib/context-helpers.js';
 
 const checkPeriod = 60 * 1000;
 
@@ -55,4 +53,8 @@ function start() {
     }
 }
 
-module.exports.start = start;
+export { start };
+
+export default {
+    start
+};

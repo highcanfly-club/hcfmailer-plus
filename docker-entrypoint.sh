@@ -56,8 +56,8 @@ RELAY_HOST_PORT=${RELAY_HOST_PORT:-''}
 RELAY_HOST_USER=${RELAY_HOST_USER:-''}
 RELAY_HOST_PASSWORD=${RELAY_HOST_PASSWORD:-''}
 
-/app/init-letsencrypt.sh
-/app/init-cloudflare.sh
+/app/scripts/init-letsencrypt.sh
+/app/scripts/init-cloudflare.sh
 
 # Warning for users that already rely on the MAILTRAIN_SETTING variable
 # Can probably be removed in the future.
@@ -204,7 +204,7 @@ echo 'Info: Waiting for MySQL Server'
 while ! nc -z $MYSQL_HOST $MYSQL_PORT; do sleep 1; done
 
 echo 'Info: Running s3 restore script'
-/app/init-from-s3.sh
+/app/scripts/init-from-s3.sh
 
 if [ "$WITH_REDIS" = "true" ]; then
   echo 'Info: Waiting for Redis Server'

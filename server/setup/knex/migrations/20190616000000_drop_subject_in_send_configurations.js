@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.table('send_configurations', table => {
         table.dropColumn('subject');
         table.dropColumn('subject_overridable');
@@ -11,5 +11,5 @@ exports.up = (knex, Promise) => (async() => {
     await knex('campaigns').whereNull('subject').update('subject', '');
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

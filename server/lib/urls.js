@@ -1,9 +1,7 @@
-'use strict';
-
-const config = require('./config');
-const urllib = require('url');
-const {anonymousRestrictedAccessToken} = require('../../shared/urls');
-const {getLangCodeFromExpressLocale} = require('./translate');
+import config from './config.js';
+import urllib from 'url';
+import { anonymousRestrictedAccessToken } from '../../shared/urls.js';
+import { getLangCodeFromExpressLocale } from './translate.js';
 
 function getTrustedUrlBase() {
     return urllib.resolve(config.www.trustedUrlBase, '');
@@ -43,7 +41,6 @@ function getPublicUrl(path, opts) {
     return _getUrl(config.www.publicUrlBase, path || '', opts);
 }
 
-
 function getTrustedUrlBaseDir() {
     const mailtrainUrl = urllib.parse(config.www.trustedUrlBase);
     return mailtrainUrl.pathname;
@@ -59,7 +56,7 @@ function getPublicUrlBaseDir() {
     return mailtrainUrl.pathname;
 }
 
-module.exports = {
+export {
     getTrustedUrl,
     getSandboxUrl,
     getPublicUrl,
@@ -68,5 +65,17 @@ module.exports = {
     getPublicUrlBase,
     getTrustedUrlBaseDir,
     getSandboxUrlBaseDir,
-    getPublicUrlBaseDir
+    getPublicUrlBaseDir,
+};
+
+export default {
+    getPublicUrl,
+    getPublicUrlBase,
+    getPublicUrlBaseDir,
+    getSandboxUrl,
+    getSandboxUrlBase,
+    getSandboxUrlBaseDir,
+    getTrustedUrl,
+    getTrustedUrlBase,
+    getTrustedUrlBaseDir
 };

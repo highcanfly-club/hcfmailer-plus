@@ -1,7 +1,7 @@
-const { CampaignSource } = require('../../../../shared/campaigns');
-const { TagLanguages } = require('../../../../shared/templates');
+import { CampaignSource } from '../../../../shared/campaigns.js';
+import { TagLanguages } from '../../../../shared/templates.js';
 
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.table('templates', table => {
         table.string('tag_language', 48);
     });
@@ -13,7 +13,6 @@ exports.up = (knex, Promise) => (async() => {
     await knex.schema.table('templates', table => {
         table.string('tag_language', 48).notNullable().index().alter();
     });
-
 
     await knex.schema.table('mosaico_templates', table => {
         table.string('tag_language', 48);
@@ -37,5 +36,5 @@ exports.up = (knex, Promise) => (async() => {
     }
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

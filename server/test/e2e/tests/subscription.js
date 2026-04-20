@@ -1,14 +1,13 @@
-'use strict';
+/* global fetch */
+import { useCase, step, precondition, driver } from '../lib/mocha-e2e.js';
+import config from '../lib/config.js';
+import shortid from '../lib/shortid.js';
+import expect from 'chai';
+import createPage from '../page-objects/subscription.js';
+import {faker} from '@faker-js/faker';
 
-/* eslint-disable prefer-arrow-callback */
+ 
 
-const config = require('../lib/config');
-const { useCase, step, precondition, driver } = require('../lib/mocha-e2e');
-const shortid = require('../lib/shortid');
-const expect = require('chai').expect;
-const createPage = require('../page-objects/subscription');
-const faker = require('faker');
-const request = require('request-promise');
 
 function getPage(listConf) {
     return createPage(listConf);
@@ -32,7 +31,7 @@ function generateCustomFieldValue(field) {
         case 'json':
             return `{"say":"${faker.lorem.word()}"}`;
         case 'number':
-            return faker.random.number().toString();
+            return faker.number.int().toString();
         case 'option':
             return Math.round(Math.random());
         case 'date-us':
@@ -51,9 +50,9 @@ function generateCustomFieldValue(field) {
 function generateSubscriptionData(listConf) {
     const data = {
         EMAIL: generateEmail(),
-        FIRST_NAME: faker.name.firstName(),
-        LAST_NAME: faker.name.lastName(),
-        TIMEZONE: 'Europe/Tallinn',
+        FIRST_NAME: faker.person.firstName(),
+        LAST_NAME: faker.person.lastName(),
+        TIMEZONE: 'Europe/Paris',
     };
 
     listConf.customFields.forEach(field => {
@@ -544,11 +543,14 @@ suite('Subscription use-cases', () => {
 
 async function apiSubscribe(listConf, subscription) {
     await step('Add subscription via API call.', async () => {
-        const response = await request({
-            uri: `${config.baseTrustedUrl}/api/subscribe/${listConf.cid}?access_token=${config.users.admin.accessToken}`,
+        const res = await fetch(`${config.baseTrustedUrl}/api/subscribe/${listConf.cid}?access_token=${config.users.admin.accessToken}`, {
             method: 'POST',
-            json: subscription
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(subscription)
         });
+        const response = await res.json();
         expect(response.error).to.be.a('undefined');
         expect(response.data.id).to.be.a('string');
         subscription.ucid = response.data.id;
@@ -629,13 +631,16 @@ suite('API Subscription use-cases', () => {
         const subscription = await apiSubscribe(config.lists.l1, generateSubscriptionData(config.lists.l1));
 
         await step('Unsubsribe via API call.', async () => {
-            const response = await request({
-                uri: `${config.baseTrustedUrl}/api/unsubscribe/${config.lists.l1.cid}?access_token=${config.users.admin.accessToken}`,
+            const res = await fetch(`${config.baseTrustedUrl}/api/unsubscribe/${config.lists.l1.cid}?access_token=${config.users.admin.accessToken}`, {
                 method: 'POST',
-                json: {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
                     EMAIL: subscription.EMAIL
-                }
+                })
             });
+            const response = await res.json();
 
             expect(response.error).to.be.a('undefined');
             expect(response.data.id).to.be.a('number'); // FIXME Shouldn't data.id be the cid instead of the DB id?

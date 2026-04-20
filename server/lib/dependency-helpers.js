@@ -1,9 +1,7 @@
-'use strict';
-
-const knex = require('./knex');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const entitySettings = require('./entity-settings');
-const shares = require('../models/shares');
+import knex from './knex.js';
+import * as interoperableErrors from '../../shared/interoperable-errors.js';
+import { getEntityType } from './entity-settings.js';
+import shares from '../models/shares.js';
 
 const defaultNoOfDependenciesReported = 20;
 
@@ -13,7 +11,7 @@ async function ensureNoDependencies(tx, context, id, depSpecs) {
     let andMore = false;
 
     for (const depSpec of depSpecs) {
-        const entityType = entitySettings.getEntityType(depSpec.entityTypeId);
+        const entityType = getEntityType(depSpec.entityTypeId);
 
         let rows;
 
@@ -55,4 +53,8 @@ async function ensureNoDependencies(tx, context, id, depSpecs) {
     }
 }
 
-module.exports.ensureNoDependencies = ensureNoDependencies;
+export { ensureNoDependencies };
+
+export default {
+    ensureNoDependencies
+};

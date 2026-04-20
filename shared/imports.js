@@ -1,5 +1,3 @@
-'use strict';
-
 const ImportSource = {
     MIN: 0,
 
@@ -68,7 +66,7 @@ function runStatusInProgress(status) {
     return status === RunStatus.SCHEDULED || status === RunStatus.RUNNING || status === RunStatus.STOPPING;
 }
 
-module.exports = {
+export {
     ImportSource,
     MappingType,
     ImportStatus,
@@ -78,5 +76,18 @@ module.exports = {
     prepFinished,
     prepFinishedAndNotInProgress,
     inProgress,
+    runStatusInProgress,
+};
+
+export default {
+    ImportSource,
+    ImportStatus,
+    MappingType,
+    RunStatus,
+    inProgress,
+    prepFinished,
+    prepFinishedAndNotInProgress,
+    prepInProgress,
+    runInProgress,
     runStatusInProgress
 };

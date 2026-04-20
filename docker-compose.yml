@@ -44,7 +44,7 @@ services:
             
   mailtrain:
     #image: highcanfly/hcfmailer-plus:v20250108.3
-    image: highcanfly/hcfmailer-plus:latest
+    image: highcanfly/hcfmailer-plus:PREVIEW-v20260419.0
     #build: .
     ports:
     - "3000:3000"
@@ -73,6 +73,8 @@ services:
       - INIT_LETSENCRYPT=$INIT_LETSENCRYPT
       - MYSQL_ROOT_PASSWORD=mailtrain
       - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     deploy:
       resources:
           limits:

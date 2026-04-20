@@ -1,14 +1,12 @@
-'use strict';
+import log from '../lib/log.js';
+import config from '../lib/config.js';
+import crypto from 'crypto';
+import humanize from 'humanize';
+import http from 'http';
+import bluebird from 'bluebird';
+import { SMTPServer } from 'smtp-server';
+import simpleParser from 'mailparser';
 
-const log = require('../lib/log');
-const config = require('../lib/config');
-const crypto = require('crypto');
-const humanize = require('humanize');
-const http = require('http');
-const bluebird = require('bluebird');
-
-const SMTPServer = require('smtp-server').SMTPServer;
-const simpleParser = require('mailparser').simpleParser;
 
 let totalMessages = 0;
 let received = 0;
@@ -166,7 +164,7 @@ mailBoxServer.on('error', err => {
     log.error('Test SMTP Mailbox Server', err);
 });
 
-function start(callback) {
+function _start(callback) {
     if (config.testServer.enabled) {
         server.listen(config.testServer.port, config.testServer.host, () => {
             log.info('Test SMTP', 'Server listening on port %s', config.testServer.port);
@@ -194,4 +192,5 @@ function start(callback) {
     }
 }
 
-module.exports.start = bluebird.promisify(start);
+const start = bluebird.promisify(_start);
+export default { start };

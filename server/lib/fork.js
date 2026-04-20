@@ -1,6 +1,4 @@
-'use strict';
-
-const builtinFork = require('child_process').fork;
+import { fork as builtinFork } from 'child_process';
 
 const cleanExit = () => process.exit();
 process.on('SIGINT', cleanExit); // catch ctrl-c
@@ -13,7 +11,6 @@ process.on('message', msg => {
         cleanExit();
     }
 });
-
 
 process.on('exit', function() {
     for (const child of children) {
@@ -28,4 +25,8 @@ function fork(path, args, opts) {
     return child;
 }
 
-module.exports.fork = fork;
+export { fork };
+
+export default {
+    fork
+};

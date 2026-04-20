@@ -1,4 +1,4 @@
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.createTable('channels', table => {
         table.increments('id').primary();
         table.string('cid').unique().collate('utf8_general_ci');
@@ -50,5 +50,5 @@ exports.up = (knex, Promise) => (async() => {
 
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

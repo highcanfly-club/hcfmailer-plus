@@ -1,13 +1,12 @@
-'use strict';
-
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const entitySettings = require('../lib/entity-settings');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const dependencyHelpers = require('../lib/dependency-helpers');
+import { enforce, filterObject } from '../lib/helpers.js';
+import knex from '../lib/knex.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import entitySettings from '../lib/entity-settings.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
 
 
 const allowedKeys = new Set(['name', 'description', 'namespace']);
@@ -241,11 +240,22 @@ async function remove(context, id) {
     });
 }
 
-module.exports.hash = hash;
-module.exports.listTree = listTree;
-module.exports.getById = getById;
-module.exports.getChildrenTx = getChildrenTx;
-module.exports.create = create;
-module.exports.createTx = createTx;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
+export { hash };
+export { listTree };
+export { getById };
+export { getChildrenTx };
+export { create };
+export { createTx };
+export { updateWithConsistencyCheck };
+export { remove };
+
+export default {
+    create,
+    createTx,
+    getById,
+    getChildrenTx,
+    hash,
+    listTree,
+    remove,
+    updateWithConsistencyCheck
+};

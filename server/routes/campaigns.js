@@ -1,13 +1,10 @@
-'use strict';
-
-const passport = require('../lib/passport');
-const routerFactory = require('../lib/router-async');
-const campaigns = require('../models/campaigns');
-const lists = require('../models/lists');
-const users = require('../models/users');
-const contextHelpers = require('../lib/context-helpers');
-const { AppType } = require('../../shared/app');
-
+import { AppType } from '../../shared/app.js';
+import passport from '../lib/passport.js';
+import routerFactory from '../lib/router-async.js';
+import campaigns from '../models/campaigns.js';
+import lists from '../models/lists.js';
+import users from '../models/users.js';
+import contextHelpers from '../lib/context-helpers.js';
 
 users.registerRestrictedAccessTokenMethod('rssPreview', async ({campaignCid, listCid}) => {
 
@@ -66,4 +63,8 @@ async function getRouter(appType) {
     return router;
 }
 
-module.exports.getRouter = getRouter;
+export { getRouter };
+
+export default {
+    getRouter
+};

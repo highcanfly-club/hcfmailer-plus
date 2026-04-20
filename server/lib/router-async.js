@@ -1,6 +1,4 @@
-'use strict';
-
-const express = require('express');
+import express from 'express';
 
 function replaceLastBySafeHandler(handlers) {
     if (handlers.length === 0) {
@@ -25,7 +23,8 @@ function create() {
     return router;
 }
 
-module.exports = {
+export { create };
+
+export default {
     create
 };
-

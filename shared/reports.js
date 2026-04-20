@@ -1,5 +1,3 @@
-'use strict';
-
 const ReportState = {
     MIN: 0,
 
@@ -11,6 +9,8 @@ const ReportState = {
     MAX: 3
 };
 
-module.exports = {
+export { ReportState };
+
+export default {
     ReportState
 };

@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const campaigns = require('../../models/campaigns');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import campaigns from '../../models/campaigns.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/campaigns-table', passport.loggedIn, async (req, res) => {
@@ -87,7 +85,6 @@ router.postAsync('/campaign-start-at/:campaignId', passport.loggedIn, passport.c
     return res.json(await campaigns.start(req.context, castToInteger(req.params.campaignId), {startAt, timezone}));
 });
 
-
 router.postAsync('/campaign-stop/:campaignId', passport.loggedIn, passport.csrfProtection, async (req, res) => {
     return res.json(await campaigns.stop(req.context, castToInteger(req.params.campaignId)));
 });
@@ -126,6 +123,4 @@ router.postAsync('/campaign-test-send', passport.loggedIn, passport.csrfProtecti
     return res.json(result);
 });
 
-
-
-module.exports = router;
+export default router;

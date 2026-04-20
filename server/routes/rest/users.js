@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const users = require('../../models/users');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import users from '../../models/users.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/users/:userId', passport.loggedIn, async (req, res) => {
@@ -38,5 +36,4 @@ router.postAsync('/users-table', passport.loggedIn, async (req, res) => {
     return res.json(await users.listDTAjax(req.context, req.body));
 });
 
-
-module.exports = router;
+export default router;

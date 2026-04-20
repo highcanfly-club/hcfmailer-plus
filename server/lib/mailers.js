@@ -1,21 +1,15 @@
-'use strict';
+import { SES } from '@aws-sdk/client-ses';
+import { ZoneMTAType, MailerType } from '../../shared/send-configurations.js';
+import log from './log.js';
+import config from './config.js';
+import nodemailer from 'nodemailer';
+import { openpgpEncrypt } from 'nodemailer-openpgp';
+import sendConfigurations from '../models/send-configurations.js';
+import builtinZoneMta from './builtin-zone-mta.js';
+import contextHelpers from './context-helpers.js';
+import settings from '../models/settings.js';
+import bluebird from 'bluebird';
 
-const log = require('./log');
-const config = require('./config');
-
-const nodemailer = require('nodemailer');
-const {
-    SES
-} = require("@aws-sdk/client-ses");
-const openpgpEncrypt = require('nodemailer-openpgp').openpgpEncrypt;
-const sendConfigurations = require('../models/send-configurations');
-const { ZoneMTAType, MailerType } = require('../../shared/send-configurations');
-const builtinZoneMta = require('./builtin-zone-mta');
-
-const contextHelpers = require('./context-helpers');
-const settings = require('../models/settings');
-
-const bluebird = require('bluebird');
 
 const transports = new Map();
 
@@ -26,8 +20,6 @@ class SendConfigurationError extends Error {
         Error.captureStackTrace(this, SendConfigurationError);
     }
 }
-
-
 
 async function getOrCreateMailer(sendConfigurationId) {
     let sendConfiguration;
@@ -45,8 +37,6 @@ async function getOrCreateMailer(sendConfigurationId) {
 function invalidateMailer(sendConfigurationId) {
     transports.delete(sendConfigurationId);
 }
-
-
 
 function _addDkimKeys(transport, mail) {
     const sendConfiguration = transport.mailer.sendConfiguration;
@@ -77,7 +67,6 @@ function _addDkimKeys(transport, mail) {
     }
 }
 
-
 async function _sendMail(transport, mail, template) {
     _addDkimKeys(transport, mail);
 
@@ -85,7 +74,7 @@ async function _sendMail(transport, mail, template) {
         return await transport.sendMailAsync(mail);
 
     } catch (err) {
-        if ( (err.responseCode && err.responseCode >= 400 && err.responseCode < 500) ||
+        if ((err.responseCode && err.responseCode >= 400 && err.responseCode < 500) ||
             (err.code === 'ECONNECTION' && err.errno === 'ECONNREFUSED')
         ) {
             throw new SendConfigurationError(transport.mailer.sendConfiguration.id, 'Cannot connect to service specified by send configuration ' + transport.mailer.sendConfiguration.id);
@@ -112,7 +101,7 @@ function _daysBetween(date1, date2) {
     const differenceMs = Math.abs(date1 - date2);
 
     // Convert back to days and return
-    return Math.round(differenceMs / ONE_DAY);    
+    return Math.round(differenceMs / ONE_DAY);
 }
 
 function _senderIsEnabledForDay(enabledDaysInWeek, date) {
@@ -123,7 +112,7 @@ function _senderIsEnabledForDay(enabledDaysInWeek, date) {
     const dayInWeek = date.getUTCDay();
     if (enabledDaysInWeek[dayInWeek] === 1) return true;
     return false;
-  }
+}
 
 // e.g. for enabling working days only
 // enabledDaysInWeek = [0, 1, 1, 1, 1, 1, 0] from Sunday to Saturday
@@ -132,45 +121,45 @@ function _senderTimeToNextEnabledDay(enabledDaysInWeek) {
 
     if (!Array.isArray(enabledDaysInWeek)) return 0;
     if (enabledDaysInWeek.length !== 7) return 0;
-  
+
     const dateNow = new Date(Date.now());
     const dayInWeek = dateNow.getUTCDay(); // Sunday - Saturday : 0 - 6 
     let _enabledDaysInWeek = enabledDaysInWeek.concat(enabledDaysInWeek);
     let timeToNextEnabledDay = 0;
-  
+
     for (let i = dayInWeek; i < 2 * 7; i++) {
-      if (_enabledDaysInWeek[i] === 1) {
-        const daysToNextEnabledDay = i - dayInWeek;
-        // Set exact utc time when next enabled day starts
-        let d = new Date(Date.UTC(dateNow.getUTCFullYear(), dateNow.getUTCMonth(), dateNow.getDate(), 0, 0, 0));
-  
-        d.setDate(dateNow.getDate() + daysToNextEnabledDay); // add days 
-        _senderIsEnabledForDay(enabledDaysInWeek, d)
-        timeToNextEnabledDay = d.getTime() - dateNow.getTime();
-        if (timeToNextEnabledDay < 0) timeToNextEnabledDay = 0;
-        return timeToNextEnabledDay;
-      }
-  
+        if (_enabledDaysInWeek[i] === 1) {
+            const daysToNextEnabledDay = i - dayInWeek;
+            // Set exact utc time when next enabled day starts
+            let d = new Date(Date.UTC(dateNow.getUTCFullYear(), dateNow.getUTCMonth(), dateNow.getDate(), 0, 0, 0));
+
+            d.setDate(dateNow.getDate() + daysToNextEnabledDay); // add days 
+            _senderIsEnabledForDay(enabledDaysInWeek, d)
+            timeToNextEnabledDay = d.getTime() - dateNow.getTime();
+            if (timeToNextEnabledDay < 0) timeToNextEnabledDay = 0;
+            return timeToNextEnabledDay;
+        }
+
     }
     return 0;
-  }
-  
-  function _getWarmUpMultiplicator(throttlingWarmUpDays, throttlingWarmUpFrom) {
+}
+
+function _getWarmUpMultiplicator(throttlingWarmUpDays, throttlingWarmUpFrom) {
     if (throttlingWarmUpDays && throttlingWarmUpFrom) {
-  
-      const timeNow = Date.now();
-      if (throttlingWarmUpFrom > timeNow) throttlingWarmUpFrom = timeNow;
-  
-      const warmingUpDays = _daysBetween(timeNow, throttlingWarmUpFrom);
-      if (warmingUpDays < throttlingWarmUpDays) {
-        let warmUpMultiplicator = warmingUpDays / throttlingWarmUpDays;
-        log.verbose('Mail', 'Warn up day %s/%s, warmUpMultiplicator %s)', warmingUpDays, throttlingWarmUpDays, warmUpMultiplicator);
-        return warmUpMultiplicator;
-      }
+
+        const timeNow = Date.now();
+        if (throttlingWarmUpFrom > timeNow) throttlingWarmUpFrom = timeNow;
+
+        const warmingUpDays = _daysBetween(timeNow, throttlingWarmUpFrom);
+        if (warmingUpDays < throttlingWarmUpDays) {
+            let warmUpMultiplicator = warmingUpDays / throttlingWarmUpDays;
+            log.verbose('Mail', 'Warn up day %s/%s, warmUpMultiplicator %s)', warmingUpDays, throttlingWarmUpDays, warmUpMultiplicator);
+            return warmUpMultiplicator;
+        }
     }
     return 1;
-  }
-  
+}
+
 
 async function _createTransport(sendConfiguration) {
     const mailerSettings = sendConfiguration.mailer_settings;
@@ -193,7 +182,6 @@ async function _createTransport(sendConfiguration) {
         args.unshift('Mail');
         log[level](...args);
     };
-
 
     let transportOptions;
 
@@ -283,18 +271,18 @@ async function _createTransport(sendConfiguration) {
         const enableSenderOnDayWed = mailerSettings.enableSenderOnDayWed === true ? 1 : 0;
         const enableSenderOnDayThu = mailerSettings.enableSenderOnDayThu === true ? 1 : 0;
         const enableSenderOnDayFri = mailerSettings.enableSenderOnDayFri === true ? 1 : 0;
-        const enableSenderOnDaySat = mailerSettings.enableSenderOnDaySat === true ? 1 : 0;  
+        const enableSenderOnDaySat = mailerSettings.enableSenderOnDaySat === true ? 1 : 0;
 
         // From Sunday to Saturday e.g. enable sending in working days only [0,1,1,1,1,1,0]        
-        let enabledDaysInWeek  = [
-            enableSenderOnDaySun, 
+        let enabledDaysInWeek = [
+            enableSenderOnDaySun,
             enableSenderOnDayMon,
             enableSenderOnDayTue,
             enableSenderOnDayWed,
             enableSenderOnDayThu,
             enableSenderOnDayFri,
             enableSenderOnDaySat
-        ];         
+        ];
 
         const warmUpMultiplicator = _getWarmUpMultiplicator(throttlingWarmUpDays, throttlingWarmUpFrom)
         let throttlingOrig = mailerSettings.throttling;
@@ -304,11 +292,11 @@ async function _createTransport(sendConfiguration) {
             throttling = 1 / (throttling * warmUpMultiplicator / (3600 * 1000));
             // For loging purposes only
             throttlingWarmUp = throttling;
-            throttlingOrig = 1 / (throttlingOrig / (3600 * 1000)); 
+            throttlingOrig = 1 / (throttlingOrig / (3600 * 1000));
         }
-        
-        let timeToNextEnabledDay = _senderTimeToNextEnabledDay(enabledDaysInWeek);    
-        throttling = Math.max(throttling,timeToNextEnabledDay);
+
+        let timeToNextEnabledDay = _senderTimeToNextEnabledDay(enabledDaysInWeek);
+        throttling = Math.max(throttling, timeToNextEnabledDay);
         log.verbose('Mail', 'Throttling changed from %s to %s (throttlingWarmUp in %s ms, timeToNextEnabledDay in %s ms)', throttlingOrig, throttling, throttlingWarmUp, timeToNextEnabledDay);
 
         let lastCheck = Date.now();
@@ -352,7 +340,14 @@ class MailerError extends Error {
     }
 }
 
-module.exports.getOrCreateMailer = getOrCreateMailer;
-module.exports.invalidateMailer = invalidateMailer;
-module.exports.MailerError = MailerError;
-module.exports.SendConfigurationError = SendConfigurationError;
+export { getOrCreateMailer };
+export { invalidateMailer };
+export { MailerError };
+export { SendConfigurationError };
+
+export default {
+    MailerError,
+    SendConfigurationError,
+    getOrCreateMailer,
+    invalidateMailer
+};

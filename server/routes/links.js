@@ -1,10 +1,10 @@
-'use strict';
+import log from '../lib/log.js';
+import config from '../lib/config.js';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
+import links from '../models/links.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
 
-const log = require('../lib/log');
-const config = require('../lib/config');
-const router = require('../lib/router-async').create();
-const links = require('../models/links');
-const interoperableErrors = require('../../shared/interoperable-errors');
 
 const trackImg = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
 
@@ -34,5 +34,4 @@ router.getAsync('/:campaign/:list/:subscription', async (req, res) => {
     await links.countLink(req.ip, req.headers['user-agent'], req.params.campaign, req.params.list, req.params.subscription, links.LinkId.OPEN);
 });
 
-
-module.exports = router;
+export default router;

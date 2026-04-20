@@ -1,9 +1,7 @@
-"use strict";
-
-const config = require('config');
+import config from 'config';
 
 if (!config.roles) {
     config.roles = config.defaultRoles;
 }
 
-module.exports = config;
+export default config;

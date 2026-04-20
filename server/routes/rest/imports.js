@@ -1,18 +1,14 @@
-'use strict';
+import { castToInteger } from '../../lib/helpers.js';
+import { uploadedFilesDir } from '../../lib/file-helpers.js';
+import passport from '../../lib/passport.js';
+import imports from '../../models/imports.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
+import path from 'path';
+import files from '../../models/files.js';
+import multerFactory from 'multer';
 
-const passport = require('../../lib/passport');
-const imports = require('../../models/imports');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
-
-
-const path = require('path');
-const files = require('../../models/files');
-
-const {uploadedFilesDir} = require('../../lib/file-helpers')
-
-const multer = require('multer')({
+const multer = multerFactory({
     dest: uploadedFilesDir
 });
 
@@ -30,14 +26,21 @@ const fileFields = [
     {name: 'csvFile', maxCount: 1}
 ];
 
+function parseEntity(req) {
+    if (req.body.entity !== undefined) {
+        return typeof req.body.entity === 'string' ? JSON.parse(req.body.entity) : req.body.entity;
+    }
+    return req.body;
+}
+
 router.postAsync('/imports/:listId', passport.loggedIn, passport.csrfProtection, multer.fields(fileFields), async (req, res) => {
-    const entity = JSON.parse(req.body.entity);
+    const entity = parseEntity(req);
 
     return res.json(await imports.create(req.context, castToInteger(req.params.listId), entity, req.files));
 });
 
 router.putAsync('/imports/:listId/:importId', passport.loggedIn, passport.csrfProtection, multer.fields(fileFields), async (req, res) => {
-    const entity = JSON.parse(req.body.entity);
+    const entity = parseEntity(req);
     entity.id = castToInteger(req.params.importId);
 
     await imports.updateWithConsistencyCheck(req.context, castToInteger(req.params.listId), entity, req.files);
@@ -57,4 +60,4 @@ router.postAsync('/import-stop/:listId/:importId', passport.loggedIn, passport.c
     return res.json(await imports.stop(req.context, castToInteger(req.params.listId), castToInteger(req.params.importId)));
 });
 
-module.exports = router;
+export default router;

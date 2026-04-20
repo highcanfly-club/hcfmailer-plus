@@ -1,14 +1,13 @@
-'use strict';
-
-const { filesDir } = require('../models/files');
-const path = require('path');
-const log = require('./log');
-const knex = require('./knex');
-const fs = require('fs-extra-promise');
-const stream = require('stream');
-const privilegeHelpers = require('./privilege-helpers');
-const synchronized = require('./synchronized');
-const { tmpName } = require('tmp-promise');
+import { filesDir } from '../models/files.js';
+import crypto from 'crypto';
+import os from 'os';
+import path from 'path';
+import log from './log.js';
+import knex from './knex.js';
+import fs from 'fs-extra-promise';
+import stream from 'stream';
+import privilegeHelpers from './privilege-helpers.js';
+import synchronized from './synchronized.js';
 
 const pruneBatchSize = 1000;
 
@@ -69,7 +68,6 @@ async function _fileCache(typeId, cacheConfig, keyGen) {
     await pruneCache();
     setInterval(pruneCache, cacheConfig.pruneInterval * 1000);
 
-
     const handleCache = async (key, res, next) => {
         const fileEntry = await knex('file_cache').where('type', typeId).where('key', key).first();
 
@@ -97,11 +95,9 @@ async function _fileCache(typeId, cacheConfig, keyGen) {
 
             const ensureFileStream = callback => {
                 if (!fileStream) {
-                    tmpName().then(tmp => {
-                        tmpFilePath = tmp;
-                        fileStream = fs.createWriteStream(tmpFilePath);
-                        setTimeout(callback, 5000);
-                    })
+                    tmpFilePath = path.join(os.tmpdir(), `mailtrain-${crypto.randomUUID()}`);
+                    fileStream = fs.createWriteStream(tmpFilePath, { flags: 'wx' });
+                    fileStream.once('open', callback);
                 } else {
                     callback();
                 }
@@ -182,5 +178,10 @@ async function _fileCache(typeId, cacheConfig, keyGen) {
 
 const fileCache = synchronized(_fileCache);
 
-module.exports.fileCache = fileCache;
-module.exports.fileCacheFilesDir = fileCacheFilesDir;
+export { fileCache };
+export { fileCacheFilesDir };
+
+export default {
+    fileCache,
+    fileCacheFilesDir
+};

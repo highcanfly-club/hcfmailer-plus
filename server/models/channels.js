@@ -1,24 +1,22 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { allTagLanguages } from '../../shared/templates.js';
+import { CampaignSource, } from '../../shared/campaigns.js';
+import { EntityActivityType, CampaignActivityType } from '../../shared/activity-log.js';
+import knex from '../lib/knex.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shortid from '../lib/shortid.js';
+import shares from './shares.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import segments from './segments.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
+import activityLog from '../lib/activity-log.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shortid = require('../lib/shortid');
-const { enforce, filterObject } = require('../lib/helpers');
-const shares = require('./shares');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const { allTagLanguages } = require('../../shared/templates');
-const { CampaignSource, } = require('../../shared/campaigns');
-const segments = require('./segments');
-const dependencyHelpers = require('../lib/dependency-helpers');
-
-const {EntityActivityType, CampaignActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
 
 const allowedKeys = new Set(['name', 'description', 'namespace', 'cpg_name', 'cpg_description',
     'send_configuration', 'from_name_override', 'from_email_override', 'reply_to_override', 'subject', 'data', 'click_tracking_disabled', 'open_tracking_disabled', 'unsubscribe_url', 'source']);
-
 
 function hash(entity) {
     let filteredEntity;
@@ -56,7 +54,6 @@ async function listWithCreateCampaignPermissionDTAjax(context, params) {
         ['channels.id', 'channels.name', 'channels.cid', 'channels.description', 'namespaces.name']
     );
 }
-
 
 async function _getByTx(tx, context, key, id, withPermissions = true) {
     const entity = await tx('channels').where('channels.' + key, id)
@@ -196,7 +193,6 @@ async function updateWithConsistencyCheck(context, entity) {
     });
 }
 
-
 async function remove(context, id) {
     await knex.transaction(async tx => {
         await shares.enforceEntityPermissionTx(tx, context, 'channel', id, 'delete');
@@ -211,12 +207,22 @@ async function remove(context, id) {
     });
 }
 
+export { hash };
+export { listDTAjax };
+export { listWithCreateCampaignPermissionDTAjax };
+export { getByIdTx };
+export { getById };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
 
-module.exports.hash = hash;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listWithCreateCampaignPermissionDTAjax = listWithCreateCampaignPermissionDTAjax;
-module.exports.getByIdTx = getByIdTx;
-module.exports.getById = getById;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
+export default {
+    create,
+    getById,
+    getByIdTx,
+    hash,
+    listDTAjax,
+    listWithCreateCampaignPermissionDTAjax,
+    remove,
+    updateWithConsistencyCheck
+};

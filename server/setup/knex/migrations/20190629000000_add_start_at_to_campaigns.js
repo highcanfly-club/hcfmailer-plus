@@ -1,6 +1,6 @@
-const { CampaignType, CampaignStatus } = require('../../../../shared/campaigns');
+import { CampaignType, CampaignStatus } from '../../../../shared/campaigns.js';
 
-exports.up = (knex, Promise) => (async() => {
+export const up = (knex, Promise) => (async() => {
     await knex.schema.table('campaigns', table => {
         table.timestamp('start_at').nullable().defaultTo(null);
     });
@@ -22,5 +22,5 @@ exports.up = (knex, Promise) => (async() => {
         });
 })();
 
-exports.down = (knex, Promise) => (async() => {
+export const down = (knex, Promise) => (async() => {
 })();

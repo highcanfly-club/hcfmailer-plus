@@ -1,13 +1,12 @@
-'use strict';
+import config from 'config';
+import spawn from 'child_process';
+import log from 'npmlog';
 
 if (process.env.NODE_ENV === 'production') {
-    console.log('This script does not run in production'); // eslint-disable-line no-console
+    console.log('This script does not run in production');  
     process.exit(1);
 }
 
-let config = require('config');
-let spawn = require('child_process').spawn;
-let log = require('npmlog');
 
 log.level = 'verbose';
 

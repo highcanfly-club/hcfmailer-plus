@@ -1,15 +1,13 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const lists = require('../../models/lists');
-const forms = require('../../models/forms');
-const fields = require('../../models/fields');
-const settings = require('../../models/settings');
-const tools = require('../../lib/tools');
-const contextHelpers = require('../../lib/context-helpers');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import lists from '../../models/lists.js';
+import forms from '../../models/forms.js';
+import fields from '../../models/fields.js';
+import settings from '../../models/settings.js';
+import tools from '../../lib/tools.js';
+import contextHelpers from '../../lib/context-helpers.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/forms-table', passport.loggedIn, async (req, res) => {
@@ -83,5 +81,4 @@ router.postAsync('/forms-preview', passport.loggedIn, passport.csrfProtection, a
     return res.json({content: htmlRenderer(data)});
 });
 
-
-module.exports = router;
+export default router;

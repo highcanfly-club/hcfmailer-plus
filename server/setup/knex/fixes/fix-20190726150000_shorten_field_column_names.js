@@ -1,9 +1,7 @@
-'use strict';
-
-const config = require('../config');
-const knex = require('../../../lib/knex');
-const shortid = require('../../../lib/shortid');
-const slugify = require('slugify');
+import config from '../config.js';
+import knex from '../../../lib/knex.js';
+import shortid from '../../../lib/shortid.js';
+import slugify from 'slugify';
 
 async function run() {
     const lists = await knex('lists');
@@ -29,7 +27,6 @@ async function run() {
                 table.renameColumn('source_' + oldName, 'source_' + newName);
             });
         }
-
 
         function processRule(rule) {
             if (rule.type === 'all' || rule.type === 'some' || rule.type === 'none') {

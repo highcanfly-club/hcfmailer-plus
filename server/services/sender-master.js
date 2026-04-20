@@ -1,17 +1,20 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { CampaignStatus, CampaignType, CampaignMessageStatus } from '../../shared/campaigns.js';
+import { CampaignActivityType } from '../../shared/activity-log.js';
+import { MessageType } from '../lib/message-sender.js';
+import config from '../lib/config.js';
+import { fork } from '../lib/fork.js';
+import log from '../lib/log.js';
+import path from 'path';
+import knex from '../lib/knex.js';
+import campaigns from '../models/campaigns.js';
+import builtinZoneMta from '../lib/builtin-zone-mta.js';
+import activityLog from '../lib/activity-log.js';
+import '../lib/fork.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const config = require('../lib/config');
-const fork = require('../lib/fork').fork;
-const log = require('../lib/log');
-const path = require('path');
-const knex = require('../lib/knex');
-const {CampaignStatus, CampaignType, CampaignMessageStatus} = require('../../shared/campaigns');
-const campaigns = require('../models/campaigns');
-const builtinZoneMta = require('../lib/builtin-zone-mta');
-const {CampaignActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
-const {MessageType} = require('../lib/message-sender');
-require('../lib/fork');
 
 class Notifications {
     constructor() {
@@ -126,7 +129,6 @@ function getPostponedSendConfigurationIds() {
     return result;
 }
 
-
 function getExpirationThresholds() {
     const now = Date.now();
 
@@ -150,7 +152,6 @@ function getExpirationThresholds() {
     };
 }
 
-
 function messagesProcessed(workerId, withErrors) {
     const wa = workAssignment.get(workerId);
 
@@ -162,7 +163,6 @@ function messagesProcessed(workerId, withErrors) {
     } else {
         setSendConfigurationRetryCount(sendConfigurationStatus, 0);
     }
-
 
     workAssignment.delete(workerId);
     idleWorkers.push(workerId);
@@ -257,7 +257,6 @@ async function workersLoop() {
         return minTask;
     }
 
-
     while (true) {
         const workerId = await getAvailableWorker();
         const task = selectNextTask();
@@ -295,7 +294,6 @@ async function workersLoop() {
     }
 }
 
-
 async function processCampaign(campaignId) {
     const msgQueue = campaignMessageQueue.get(campaignId);
 
@@ -329,7 +327,6 @@ async function processCampaign(campaignId) {
             await activityLog.logEntityActivity('campaign', CampaignActivityType.STATUS_CHANGE, campaignId, {status: newStatus});
         }
     }
-
 
     try {
         await campaigns.prepareCampaignMessages(campaignId);
@@ -394,7 +391,6 @@ async function processCampaign(campaignId) {
     }
 }
 
-
 async function scheduleCampaigns() {
     if (campaignSchedulerRunning) {
         return;
@@ -428,7 +424,6 @@ async function scheduleCampaigns() {
             queue.splice(0);
             notifier.notify(`campaignMessageQueueEmpty:${campaignId}`);
         }
-
 
         while (true) {
             let campaignId = 0;
@@ -469,7 +464,6 @@ async function scheduleCampaigns() {
     campaignSchedulerRunning = false;
 }
 
-
 async function processQueuedBySendConfiguration(sendConfigurationId) {
     const msgQueue = sendConfigurationMessageQueue.get(sendConfigurationId);
 
@@ -500,7 +494,6 @@ async function processQueuedBySendConfiguration(sendConfigurationId) {
             sendConfigurationMessageQueue.delete(sendConfigurationId);
         }
     }
-
 
     try {
         while (true) {
@@ -620,7 +613,6 @@ async function scheduleQueued() {
     queuedSchedulerRunning = false;
 }
 
-
 async function spawnWorker(workerId) {
     return await new Promise((resolve, reject) => {
         log.verbose('Senders', `Spawning worker process ${workerId}`);
@@ -665,7 +657,6 @@ function sendToWorker(workerId, msgType, data) {
     messageTid++;
 }
 
-
 function scheduleCheck() {
     // noinspection JSIgnoredPromiseFromCall
     scheduleCampaigns();
@@ -680,7 +671,6 @@ function periodicCheck() {
 
     setTimeout(periodicCheck, checkPeriod);
 }
-
 
 async function init() {
     const spawnWorkerFutures = [];

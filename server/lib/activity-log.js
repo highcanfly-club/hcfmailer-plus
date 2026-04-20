@@ -1,6 +1,4 @@
-'use strict';
-
-const moment = require('moment');
+import moment from 'moment';
 
 const activityQueueLenthThreshold = 100;
 const actitivyQueue = [];
@@ -79,6 +77,10 @@ async function logBlacklistActivity(activityType, email) {
     await _logActivity('blacklist', data);
 }
 
-module.exports.logEntityActivity = logEntityActivity;
-module.exports.logBlacklistActivity = logBlacklistActivity;
-module.exports.logCampaignTrackerActivity = logCampaignTrackerActivity;
+export { logEntityActivity, logBlacklistActivity, logCampaignTrackerActivity };
+
+export default {
+    logBlacklistActivity,
+    logCampaignTrackerActivity,
+    logEntityActivity
+};

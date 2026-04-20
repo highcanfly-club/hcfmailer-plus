@@ -1,12 +1,12 @@
-'use strict';
+import webdriver from 'selenium-webdriver';
+import fs from 'fs-extra';
+import driver from './mocha-e2e.js';
+import url from 'url';
+import UrlPattern from 'url-pattern';
 
-const webdriver = require('selenium-webdriver');
 const By = webdriver.By;
 const until = webdriver.until;
-const fs = require('fs-extra');
-const driver = require('./mocha-e2e').driver;
-const url = require('url');
-const UrlPattern = require('url-pattern');
+
 
 const waitTimeout = 20000;
 

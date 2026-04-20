@@ -1,9 +1,11 @@
-'use strict';
-
-const config = require('./config');
-const log = require('npmlog');
-const path = require('path');
-const fs = require('fs');
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import config from './config.js';
+import log from 'npmlog';
+import path from 'path';
+import fs from 'fs';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 if (process.env.NODE_ENV !== 'test' || !fs.existsSync(path.join(__dirname, '..', '..', '..', 'config', 'test.yaml'))) {
     log.error('e2e', 'This script only runs in test and config/test.yaml (i.e. a dedicated test database) is present');

@@ -1,19 +1,6 @@
-'use strict';
+import config from '../../../lib/config.js';
 
-const config = require('../../../lib/config');
-
-module.exports = {
-    app: config,
-    baseTrustedUrl: 'http://localhost:' + config.www.trustedPort,
-    basePublicUrl: 'http://localhost:' + config.www.publicPort,
-    mailUrl: 'http://localhost:' + config.testServer.mailboxServerPort,
-    users: {
-        admin: {
-            username: 'admin',
-            password: 'test',
-            email: 'keep.admin@mailtrain.org',
-            accessToken: '7833d148e22c85474c314f43ae4591a7c9adec26'
-        }
+export { app, baseTrustedUrl, basePublicUrl, mailUrl, users, password, email, accessToken };
     },
     lists: {
         l1: {
@@ -81,4 +68,15 @@ module.exports = {
         'smtp-user': config.testServer.username,
         'smtp-pass': config.testServer.password
     }
+};
+
+export default {
+    accessToken,
+    app,
+    basePublicUrl,
+    baseTrustedUrl,
+    email,
+    mailUrl,
+    password,
+    users
 };

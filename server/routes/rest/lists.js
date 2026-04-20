@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const lists = require('../../models/lists');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import lists from '../../models/lists.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/lists-table', passport.loggedIn, async (req, res) => {
@@ -42,5 +40,4 @@ router.deleteAsync('/lists/:listId', passport.loggedIn, passport.csrfProtection,
     return res.json();
 });
 
-
-module.exports = router;
+export default router;

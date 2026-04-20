@@ -12,7 +12,8 @@
 
     <title>Mailtrain</title>
 
-    <link rel="stylesheet" href="{{publicPath}}client/mailtrain.css">
+    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/untrusted.css">{{/unless}}
+    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/sandboxed-ckeditor.css">{{/unless}}
 
     <script src="{{publicPath}}static-npm/jquery.min.js"></script>
     <script src="{{publicPath}}static-npm/popper.min.js"></script>
@@ -25,8 +26,22 @@
             window.mailtrainConfig = {{{mailtrainConfig}}};
         </script>
 
+        {{#if isDev}}
+        <script type="module">
+            import RefreshRuntime from '{{publicPath}}client/@react-refresh';
+            RefreshRuntime.injectIntoGlobalHook(window);
+            window.$RefreshReg$ = () => {};
+            window.$RefreshSig$ = () => () => {};
+            window.__vite_plugin_react_preamble_installed__ = true;
+        </script>
+        {{/if}}
+
         {{#each scriptFiles}}
-            <script src="{{this}}"></script>
+            {{#if this.type}}
+                <script type="{{this.type}}" src="{{this.src}}"></script>
+            {{else}}
+                <script src="{{this}}"></script>
+            {{/if}}
         {{/each}}
     {{/if}}
 </head>

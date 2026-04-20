@@ -1,6 +1,4 @@
-'use strict';
-
-const moment = require('moment');
+import moment from 'moment';
 
 const birthdayYear = 2000;
 
@@ -63,7 +61,7 @@ function getBirthdayFormatString(format) {
     return birthdayFormatStrings[format];
 }
 
-module.exports = {
+export {
     DateFormat,
     birthdayYear,
     parseDate,
@@ -71,5 +69,16 @@ module.exports = {
     formatDate,
     formatBirthday,
     getDateFormatString,
-    getBirthdayFormatString
+    getBirthdayFormatString,
+};
+
+export default {
+    DateFormat,
+    birthdayYear,
+    formatBirthday,
+    formatDate,
+    getBirthdayFormatString,
+    getDateFormatString,
+    parseBirthday,
+    parseDate
 };

@@ -1,38 +1,33 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { getTrustedUrl, getSandboxUrl, getPublicUrl } from '../lib/urls.js';
+import { base } from '../../shared/templates.js';
+import { AppType } from '../../shared/app.js';
+import { castToInteger } from '../lib/helpers.js';
+import { fileCache } from '../lib/file-cache.js';
+import config from '../lib/config.js';
+import path from 'path';
+import express from 'express';
+import routerFactory from '../lib/router-async.js';
+import passport from '../lib/passport.js';
+import clientHelpers from '../lib/client-helpers.js';
+import gmBase from 'gm';
+import users from '../models/users.js';
+import capitalize from 'capitalize';
+import fs from 'fs-extra';
+import files from '../models/files.js';
+import fileHelpers from '../lib/file-helpers.js';
+import templates from '../models/templates.js';
+import mosaicoTemplates from '../models/mosaico-templates.js';
+import contextHelpers from '../lib/context-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import bluebird from 'bluebird';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const config = require('../lib/config');
-const path = require('path');
-const express = require('express');
-const routerFactory = require('../lib/router-async');
-const passport = require('../lib/passport');
-const clientHelpers = require('../lib/client-helpers');
-const gm = require('gm').subClass({
+const gm = gmBase.subClass({
     imageMagick: true
 });
-const users = require('../models/users');
-const capitalize = require('capitalize');
-
-const fs = require('fs-extra')
-
-const files = require('../models/files');
-const fileHelpers = require('../lib/file-helpers');
-
-const templates = require('../models/templates');
-const mosaicoTemplates = require('../models/mosaico-templates');
-
-const contextHelpers = require('../lib/context-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-
-const bluebird = require('bluebird');
-
-const { getTrustedUrl, getSandboxUrl, getPublicUrl } = require('../lib/urls');
-const { base } = require('../../shared/templates');
-const { AppType } = require('../../shared/app');
-
-const {castToInteger} = require('../lib/helpers');
-
-const { fileCache } = require('../lib/file-cache');
-
 
 users.registerRestrictedAccessTokenMethod('mosaico', async ({entityTypeId, entityId}) => {
     if (entityTypeId === 'template') {
@@ -52,7 +47,6 @@ users.registerRestrictedAccessTokenMethod('mosaico', async ({entityTypeId, entit
         }
     }
 });
-
 
 async function placeholderImage(width, height, labelText, labelColor) {
     const magick = gm(width, height, '#707070');
@@ -130,8 +124,6 @@ function sanitizeSize(val, min, max, defaultVal, allowNull) {
     val = Math.min(max, val);
     return val;
 }
-
-
 
 async function getRouter(appType) {
     const router = routerFactory.create();
@@ -212,15 +204,20 @@ async function getRouter(appType) {
                 }
             }
 
+            const isDev = process.env.NODE_ENV === 'development' && process.env.VITE_PREVIEW !== 'true';
             res.render('mosaico/root', {
                 layout: 'mosaico/layout',
                 editorConfig: config.mosaico,
                 languageStrings: languageStrings,
                 reactCsrfToken: req.csrfToken(),
                 mailtrainConfig: JSON.stringify(mailtrainConfig),
-                scriptFiles: [
-                    getSandboxUrl('client/mosaico-root.js')
-                ],
+                isDev,
+                scriptFiles: isDev
+                    ? [
+                        { src: getSandboxUrl('client/@vite/client'), type: 'module' },
+                        { src: getSandboxUrl('client/src/lib/sandboxed-mosaico-root.jsx'), type: 'module' }
+                    ]
+                    : [{ src: getSandboxUrl('client/mosaico-root.js'), type: 'module' }],
                 publicPath: getSandboxUrl()
             });
         });
@@ -246,13 +243,11 @@ async function getRouter(appType) {
             }
         };
 
-
         router.getAsync('/img', await fileCache('mosaico-images', config.mosaico.fileCache.images, imgCacheFileName), async (req, res) => {
             const method = typeof req.query.method === 'undefined' ? req.query["amp;method"] : req.query.method;
             const params = typeof req.query.params=== 'undefined' ? req.query["amp;params"] : req.query.params;
             let [width, height] = params.split(',');
             let image;
-
 
             if (method === 'placeholder') {
                 width = sanitizeSize(width, 1, 2048, 600, false);
@@ -289,4 +284,8 @@ async function getRouter(appType) {
     return router;
 }
 
-module.exports.getRouter = getRouter;
+export { getRouter };
+
+export default {
+    getRouter
+};

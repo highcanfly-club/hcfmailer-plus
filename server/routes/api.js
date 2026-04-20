@@ -1,27 +1,27 @@
-'use strict';
+import { SubscriptionStatus, SubscriptionSource } from '../../shared/lists.js';
+import { getMergeTagsForBases } from '../../shared/templates.js';
+import { castToInteger } from '../lib/helpers.js';
+import { getSystemSendConfigurationId } from '../../shared/send-configurations.js';
+import config from '../lib/config.js';
+import lists from '../models/lists.js';
+import tools from '../lib/tools.js';
+import blacklist from '../models/blacklist.js';
+import fields from '../models/fields.js';
+import subscriptions from '../models/subscriptions.js';
+import confirmations from '../models/confirmations.js';
+import log from '../lib/log.js';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
+import mailHelpers from '../lib/subscription-mail-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import contextHelpers from '../lib/context-helpers.js';
+import shares from '../models/shares.js';
+import slugify from 'slugify';
+import passport from '../lib/passport.js';
+import templates from '../models/templates.js';
+import campaigns from '../models/campaigns.js';
+import urls from '../lib/urls.js';
 
-const config = require('../lib/config');
-const lists = require('../models/lists');
-const tools = require('../lib/tools');
-const blacklist = require('../models/blacklist');
-const fields = require('../models/fields');
-const { SubscriptionStatus, SubscriptionSource } = require('../../shared/lists');
-const subscriptions = require('../models/subscriptions');
-const confirmations = require('../models/confirmations');
-const log = require('../lib/log');
-const router = require('../lib/router-async').create();
-const mailHelpers = require('../lib/subscription-mail-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const contextHelpers = require('../lib/context-helpers');
-const shares = require('../models/shares');
-const slugify = require('slugify');
-const passport = require('../lib/passport');
-const templates = require('../models/templates');
-const campaigns = require('../models/campaigns');
-const urls = require('../lib/urls')
-const { getMergeTagsForBases } = require('../../shared/templates')
-const {castToInteger} = require('../lib/helpers');
-const {getSystemSendConfigurationId} = require('../../shared/send-configurations');
 
 class APIError extends Error {
     constructor(msg, status) {
@@ -29,7 +29,6 @@ class APIError extends Error {
         this.status = status;
     }
 }
-
 
 router.postAsync('/subscribe/:listCid', passport.loggedIn, async (req, res) => {
     const list = await lists.getByCid(req.context, req.params.listCid);
@@ -95,7 +94,6 @@ router.postAsync('/subscribe/:listCid', passport.loggedIn, async (req, res) => {
     }
 });
 
-
 router.postAsync('/unsubscribe/:listCid', passport.loggedIn, async (req, res) => {
     const list = await lists.getByCid(req.context, req.params.listCid);
     const input = {};
@@ -118,7 +116,6 @@ router.postAsync('/unsubscribe/:listCid', passport.loggedIn, async (req, res) =>
     });
 });
 
-
 router.postAsync('/delete/:listCid', passport.loggedIn, async (req, res) => {
     const list = await lists.getByCid(req.context, req.params.listCid);
     const input = {};
@@ -140,7 +137,6 @@ router.postAsync('/delete/:listCid', passport.loggedIn, async (req, res) => {
         }
     });
 });
-
 
 // TODO: document endpoint
 router.getAsync('/subscriptions/:listCid', passport.loggedIn, async (req, res) => {
@@ -285,7 +281,6 @@ router.postAsync('/field/:listCid', passport.loggedIn, async (req, res) => {
     });
 });
 
-
 router.postAsync('/blacklist/add', passport.loggedIn, async (req, res) => {
     let input = {};
     Object.keys(req.body).forEach(key => {
@@ -302,7 +297,6 @@ router.postAsync('/blacklist/add', passport.loggedIn, async (req, res) => {
     });
 });
 
-
 router.postAsync('/blacklist/delete', passport.loggedIn, async (req, res) => {
     let input = {};
     Object.keys(req.body).forEach(key => {
@@ -318,7 +312,6 @@ router.postAsync('/blacklist/delete', passport.loggedIn, async (req, res) => {
         data: []
     });
 });
-
 
 router.getAsync('/blacklist/get', passport.loggedIn, async (req, res) => {
     let start = parseInt(req.query.start || 0, 10);
@@ -370,10 +363,9 @@ router.postAsync('/templates/:templateId/send', async (req, res) => {
     const subject = input.SUBJECT || '';
     const attachments = input.ATTACHMENTS || [];
 
-
     const result = await templates.sendAsTransactionalEmail(req.context, templateId, sendConfigurationId, emails, subject, mergeTags, attachments);
 
     res.json({ data: result });
 });
 
-module.exports = router;
+export default router;

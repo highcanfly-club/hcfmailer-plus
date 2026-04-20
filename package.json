@@ -1,0 +1,36 @@
+{
+  "name": "hcfmailer-plus",
+  "version": "2.0.0",
+  "description": "Self-hosted email newsletter application based on Mailtrain",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared",
+    "zone-mta"
+  ],
+  "scripts": {
+    "dev": "concurrently -n infra,client,server -c cyan,green,yellow \"npm run dev:infra\" \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:infra": "set -a && source .env.dev && set +a && docker compose -f docker-compose-develop.yml up",
+    "dev:client": "set -a && source .env.dev && set +a && npm run dev --workspace=client",
+    "dev:server": "set -a && source .env.dev && set +a && npm run dev --workspace=server",
+    "dev:preview": "set -a && source .env.dev && set +a && npm run build && VITE_PREVIEW=true npm run dev --workspace=server",
+    "dev:zone-mta": "set -a && source .env.dev && set +a && npm run start --workspace=zone-mta",
+    "dev:restore:s3": "set -a && source .env.dev && set +a && npx tsx scripts/dev-restore-s3.ts",
+    "build": "npm run build --workspace=client",
+    "build:all": "npm run build --workspaces",
+    "install:all": "npm install --workspaces --include-workspace-root",
+    "install:all:deep": "find . -name 'node_modules' | xargs rm -rf && npm run install:all && npm run build"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "3.1032.0",
+    "@napi-rs/lzma": "^1.4.5",
+    "concurrently": "^9.0.1",
+    "mariadb": "^3.5.2",
+    "nanotar": "0.3.0",
+    "tsx": "^4.21.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

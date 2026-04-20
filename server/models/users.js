@@ -1,36 +1,35 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { getTrustedUrl } from '../lib/urls.js';
+import { tUI } from '../lib/translate.js';
+import { getSystemSendConfigurationId } from '../../shared/send-configurations.js';
+import config from '../lib/config.js';
+import knex from '../lib/knex.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import passwordValidator from '../../shared/password-validator.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import tools from '../lib/tools.js';
+import crypto from 'crypto';
+import settings from './settings.js';
+import messageSender from '../lib/message-sender.js';
+import bcrypt from 'bcryptjs';
+import passport from '../lib/passport.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import shares from './shares.js';
+import contextHelpers from '../lib/context-helpers.js';
 
-const config = require('../lib/config');
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const passwordValidator = require('../../shared/password-validator')();
-const dtHelpers = require('../lib/dt-helpers');
-const tools = require('../lib/tools');
-const crypto = require('crypto');
-const settings = require('./settings');
-const {getTrustedUrl} = require('../lib/urls');
-const { tUI } = require('../lib/translate');
-const messageSender = require('../lib/message-sender');
-const {getSystemSendConfigurationId} = require('../../shared/send-configurations');
-
-const bluebird = require('bluebird');
-
-const bcrypt = require('bcrypt-nodejs');
-const bcryptHash = bluebird.promisify(bcrypt.hash.bind(bcrypt));
-const bcryptCompare = bluebird.promisify(bcrypt.compare.bind(bcrypt));
-
-const passport = require('../lib/passport');
-
-const namespaceHelpers = require('../lib/namespace-helpers');
+const bcryptHash = password => new Promise((resolve, reject) => {
+    bcrypt.hash(password, 10, (err, hash) => err ? reject(err) : resolve(hash));
+});
+const bcryptCompare = (password, hash) => new Promise((resolve, reject) => {
+    bcrypt.compare(password, hash, (err, result) => err ? reject(err) : resolve(result));
+});
 
 const allowedKeys = new Set(['username', 'name', 'email', 'password', 'namespace', 'role']);
 const ownAccountAllowedKeys = new Set(['name', 'email', 'password']);
 const allowedKeysExternal = new Set(['username', 'namespace', 'role', 'name', 'email']);
 const hashKeys = new Set(['username', 'name', 'email', 'namespace', 'role']);
-const shares = require('./shares');
-const contextHelpers = require('../lib/context-helpers');
 
 function hash(entity) {
     return hasher.hash(filterObject(entity, hashKeys));
@@ -134,7 +133,6 @@ async function _validateAndPreprocess(tx, entity, isCreate, isOwnAccount) {
         throw new interoperableErrors.DuplicitEmailError();
     }
 
-
     if (!isOwnAccount) {
         await namespaceHelpers.validateEntity(tx, entity);
         enforce(entity.role in config.roles.global, 'Unknown role');
@@ -158,7 +156,7 @@ async function _validateAndPreprocess(tx, entity, isCreate, isOwnAccount) {
             throw new Error('Invalid password');
         }
 
-        entity.password = await bcryptHash(entity.password, null, null);
+        entity.password = await bcryptHash(entity.password);
     } else {
         delete entity.password;
     }
@@ -362,7 +360,7 @@ async function resetPassword(username, resetToken, password) {
                 throw new Error('Invalid password');
             }
 
-            password = await bcryptHash(password, null, null);
+            password = await bcryptHash(password);
 
             await tx('users').where({username}).update({
                 password,
@@ -374,8 +372,6 @@ async function resetPassword(username, resetToken, password) {
         }
     });
 }
-
-
 
 const restrictedAccessTokenMethods = {};
 const restrictedAccessTokens = new Map();
@@ -432,23 +428,44 @@ async function getByRestrictedAccessToken(token) {
     }
 }
 
+export { listDTAjax };
+export { remove };
+export { updateWithConsistencyCheck };
+export { create };
+export { hash };
+export { getById };
+export { serverValidate };
+export { getByAccessToken };
+export { getByUsername };
+export { getByUsernameIfPasswordMatch };
+export { getAccessToken };
+export { resetAccessToken };
+export { sendPasswordReset };
+export { isPasswordResetTokenValid };
+export { resetPassword };
+export { getByRestrictedAccessToken };
+export { getRestrictedAccessToken };
+export { refreshRestrictedAccessToken };
+export { registerRestrictedAccessTokenMethod };
 
-module.exports.listDTAjax = listDTAjax;
-module.exports.remove = remove;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.create = create;
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.serverValidate = serverValidate;
-module.exports.getByAccessToken = getByAccessToken;
-module.exports.getByUsername = getByUsername;
-module.exports.getByUsernameIfPasswordMatch = getByUsernameIfPasswordMatch;
-module.exports.getAccessToken = getAccessToken;
-module.exports.resetAccessToken = resetAccessToken;
-module.exports.sendPasswordReset = sendPasswordReset;
-module.exports.isPasswordResetTokenValid = isPasswordResetTokenValid;
-module.exports.resetPassword = resetPassword;
-module.exports.getByRestrictedAccessToken = getByRestrictedAccessToken;
-module.exports.getRestrictedAccessToken = getRestrictedAccessToken;
-module.exports.refreshRestrictedAccessToken = refreshRestrictedAccessToken;
-module.exports.registerRestrictedAccessTokenMethod = registerRestrictedAccessTokenMethod;
+export default {
+    create,
+    getAccessToken,
+    getByAccessToken,
+    getById,
+    getByRestrictedAccessToken,
+    getByUsername,
+    getByUsernameIfPasswordMatch,
+    getRestrictedAccessToken,
+    hash,
+    isPasswordResetTokenValid,
+    listDTAjax,
+    refreshRestrictedAccessToken,
+    registerRestrictedAccessTokenMethod,
+    remove,
+    resetAccessToken,
+    resetPassword,
+    sendPasswordReset,
+    serverValidate,
+    updateWithConsistencyCheck
+};

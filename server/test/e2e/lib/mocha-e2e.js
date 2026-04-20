@@ -1,13 +1,12 @@
-'use strict';
+import Mocha from 'mocha';
+import WorkerCounter from './worker-counter.js';
+import fs from 'fs-extra';
+import config from './config.js';
+import webdriver from 'selenium-webdriver';
 
-/* eslint-disable no-console */
+ 
 
-const Mocha = require('mocha');
 const color = Mocha.reporters.Base.color;
-const WorkerCounter = require('./worker-counter');
-const fs = require('fs-extra');
-const config = require('./config');
-const webdriver = require('selenium-webdriver');
 
 const driver = new webdriver.Builder()
     .forBrowser(config.app.seleniumWebDriver.browser || 'phantomjs')
@@ -133,14 +132,12 @@ function UseCaseReporter(runner) {
     });
 }
 
-
 const mocha = new Mocha()
     .timeout(120000)
     .reporter(UseCaseReporter)
     .ui('tdd');
 
 mocha._originalRun = mocha.run;
-
 
 let runner;
 mocha.run = fn => {
@@ -151,7 +148,6 @@ mocha.run = fn => {
         fn();
     });
 };
-
 
 async function useCaseExec(name, asyncFn) {
     runner.emit('use-case', {title: name});
@@ -203,11 +199,13 @@ async function precondition(preConditionName, useCaseName, asyncFn) {
     await steps(`Including use case "${useCaseName}" to satisfy precondition "${preConditionName}"`, asyncFn);
 }
 
-module.exports = {
+export { mocha, useCase, step, steps, precondition, driver };
+
+export default {
+    driver,
     mocha,
-    useCase,
+    precondition,
     step,
     steps,
-    precondition,
-    driver
+    useCase
 };

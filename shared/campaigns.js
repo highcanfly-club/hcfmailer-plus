@@ -1,5 +1,3 @@
-'use strict';
-
 const CampaignSource = {
     MIN: 1,
 
@@ -91,12 +89,22 @@ function getSendConfigurationPermissionRequiredForSend(campaign, sendConfigurati
     return requiredPermission;
 }
 
-module.exports = {
+export {
     CampaignSource,
     CampaignType,
     CampaignStatus,
     campaignOverridables,
     CampaignMessageStatus,
     CampaignMessageErrorType,
+    getSendConfigurationPermissionRequiredForSend,
+};
+
+export default {
+    CampaignMessageErrorType,
+    CampaignMessageStatus,
+    CampaignSource,
+    CampaignStatus,
+    CampaignType,
+    campaignOverridables,
     getSendConfigurationPermissionRequiredForSend
 };

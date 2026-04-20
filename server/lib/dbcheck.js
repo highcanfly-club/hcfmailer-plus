@@ -1,16 +1,20 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
 This module handles Mailtrain database initialization and upgrades
 */
 
-const config = require('./config');
-const mysql = require('mysql2');
-const log = require('./log');
-const fs = require('fs');
-const pathlib = require('path');
-const Handlebars = require('handlebars');
-const bluebird = require('bluebird');
+import config from './config.js';
+import mysql from 'mysql2';
+import log from './log.js';
+import fs from 'fs';
+import pathlib from 'path';
+import Handlebars from 'handlebars';
+import bluebird from 'bluebird';
+
 
 const highestLegacySchemaVersion = 34;
 
@@ -228,4 +232,4 @@ async function dbcheck() {
     log.info('sql', 'Database check completed');
 }
 
-module.exports = dbcheck;
+export default dbcheck;

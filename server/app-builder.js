@@ -1,76 +1,73 @@
-'use strict';
-
-const config = require('./lib/config');
-const log = require('./lib/log');
-
-const express = require('express');
-const expressLocale = require('express-locale');
-const bodyParser = require('body-parser');
-const path = require('path');
-const favicon = require('serve-favicon');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
-const flash = require('connect-flash');
-const hbs = require('hbs');
-const compression = require('compression');
-const passport = require('./lib/passport');
-const contextHelpers = require('./lib/context-helpers');
-
-const api = require('./routes/api');
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { getTrustedUrl, getSandboxUrl, getPublicUrl } from './lib/urls.js';
+import { AppType } from '../shared/app.js';
+import { createClient } from 'redis';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import config from './lib/config.js';
+import log from './lib/log.js';
+import express from 'express';
+import expressLocale from 'express-locale';
+import bodyParser from 'body-parser';
+import path from 'path';
+import favicon from 'serve-favicon';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import flash from 'connect-flash';
+import hbs from 'hbs';
+import compression from 'compression';
+import passport from './lib/passport.js';
+import contextHelpers from './lib/context-helpers.js';
+import api from './routes/api.js';
+import reports from './routes/reports.js';
+import quickReports from './routes/quick-reports.js';
+import subscriptions from './routes/subscriptions.js';
+import campaigns from './routes/campaigns.js';
+import subscription from './routes/subscription.js';
+import sandboxedMosaico from './routes/sandboxed-mosaico.js';
+import sandboxedCKEditor from './routes/sandboxed-ckeditor.js';
+import sandboxedGrapesJS from './routes/sandboxed-grapesjs.js';
+import sandboxedCodeEditor from './routes/sandboxed-codeeditor.js';
+import files from './routes/files.js';
+import links from './routes/links.js';
+import archive from './routes/archive.js';
+import webhooks from './routes/webhooks.js';
+import namespacesRest from './routes/rest/namespaces.js';
+import sendConfigurationsRest from './routes/rest/send-configurations.js';
+import usersRest from './routes/rest/users.js';
+import accountRest from './routes/rest/account.js';
+import reportTemplatesRest from './routes/rest/report-templates.js';
+import reportsRest from './routes/rest/reports.js';
+import channelsRest from './routes/rest/channels.js';
+import campaignsRest from './routes/rest/campaigns.js';
+import triggersRest from './routes/rest/triggers.js';
+import listsRest from './routes/rest/lists.js';
+import formsRest from './routes/rest/forms.js';
+import fieldsRest from './routes/rest/fields.js';
+import importsRest from './routes/rest/imports.js';
+import importRunsRest from './routes/rest/import-runs.js';
+import sharesRest from './routes/rest/shares.js';
+import segmentsRest from './routes/rest/segments.js';
+import subscriptionsRest from './routes/rest/subscriptions.js';
+import templatesRest from './routes/rest/templates.js';
+import mosaicoTemplatesRest from './routes/rest/mosaico-templates.js';
+import blacklistRest from './routes/rest/blacklist.js';
+import editorsRest from './routes/rest/editors.js';
+import filesRest from './routes/rest/files.js';
+import settingsRest from './routes/rest/settings.js';
+import index from './routes/index.js';
+import interoperableErrors from '../shared/interoperable-errors.js';
+import { RedisStore } from 'connect-redis';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // These are routes for the new React-based client
-const reports = require('./routes/reports');
-const quickReports = require('./routes/quick-reports');
-const subscriptions = require('./routes/subscriptions');
-const campaigns = require('./routes/campaigns');
-const subscription = require('./routes/subscription');
-const sandboxedMosaico = require('./routes/sandboxed-mosaico');
-const sandboxedCKEditor = require('./routes/sandboxed-ckeditor');
-const sandboxedGrapesJS = require('./routes/sandboxed-grapesjs');
-const sandboxedCodeEditor = require('./routes/sandboxed-codeeditor');
-const files = require('./routes/files');
-const links = require('./routes/links');
-const archive = require('./routes/archive');
-const webhooks = require('./routes/webhooks');
-
-const namespacesRest = require('./routes/rest/namespaces');
-const sendConfigurationsRest = require('./routes/rest/send-configurations');
-const usersRest = require('./routes/rest/users');
-const accountRest = require('./routes/rest/account');
-const reportTemplatesRest = require('./routes/rest/report-templates');
-const reportsRest = require('./routes/rest/reports');
-const channelsRest = require('./routes/rest/channels');
-const campaignsRest = require('./routes/rest/campaigns');
-const triggersRest = require('./routes/rest/triggers');
-const listsRest = require('./routes/rest/lists');
-const formsRest = require('./routes/rest/forms');
-const fieldsRest = require('./routes/rest/fields');
-const importsRest = require('./routes/rest/imports');
-const importRunsRest = require('./routes/rest/import-runs');
-const sharesRest = require('./routes/rest/shares');
-const segmentsRest = require('./routes/rest/segments');
-const subscriptionsRest = require('./routes/rest/subscriptions');
-const templatesRest = require('./routes/rest/templates');
-const mosaicoTemplatesRest = require('./routes/rest/mosaico-templates');
-const blacklistRest = require('./routes/rest/blacklist');
-const editorsRest = require('./routes/rest/editors');
-const filesRest = require('./routes/rest/files');
-const settingsRest = require('./routes/rest/settings');
-
-const index = require('./routes/index');
-
-const interoperableErrors = require('../shared/interoperable-errors');
-
-const { getTrustedUrl, getSandboxUrl, getPublicUrl } = require('./lib/urls');
-const { AppType } = require('../shared/app');
-
 
 let isReady = false;
 function setReady() {
     isReady = true;
 }
-
 
 hbs.registerPartials(__dirname + '/views/partials');
 hbs.registerPartials(__dirname + '/views/subscription/partials/');
@@ -81,12 +78,12 @@ hbs.registerPartials(__dirname + '/views/subscription/partials/');
  * in a situation where we consume a flash messages but then comes a redirect
  * and the message is never displayed
  */
-hbs.registerHelper('flash_messages', function () { // eslint-disable-line prefer-arrow-callback
-    if (typeof this.flash !== 'function') { // eslint-disable-line no-invalid-this
+hbs.registerHelper('flash_messages', function () {
+    if (typeof this.flash !== 'function') {
         return '';
     }
 
-    const messages = this.flash(); // eslint-disable-line no-invalid-this
+    const messages = this.flash();
     const response = [];
 
     // group messages by type
@@ -119,8 +116,6 @@ hbs.registerHelper('flash_messages', function () { // eslint-disable-line prefer
     );
 });
 
-
-
 async function createApp(appType) {
     const app = express();
 
@@ -129,7 +124,7 @@ async function createApp(appType) {
             next(new interoperableErrors.NotFoundError());
         });
 
-        app.use(url + '/*', (req, res, next) => {
+        app.use(url + '/*rest', (req, res, next) => {
             next(new interoperableErrors.NotFoundError());
         });
     }
@@ -168,14 +163,13 @@ async function createApp(appType) {
     app.use(cookieParser());
 
     if (config.redis.enabled) {
-        const RedisStore = require('connect-redis').default;
-        const { createClient } = require("redis")
-        let redisClient = createClient({ 
+        let redisClient = createClient({
             legacyMode: false,
-            url: `redis://${config.redis.host}:${config.redis.port}` })
+            url: `redis://${config.redis.host}:${config.redis.port}`
+        })
         redisClient.connect().catch(console.error)
         app.use(session({
-            store: new RedisStore({client: redisClient, ...config.redis}),
+            store: new RedisStore({ client: redisClient, ...config.redis }),
             secret: config.www.secret,
             saveUninitialized: false,
             resave: false
@@ -215,7 +209,6 @@ async function createApp(appType) {
         limit: config.www.postSize
     }));
 
-
     app.use((req, res, next) => {
         if (isReady) {
             next();
@@ -236,18 +229,51 @@ async function createApp(appType) {
 
     if (appType === AppType.TRUSTED || appType === AppType.SANDBOXED) {
         // Endpoint under /api are authenticated by access token
-        app.all('/api/*', passport.authByAccessToken);
+        app.all('/api', passport.authByAccessToken);
+        app.all('/api/*rest', passport.authByAccessToken);
     }
 
     useWith404Fallback('/static', express.static(path.join(__dirname, '..', 'client', 'static')));
-    useWith404Fallback('/client', express.static(path.join(__dirname, '..', 'client', 'dist')));
 
-    useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
-    useWith404Fallback('/static-npm/jquery.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'jquery.min.js')));
-    useWith404Fallback('/static-npm/popper.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'popper.min.js')));
-    useWith404Fallback('/static-npm/bootstrap.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'bootstrap.min.js')));
-    useWith404Fallback('/static-npm/coreui.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'coreui.min.js')));
+    // In development, proxy to Vite dev server; in production, serve vite dist
+    if (process.env.NODE_ENV === 'development' && !(process.env.VITE_PREVIEW === 'true')) {
 
+
+        const viteProxy = createProxyMiddleware({
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+            ws: true,
+            pathFilter: (path) => path.startsWith('/client'),
+            on: {
+                error: (err) => {
+                    log.warn('Vite dev server', 'Proxy error: %s', err.message);
+                    log.warn('Vite dev server', 'Make sure Vite is running with: npm run dev:client');
+                }
+            }
+        });
+
+        app.use(viteProxy);
+
+        // Static npm files: fonts served directly from node_modules in dev (viteStaticCopy only runs on build)
+        useWith404Fallback('/webfonts', express.static(path.join(path.dirname(fileURLToPath(import.meta.resolve('@fortawesome/fontawesome-free/package.json'))), 'webfonts')));
+        useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
+        useWith404Fallback('/static-npm/jquery.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'jquery.min.js')));
+        useWith404Fallback('/static-npm/popper.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'popper.min.js')));
+        useWith404Fallback('/static-npm/bootstrap.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'bootstrap.min.js')));
+        useWith404Fallback('/static-npm/coreui.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'coreui.min.js')));
+    } else {
+        if (process.env.VITE_PREVIEW === 'true') {
+            console.warn('Running in preview mode: serving pre-built client. Make sure to run "npm run build" after any change to the client code.');
+        }
+        // Production: serve vite dist
+        useWith404Fallback('/client', express.static(path.join(__dirname, '..', 'client', 'dist')));
+        useWith404Fallback('/webfonts', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
+        useWith404Fallback('/static-npm/fontawesome', express.static(path.join(__dirname, '..', 'client', 'dist', 'webfonts')));
+        useWith404Fallback('/static-npm/jquery.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'jquery.min.js')));
+        useWith404Fallback('/static-npm/popper.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'popper.min.js')));
+        useWith404Fallback('/static-npm/bootstrap.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'bootstrap.min.js')));
+        useWith404Fallback('/static-npm/coreui.min.js', express.static(path.join(__dirname, '..', 'client', 'dist', 'coreui.min.js')));
+    }
 
     // Make sure flash messages are available
     // Currently, flash messages are used only from routes/subscription.js
@@ -257,12 +283,20 @@ async function createApp(appType) {
     });
 
     // Marks the following endpoint to return JSON object when error occurs
-    app.all('/api/*', (req, res, next) => {
+    app.all('/api', (req, res, next) => {
+        req.needsAPIJSONResponse = true;
+        next();
+    });
+    app.all('/api/*rest', (req, res, next) => {
         req.needsAPIJSONResponse = true;
         next();
     });
 
-    app.all('/rest/*', (req, res, next) => {
+    app.all('/rest', (req, res, next) => {
+        req.needsRESTJSONResponse = true;
+        next();
+    });
+    app.all('/rest/*rest', (req, res, next) => {
         req.needsRESTJSONResponse = true;
         next();
     });
@@ -329,12 +363,12 @@ async function createApp(appType) {
         }
         install404Fallback('/rest');
         if (config.cas && config.cas.enabled === true) {
-          app.get('/cas/login',
-            passport.authenticateCas,
-            function(req, res) {
-                res.redirect('/?cas-login-success');
-          });
-          app.get('/cas/logout', passport.logoutCas);
+            app.get('/cas/login',
+                passport.authenticateCas,
+                function (req, res) {
+                    res.redirect('/?cas-login-success');
+                });
+            app.get('/cas/logout', passport.logoutCas);
         }
     }
 
@@ -397,5 +431,10 @@ async function createApp(appType) {
     return app;
 }
 
-module.exports.createApp = createApp;
-module.exports.setReady = setReady;
+export { createApp };
+export { setReady };
+
+export default {
+    createApp,
+    setReady
+};

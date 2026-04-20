@@ -1,5 +1,3 @@
-'use strict';
-
 const MailerType = {
     GENERIC_SMTP: 'generic_smtp',
     ZONE_MTA: 'zone_mta',
@@ -21,9 +19,16 @@ function getSystemSendConfigurationCid() {
     return 'system';
 }
 
-module.exports = {
+export {
     MailerType,
     ZoneMTAType,
     getSystemSendConfigurationId,
-    getSystemSendConfigurationCid
+    getSystemSendConfigurationCid,
+};
+
+export default {
+    MailerType,
+    ZoneMTAType,
+    getSystemSendConfigurationCid,
+    getSystemSendConfigurationId
 };

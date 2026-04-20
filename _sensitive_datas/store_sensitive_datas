@@ -65,11 +65,12 @@ FILES_TO_BACKUP=(
     "Tiltfile"                            
     "private"                             
     ".vscode/settings.json"
-    "server/config/dev.yaml"
+    "server/config/*.yaml"
     "k8s/okteto-kube-admb.config"
     "zone-mta/dkim.rsa" 
     "devspace*" 
-    "dev-values.yaml"                                      
+    "dev-values.yaml"   
+    ".env.dev"                                   
 )
 
 # .env file is located one level from this script

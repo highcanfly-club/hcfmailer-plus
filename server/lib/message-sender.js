@@ -1,30 +1,28 @@
-'use strict';
-
-const config = require('./config');
-const log = require('./log');
-const mailers = require('./mailers');
-const knex = require('./knex');
-const subscriptions = require('../models/subscriptions');
-const contextHelpers = require('./context-helpers');
-const campaigns = require('../models/campaigns');
-const templates = require('../models/templates');
-const lists = require('../models/lists');
-const fields = require('../models/fields');
-const sendConfigurations = require('../models/send-configurations');
-const links = require('../models/links');
-const {CampaignSource, CampaignType} = require('../../shared/campaigns');
-const {toNameTagLangauge} = require('../../shared/lists');
-const {CampaignMessageStatus, CampaignMessageErrorType} = require('../../shared/campaigns');
-const tools = require('./tools');
-const htmlToText = require('html-to-text');
-const request = require('request-promise');
-const files = require('../models/files');
-const {getPublicUrl} = require('./urls');
-const blacklist = require('../models/blacklist');
-const libmime = require('libmime');
-const { enforce, hashEmail } = require('./helpers');
-const senders = require('./senders');
-const shortid = require('./shortid');
+/* global fetch */
+import { CampaignSource, CampaignType } from '../../shared/campaigns.js';
+import { toNameTagLangauge } from '../../shared/lists.js';
+import { CampaignMessageStatus, CampaignMessageErrorType } from '../../shared/campaigns.js';
+import { getPublicUrl } from './urls.js';
+import { enforce, hashEmail } from './helpers.js';
+import config from './config.js';
+import log from './log.js';
+import mailers from './mailers.js';
+import knex from './knex.js';
+import subscriptions from '../models/subscriptions.js';
+import contextHelpers from './context-helpers.js';
+import campaigns from '../models/campaigns.js';
+import templates from '../models/templates.js';
+import lists from '../models/lists.js';
+import fields from '../models/fields.js';
+import sendConfigurations from '../models/send-configurations.js';
+import links from '../models/links.js';
+import tools from './tools.js';
+import { htmlToText } from 'html-to-text';
+import files from '../models/files.js';
+import blacklist from '../models/blacklist.js';
+import libmime from 'libmime';
+import senders from './senders.js';
+import shortid from './shortid.js';
 
 const MessageType = {
     REGULAR: 0,
@@ -88,7 +86,6 @@ class MessageSender {
                 this.useVerp = config.verp.enabled && this.sendConfiguration.verp_hostname;
                 this.useVerpSenderHeader = this.useVerp && !this.sendConfiguration.verp_disable_sender_header;
 
-
                 // These IFs are not mutually exclusive because there are situations when listId is provided, but we want to collect all lists of the campaign
                 // in order to support tags like LINK_PUBLIC_SUBSCRIBE, LIST_ID_<index>, PUBLIC_LIST_ID_<index>
                 if (settings.listId) {
@@ -124,7 +121,6 @@ class MessageSender {
             } else {
                 enforce(false);
             }
-
 
             if (settings.attachments) {
                 this.attachments = settings.attachments;
@@ -189,7 +185,6 @@ class MessageSender {
         let renderTags = false;
         const campaign = this.campaign;
 
-
         if (this.renderedHtml !== undefined) {
             html = this.renderedHtml;
             text = this.renderedText;
@@ -212,14 +207,20 @@ class MessageSender {
 
             let response;
             try {
-                response = await request.post({
-                    uri: sourceUrl,
-                    form,
-                    resolveWithFullResponse: true
+                const res = await fetch(sourceUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(form)
                 });
+                response = {
+                    statusCode: res.status,
+                    body: await res.text()
+                };
             } catch (exc) {
                 log.error('MessageSender', `Error pulling content from URL (${sourceUrl})`);
-                response = {statusCode: exc.message};
+                response = { statusCode: exc.message };
             }
 
             if (response.statusCode !== 200) {
@@ -250,7 +251,6 @@ class MessageSender {
             });
         }
 
-
         if (renderTags) {
             if (campaign) {
                 html = await links.updateLinks(html, this.tagLanguage, mergeTags, campaign, this.listsById, list, subscriptionGrouped);
@@ -262,7 +262,7 @@ class MessageSender {
 
         const generateText = !(text || '').trim();
         if (generateText) {
-            text = htmlToText.fromString(html, {wordwrap: 130});
+            text = htmlToText(html, { wordwrap: 130 });
         } else {
             // When no list and subscriptionGrouped is provided, formatCampaignTemplate works the same way as formatTemplate
             text = tools.formatCampaignTemplate(text, this.tagLanguage, mergeTags, false, campaign, this.listsById, list, subscriptionGrouped)
@@ -293,9 +293,8 @@ class MessageSender {
     }
 
     async initByCampaignId(campaignId) {
-        await this._init({type: MessageType.REGULAR, campaignId});
+        await this._init({ type: MessageType.REGULAR, campaignId });
     }
-
 
     /*
         Accepted combinations of subData:
@@ -452,7 +451,6 @@ class MessageSender {
             encryptionKeys
         };
 
-
         let response;
         let responseId = null;
 
@@ -506,7 +504,6 @@ class MessageSender {
             responseId = response.split(/\s+/).pop();
         }
 
-
         const result = {
             response,
             responseId: responseId,
@@ -524,7 +521,7 @@ class MessageSender {
         // We set the campaign_message to SENT before the message is actually sent. This is to avoid multiple delivery
         // if by chance we run out of disk space and couldn't change status in the database after the message has been sent out
         await knex('campaign_messages')
-            .where({id: campaignMessage.id})
+            .where({ id: campaignMessage.id })
             .update({
                 status: CampaignMessageStatus.SENT,
                 updated: new Date()
@@ -532,22 +529,22 @@ class MessageSender {
 
         let result;
         try {
-            result = await this._sendMessage({listId: campaignMessage.list, subscriptionId: campaignMessage.subscription});
+            result = await this._sendMessage({ listId: campaignMessage.list, subscriptionId: campaignMessage.subscription });
         } catch (err) {
             if (err.campaignMessageErrorType === CampaignMessageErrorType.PERMANENT) {
-              await knex('campaign_messages')
-                .where({id: campaignMessage.id})
-                .update({
-                  status: CampaignMessageStatus.FAILED,
-                  updated: new Date()
-                });
+                await knex('campaign_messages')
+                    .where({ id: campaignMessage.id })
+                    .update({
+                        status: CampaignMessageStatus.FAILED,
+                        updated: new Date()
+                    });
             } else {
-              await knex('campaign_messages')
-                .where({id: campaignMessage.id})
-                .update({
-                    status: CampaignMessageStatus.SCHEDULED,
-                    updated: new Date()
-                });
+                await knex('campaign_messages')
+                    .where({ id: campaignMessage.id })
+                    .update({
+                        status: CampaignMessageStatus.SCHEDULED,
+                        updated: new Date()
+                    });
             }
             throw err;
         }
@@ -556,7 +553,7 @@ class MessageSender {
         enforce(result.subscriptionGrouped);
 
         await knex('campaign_messages')
-            .where({id: campaignMessage.id})
+            .where({ id: campaignMessage.id })
             .update({
                 response: result.response,
                 response_id: result.responseId,
@@ -566,7 +563,6 @@ class MessageSender {
         await knex('campaigns').where('id', this.campaign.id).increment('delivered');
     }
 }
-
 
 async function sendQueuedMessage(queuedMessage) {
     const messageType = queuedMessage.type;
@@ -594,7 +590,7 @@ async function sendQueuedMessage(queuedMessage) {
     const campaign = cs.campaign;
 
     await knex('queued')
-        .where({id: queuedMessage.id})
+        .where({ id: queuedMessage.id })
         .del();
 
     let result;
@@ -673,20 +669,18 @@ async function sendQueuedMessage(queuedMessage) {
 
 async function dropQueuedMessage(queuedMessage) {
     await knex('queued')
-        .where({id: queuedMessage.id})
+        .where({ id: queuedMessage.id })
         .del();
 }
-
-
 
 async function queueCampaignMessageTx(tx, sendConfigurationId, listId, subscriptionId, messageType, messageData) {
     enforce(messageType === MessageType.TRIGGERED || messageType === MessageType.TEST);
 
-    const msgData = {...messageData};
+    const msgData = { ...messageData };
 
     if (msgData.attachments) {
         for (const attachment of messageData.attachments) {
-            await files.lockTx(tx,'campaign', 'attachment', attachment.id);
+            await files.lockTx(tx, 'campaign', 'attachment', attachment.id);
         }
     }
 
@@ -736,7 +730,7 @@ async function queueSubscriptionMessage(sendConfigurationId, to, subject, encryp
     if (textRenderer) {
         text = textRenderer(template.data || {});
     } else if (html) {
-        text = htmlToText.fromString(html, {
+        text = htmlToText(html, {
             wordwrap: 130
         });
     }
@@ -760,7 +754,7 @@ async function queueSubscriptionMessage(sendConfigurationId, to, subject, encryp
 
 async function getMessage(campaignCid, listCid, subscriptionCid, settings, isTest = false) {
     const cs = new MessageSender();
-    await cs._init({type: MessageType.REGULAR, campaignCid, listCid, ...settings});
+    await cs._init({ type: MessageType.REGULAR, campaignCid, listCid, ...settings });
 
     const campaign = cs.campaign;
     const list = cs.listsByCid.get(listCid);
@@ -799,11 +793,22 @@ async function getMessage(campaignCid, listCid, subscriptionCid, settings, isTes
     return await cs._getMessage(mergeTags, list, subscriptionGrouped, false);
 }
 
-module.exports.MessageSender = MessageSender;
-module.exports.MessageType = MessageType;
-module.exports.sendQueuedMessage = sendQueuedMessage;
-module.exports.queueCampaignMessageTx = queueCampaignMessageTx;
-module.exports.queueSubscriptionMessage = queueSubscriptionMessage;
-module.exports.dropQueuedMessage = dropQueuedMessage;
-module.exports.getMessage = getMessage;
-module.exports.queueAPITransactionalMessageTx = queueAPITransactionalMessageTx;
+export { MessageSender };
+export { MessageType };
+export { sendQueuedMessage };
+export { queueCampaignMessageTx };
+export { queueSubscriptionMessage };
+export { dropQueuedMessage };
+export { getMessage };
+export { queueAPITransactionalMessageTx };
+
+export default {
+    MessageSender,
+    MessageType,
+    dropQueuedMessage,
+    getMessage,
+    queueAPITransactionalMessageTx,
+    queueCampaignMessageTx,
+    queueSubscriptionMessage,
+    sendQueuedMessage
+};

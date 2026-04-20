@@ -1,9 +1,13 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const fork = require('./fork').fork;
-const log = require('./log');
-const path = require('path');
-const bluebird = require('bluebird');
+import { fork } from './fork.js';
+import log from './log.js';
+import path from 'path';
+import bluebird from 'bluebird';
+
 
 const requestCallbacks = {};
 let messageTid = 0;
@@ -76,6 +80,13 @@ function stop(tid) {
     });
 }
 
-module.exports.spawn = bluebird.promisify(spawn);
-module.exports.start = start;
-module.exports.stop = stop;
+const spawnAsync = bluebird.promisify(spawn);
+
+export { spawnAsync as spawn, start, stop };
+
+export default {
+    spawn: spawnAsync,
+    spawnAsync,
+    start,
+    stop
+};

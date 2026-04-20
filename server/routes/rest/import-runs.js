@@ -1,10 +1,9 @@
-'use strict';
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import importRuns from '../../models/import-runs.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
-const passport = require('../../lib/passport');
-const importRuns = require('../../models/import-runs');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
 
 router.postAsync('/import-runs-table/:listId/:importId', passport.loggedIn, async (req, res) => {
     return res.json(await importRuns.listDTAjax(req.context, castToInteger(req.params.listId), castToInteger(req.params.importId), req.body));
@@ -19,4 +18,4 @@ router.getAsync('/import-runs/:listId/:importId/:runId', passport.loggedIn, asyn
     return res.json(entity);
 });
 
-module.exports = router;
+export default router;

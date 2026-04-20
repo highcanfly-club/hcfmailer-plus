@@ -1,18 +1,7 @@
-'use strict';
+import config from '../lib/config.js';
+import web from '../lib/web.js';
 
-const config = require('../lib/config');
-const web = require('../lib/web');
-
-module.exports = {
-    login: web({
-        baseUrl: config.baseTrustedUrl,
-        url: '/users/login',
-        elementsToWaitFor: ['submitButton'],
-        elements: {
-            usernameInput: 'form[action="/login"] input[name="username"]',
-            passwordInput: 'form[action="/login"] input[name="password"]',
-            submitButton: 'form[action="/login"] [type=submit]'
-        }
+export { login, url, elementsToWaitFor, elements, passwordInput, submitButton };
     }),
 
     logout: web({
@@ -30,4 +19,13 @@ module.exports = {
             emailInput: 'form[action="/users/account"] input[name="email"]'
         }
     })
+};
+
+export default {
+    elements,
+    elementsToWaitFor,
+    login,
+    passwordInput,
+    submitButton,
+    url
 };

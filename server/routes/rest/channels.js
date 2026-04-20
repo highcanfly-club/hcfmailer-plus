@@ -1,10 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const channels = require('../../models/channels');
-
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import channels from '../../models/channels.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/channels-table', passport.loggedIn, async (req, res) => {
@@ -38,5 +36,4 @@ router.deleteAsync('/channels/:channelId', passport.loggedIn, passport.csrfProte
     return res.json();
 });
 
-
-module.exports = router;
+export default router;

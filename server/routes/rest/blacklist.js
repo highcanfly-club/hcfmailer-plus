@@ -1,9 +1,7 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const blacklist = require('../../models/blacklist');
-
-const router = require('../../lib/router-async').create();
+import passport from '../../lib/passport.js';
+import blacklist from '../../models/blacklist.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.postAsync('/blacklist-table', passport.loggedIn, async (req, res) => {
@@ -23,4 +21,4 @@ router.postAsync('/blacklist-validate', passport.loggedIn, async (req, res) => {
     return res.json(await blacklist.serverValidate(req.context, req.body));
 });
 
-module.exports = router;
+export default router;

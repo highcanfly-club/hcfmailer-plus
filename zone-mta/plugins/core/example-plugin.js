@@ -1,0 +1,1 @@
+../../node_modules/@zone-eu/zone-mta/plugins/core/example-plugin.js

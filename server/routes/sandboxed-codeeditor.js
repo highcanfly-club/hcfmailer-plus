@@ -1,20 +1,13 @@
-'use strict';
-
-const routerFactory = require('../lib/router-async');
-const passport = require('../lib/passport');
-const clientHelpers = require('../lib/client-helpers');
-const users = require('../models/users');
-
-const files = require('../models/files');
-const fileHelpers = require('../lib/file-helpers');
-
-const templates = require('../models/templates');
-
-const contextHelpers = require('../lib/context-helpers');
-
-const { getTrustedUrl, getSandboxUrl, getPublicUrl } = require('../lib/urls');
-const { AppType } = require('../../shared/app');
-
+import { getTrustedUrl, getSandboxUrl, getPublicUrl } from '../lib/urls.js';
+import { AppType } from '../../shared/app.js';
+import routerFactory from '../lib/router-async.js';
+import passport from '../lib/passport.js';
+import clientHelpers from '../lib/client-helpers.js';
+import users from '../models/users.js';
+import files from '../models/files.js';
+import fileHelpers from '../lib/file-helpers.js';
+import templates from '../models/templates.js';
+import contextHelpers from '../lib/context-helpers.js';
 
 users.registerRestrictedAccessTokenMethod('codeeditor', async ({entityTypeId, entityId}) => {
     if (entityTypeId === 'template') {
@@ -32,7 +25,6 @@ users.registerRestrictedAccessTokenMethod('codeeditor', async ({entityTypeId, en
     }
 });
 
-
 async function getRouter(appType) {
     const router = routerFactory.create();
 
@@ -40,13 +32,18 @@ async function getRouter(appType) {
         router.getAsync('/editor', passport.csrfProtection, async (req, res) => {
             const mailtrainConfig = await clientHelpers.getAnonymousConfig(req.context, appType);
 
+            const isDev = process.env.NODE_ENV === 'development' && process.env.VITE_PREVIEW !== 'true';
             res.render('ckeditor/root', {
                 layout: 'ckeditor/layout',
                 reactCsrfToken: req.csrfToken(),
                 mailtrainConfig: JSON.stringify(mailtrainConfig),
-                scriptFiles: [
-                    getSandboxUrl('client/codeeditor-root.js')
-                ],
+                isDev,
+                scriptFiles: isDev
+                    ? [
+                        { src: getSandboxUrl('client/@vite/client'), type: 'module' },
+                        { src: getSandboxUrl('client/src/lib/sandboxed-codeeditor-root.jsx'), type: 'module' }
+                    ]
+                    : [{ src: getSandboxUrl('client/codeeditor-root.js'), type: 'module' }],
                 publicPath: getSandboxUrl()
             });
         });
@@ -55,4 +52,8 @@ async function getRouter(appType) {
     return router;
 }
 
-module.exports.getRouter = getRouter;
+export { getRouter };
+
+export default {
+    getRouter
+};

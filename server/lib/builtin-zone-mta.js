@@ -1,13 +1,17 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const config = require('./config');
-const fork = require('./fork').fork;
-const log = require('./log');
-const path = require('path');
-const fs = require('fs-extra');
-const crypto = require('crypto');
-const bluebird = require('bluebird');
-const os = require('os');
+import config from './config.js';
+import { fork } from './fork.js';
+import log from './log.js';
+import path from 'path';
+import fs from 'fs-extra';
+import crypto from 'crypto';
+import bluebird from 'bluebird';
+import os from 'os';
+
 
 let zoneMtaProcess = null;
 
@@ -218,6 +222,13 @@ function spawn(callback) {
     }
 }
 
-module.exports.spawn = bluebird.promisify(spawn);
-module.exports.getUsername = getUsername;
-module.exports.getPassword = getPassword;
+const spawnAsync = bluebird.promisify(spawn);
+
+export { spawnAsync as spawn, getUsername, getPassword };
+
+export default {
+    getPassword,
+    getUsername,
+    spawn: spawnAsync,
+    spawnAsync
+};

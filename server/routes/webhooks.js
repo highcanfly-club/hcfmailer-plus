@@ -1,16 +1,16 @@
-'use strict';
+/* global fetch */
+import { CampaignMessageStatus } from '../../shared/campaigns.js';
+import { MailerType } from '../../shared/send-configurations.js';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
+import campaigns from '../models/campaigns.js';
+import sendConfigurations from '../models/send-configurations.js';
+import contextHelpers from '../lib/context-helpers.js';
+import log from '../lib/log.js';
+import multer from 'multer';
 
-const router = require('../lib/router-async').create();
-const request = require('request-promise');
-const campaigns = require('../models/campaigns');
-const sendConfigurations = require('../models/send-configurations');
-const contextHelpers = require('../lib/context-helpers');
-const {CampaignMessageStatus} = require('../../shared/campaigns');
-const {MailerType} = require('../../shared/send-configurations');
-const log = require('../lib/log');
-const multer = require('multer');
+
 const uploads = multer();
-
 
 router.postAsync('/aws', async (req, res) => {
     if (typeof req.body === 'string') {
@@ -21,7 +21,7 @@ router.postAsync('/aws', async (req, res) => {
 
         case 'SubscriptionConfirmation':
             if (req.body.SubscribeURL) {
-                await request(req.body.SubscribeURL);
+                await fetch(req.body.SubscribeURL);
                 break;
             } else {
                 const err = new Error('SubscribeURL not set');
@@ -64,7 +64,6 @@ router.postAsync('/aws', async (req, res) => {
         success: true
     });
 });
-
 
 router.postAsync('/sparkpost', async (req, res) => {
     const events = [].concat(req.body || []); // This is just a cryptic way getting an array regardless whether req.body is empty, one item, or array
@@ -114,7 +113,6 @@ router.postAsync('/sparkpost', async (req, res) => {
     });
 });
 
-
 router.postAsync('/sendgrid', async (req, res) => {
     let events = [].concat(req.body || []);
 
@@ -156,7 +154,6 @@ router.postAsync('/sendgrid', async (req, res) => {
     });
 });
 
-
 router.postAsync('/mailgun', uploads.any(), async (req, res) => {
     const evt = req.body;
 
@@ -188,7 +185,6 @@ router.postAsync('/mailgun', uploads.any(), async (req, res) => {
     });
 });
 
-
 router.postAsync('/zone-mta', async (req, res) => {
     try {
         if (typeof req.body === 'string') {
@@ -212,7 +208,6 @@ router.postAsync('/zone-mta', async (req, res) => {
         throw err;
     }
 });
-
 
 router.postAsync('/zone-mta/sender-config/:sendConfigurationCid', async (req, res) => {
     if (!req.query.api_token) {
@@ -252,7 +247,6 @@ router.postAsync('/zone-mta/sender-config/:sendConfigurationCid', async (req, re
     });
 });
 
-
 router.postAsync('/postal', async (req, res) => {
 
     if (typeof req.body === 'string') {
@@ -287,4 +281,4 @@ router.postAsync('/postal', async (req, res) => {
     });
 });
 
-module.exports = router;
+export default router;

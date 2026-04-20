@@ -1,6 +1,4 @@
-'use strict';
-
-const owaspPasswordStrengthTest = require('owasp-password-strength-test');
+import owaspPasswordStrengthTest from 'owasp-password-strength-test';
 
 function passwordValidator(t) {
     const config = {
@@ -33,4 +31,4 @@ function passwordValidator(t) {
     return passwordValidator;
 }
 
-module.exports = passwordValidator;
+export default passwordValidator;

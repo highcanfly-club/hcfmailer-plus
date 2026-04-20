@@ -2,8 +2,6 @@
 @import "bootstrap/scss/variables";
 @import "../scss/variables.scss";
 
-:global {
-
 .mt-treetable-container .fancytree-container {
     border: none;
 }
@@ -89,6 +87,4 @@
 .mt-treetable-container .table td {
     padding-top: 3px;
     padding-bottom: 3px;
-}
-
 }

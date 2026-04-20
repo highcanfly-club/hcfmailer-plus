@@ -1,13 +1,13 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { EntityVals, EventVals, Entity } from '../../shared/triggers.js';
+import knex from '../lib/knex.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import campaigns from './campaigns.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const {EntityVals, EventVals, Entity} = require('../../shared/triggers');
-const campaigns = require('./campaigns');
 
 const allowedKeys = new Set(['name', 'description', 'entity', 'event', 'seconds', 'enabled', 'source_campaign']);
 
@@ -132,15 +132,25 @@ async function removeAllByCampaignIdTx(tx, context, campaignId) {
     }
 }
 
-
-
 // This is to handle circular dependency with campaigns.js
-module.exports.hash = hash;
-module.exports.getById = getById;
-module.exports.listByCampaignDTAjax = listByCampaignDTAjax;
-module.exports.listByListDTAjax = listByListDTAjax;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.removeTx = removeTx;
-module.exports.remove = remove;
-module.exports.removeAllByCampaignIdTx = removeAllByCampaignIdTx;
+export { hash };
+export { getById };
+export { listByCampaignDTAjax };
+export { listByListDTAjax };
+export { create };
+export { updateWithConsistencyCheck };
+export { removeTx };
+export { remove };
+export { removeAllByCampaignIdTx };
+
+export default {
+    create,
+    getById,
+    hash,
+    listByCampaignDTAjax,
+    listByListDTAjax,
+    remove,
+    removeAllByCampaignIdTx,
+    removeTx,
+    updateWithConsistencyCheck
+};

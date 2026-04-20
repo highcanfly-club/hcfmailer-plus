@@ -1,13 +1,17 @@
-'use strict';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const knex = require('./knex');
-const fork = require('./fork').fork;
-const log = require('./log');
-const path = require('path');
-const {ImportStatus, RunStatus} = require('../../shared/imports');
-const {ListActivityType} = require('../../shared/activity-log');
-const activityLog = require('./activity-log');
-const bluebird = require('bluebird');
+import knex from './knex.js';
+import { fork } from './fork.js';
+import log from './log.js';
+import path from 'path';
+import { ImportStatus, RunStatus } from '../../shared/imports.js';
+import { ListActivityType } from '../../shared/activity-log.js';
+import * as activityLog from './activity-log.js';
+import bluebird from 'bluebird';
+
 
 let messageTid = 0;
 let importerProcess;
@@ -61,5 +65,12 @@ function scheduleCheck() {
     messageTid++;
 }
 
-module.exports.spawn = bluebird.promisify(spawn);
-module.exports.scheduleCheck = scheduleCheck;
+const spawnAsync = bluebird.promisify(spawn);
+
+export { spawnAsync as spawn, scheduleCheck };
+
+export default {
+    scheduleCheck,
+    spawn: spawnAsync,
+    spawnAsync
+};

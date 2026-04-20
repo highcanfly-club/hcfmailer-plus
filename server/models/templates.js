@@ -1,17 +1,17 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { convertFileURLs } from '../lib/campaign-content.js';
+import { allTagLanguages } from '../../shared/templates.js';
+import knex from '../lib/knex.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import namespaceHelpers from '../lib/namespace-helpers.js';
+import shares from './shares.js';
+import files from './files.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
+import messageSender from '../lib/message-sender.js';
 
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const { enforce, filterObject } = require('../lib/helpers');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const namespaceHelpers = require('../lib/namespace-helpers');
-const shares = require('./shares');
-const files = require('./files');
-const dependencyHelpers = require('../lib/dependency-helpers');
-const {convertFileURLs} = require('../lib/campaign-content');
-const { allTagLanguages } = require('../../shared/templates');
-const messageSender = require('../lib/message-sender');
 
 const allowedKeys = new Set(['name', 'description', 'type', 'tag_language', 'data', 'html', 'text', 'namespace']);
 
@@ -174,13 +174,24 @@ async function sendAsTransactionalEmail(context, templateId, sendConfigurationId
 	});
 }
 
+export { hash };
+export { getByIdTx };
+export { getById };
+export { listDTAjax };
+export { listByNamespaceDTAjax };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { sendAsTransactionalEmail };
 
-module.exports.hash = hash;
-module.exports.getByIdTx = getByIdTx;
-module.exports.getById = getById;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listByNamespaceDTAjax = listByNamespaceDTAjax;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.sendAsTransactionalEmail = sendAsTransactionalEmail;
+export default {
+    create,
+    getById,
+    getByIdTx,
+    hash,
+    listByNamespaceDTAjax,
+    listDTAjax,
+    remove,
+    sendAsTransactionalEmail,
+    updateWithConsistencyCheck
+};

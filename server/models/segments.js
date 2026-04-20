@@ -1,22 +1,20 @@
-'use strict';
+import { enforce, filterObject } from '../lib/helpers.js';
+import { ListActivityType } from '../../shared/activity-log.js';
+import { SubscriptionStatus } from '../../shared/lists.js';
+import knex from '../lib/knex.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import moment from 'moment';
+import fields from './fields.js';
+import subscriptions from './subscriptions.js';
+import dependencyHelpers from '../lib/dependency-helpers.js';
+import activityLog from '../lib/activity-log.js';
 
-const knex = require('../lib/knex');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const { enforce, filterObject } = require('../lib/helpers');
-const hasher = require('node-object-hash')();
-const moment = require('moment');
-const fields = require('./fields');
-const subscriptions = require('./subscriptions');
-const dependencyHelpers = require('../lib/dependency-helpers');
-const {ListActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
-const {SubscriptionStatus} = require('../../shared/lists');
 
 const allowedKeys = new Set(['name', 'settings']);
-
-
 
 const predefColumns = [
     {
@@ -55,7 +53,6 @@ const predefColumns = [
     }
 ];
 
-
 const compositeRuleTypes = {
     all: {
         addQuery: (query, rules, addSubQuery) => {
@@ -86,8 +83,6 @@ const compositeRuleTypes = {
     },
 };
 
-
-
 const primitiveRuleTypes = {
     text: {},
     website: {},
@@ -99,7 +94,6 @@ const primitiveRuleTypes = {
     'radio-enum': {},
     'dropdown-static': {}
 };
-
 
 function stringValueSettings(sqlOperator, allowEmpty) {
     return {
@@ -178,7 +172,6 @@ function staticEnumValueSettings(sqlOperator) {
     };
 }
 
-
 primitiveRuleTypes.text.eq = stringValueSettings('=', true);
 primitiveRuleTypes.text.like = stringValueSettings('LIKE', true);
 primitiveRuleTypes.text.re = stringValueSettings('REGEXP', true);
@@ -244,7 +237,6 @@ primitiveRuleTypes['radio-enum'].ge = stringValueSettings('>=', false);
 
 primitiveRuleTypes['dropdown-static'].eq = staticEnumValueSettings('=', true);
 
-
 function hash(entity) {
     return hasher.hash(filterObject(entity, allowedKeys));
 }
@@ -296,7 +288,6 @@ async function _validateAndPreprocess(tx, listId, entity, isCreate) {
     enforce(entity.settings.rootRule, 'Root rule must be present in setting');
     enforce(entity.settings.rootRule.type in compositeRuleTypes, 'Root rule must be composite');
 
-
     const flds = await fields.listTx(tx, listId);
     const allowedFlds = [
         ...predefColumns,
@@ -319,7 +310,6 @@ async function _validateAndPreprocess(tx, listId, entity, isCreate) {
             primitiveRuleTypes[colType][rule.type].validate(rule, fldDef);
         }
     }
-
 
     validateRule(entity.settings.rootRule);
 
@@ -367,7 +357,6 @@ async function updateWithConsistencyCheck(context, listId, entity) {
         await activityLog.logEntityActivity('list', ListActivityType.UPDATE_SEGMENT, listId, {segmentId: entity.id});
     });
 }
-
 
 async function removeTx(tx, context, listId, id) {
     await shares.enforceEntityPermissionTx(tx, context, 'list', listId, 'manageSegments');
@@ -463,14 +452,28 @@ async function getQueryGeneratorTx(tx, listId, id) {
 } 
 
 // This is to handle circular dependency with fields.js
-module.exports.hash = hash;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listIdName = listIdName;
-module.exports.getById = getById;
-module.exports.getByIdTx = getByIdTx;
-module.exports.create = create;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.removeAllByListIdTx = removeAllByListIdTx;
-module.exports.removeRulesByColumnTx = removeRulesByColumnTx;
-module.exports.getQueryGeneratorTx = getQueryGeneratorTx;
+export { hash };
+export { listDTAjax };
+export { listIdName };
+export { getById };
+export { getByIdTx };
+export { create };
+export { updateWithConsistencyCheck };
+export { remove };
+export { removeAllByListIdTx };
+export { removeRulesByColumnTx };
+export { getQueryGeneratorTx };
+
+export default {
+    create,
+    getById,
+    getByIdTx,
+    getQueryGeneratorTx,
+    hash,
+    listDTAjax,
+    listIdName,
+    remove,
+    removeAllByListIdTx,
+    removeRulesByColumnTx,
+    updateWithConsistencyCheck
+};

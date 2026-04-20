@@ -1,7 +1,6 @@
-'use strict';
-
-const router = require('../lib/router-async').create();
-const messageSender = require('../lib/message-sender');
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
+import messageSender from '../lib/message-sender.js';
 
 
 router.get('/:campaign/:list/:subscription', (req, res, next) => {
@@ -35,4 +34,4 @@ router.get('/:campaign/:list/:subscription', (req, res, next) => {
         .catch(err => next(err));
 });
 
-module.exports = router;
+export default router;

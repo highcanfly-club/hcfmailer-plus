@@ -1,19 +1,23 @@
-'use strict';
+import { createRequire } from 'module';
+import { nodeifyFunction, nodeifyPromise } from './nodeify.js';
+import config from './config.js';
+import log from './log.js';
+import util from 'util';
+import passport from 'passport';
+import LocalStrategy from 'passport-local';
+import csurf from 'csurf';
+import bodyParser from 'body-parser';
+import users from '../models/users.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import contextHelpers from './context-helpers.js';
 
-const config = require('./config');
-const log = require('./log');
-const util = require('util');
+const require = createRequire(import.meta.url);
 
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-
-const csrf = require('csurf');
-const bodyParser = require('body-parser');
-
-const users = require('../models/users');
-const { nodeifyFunction, nodeifyPromise } = require('./nodeify');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const contextHelpers = require('./context-helpers');
+const csrfProtection = csurf({ cookie: true });
+const parseForm = bodyParser.urlencoded({
+    extended: false,
+    limit: config.www.postSize
+});
 
 let authMode = 'local';
 
@@ -23,7 +27,7 @@ if (config.ldap.enabled) {
     const ldapProtocol = config.ldap.secure ? 'ldaps' : 'ldap';
     if (!config.ldap.method || config.ldap.method === 'ldapjs') {
         try {
-            LdapStrategy = require('passport-ldapjs').Strategy; // eslint-disable-line global-require
+            LdapStrategy = require('passport-ldapjs').Strategy;
             authMode = 'ldap';
             log.info('LDAP', 'Found module "passport-ldapjs". It will be used for LDAP auth.');
 
@@ -49,7 +53,7 @@ if (config.ldap.enabled) {
 
     if (!LdapStrategy && (!config.ldap.method || config.ldap.method === 'ldapauth')) {
         try {
-            LdapStrategy = require('passport-ldapauth').Strategy; // eslint-disable-line global-require
+            LdapStrategy = require('passport-ldapauth').Strategy;
             authMode = 'ldapauth';
             log.info('LDAP', 'Found module "passport-ldapauth". It will be used for LDAP auth.');
 
@@ -69,16 +73,7 @@ if (config.ldap.enabled) {
     }
 }
 
-module.exports.csrfProtection = csrf({
-    cookie: true
-});
-
-module.exports.parseForm = bodyParser.urlencoded({
-    extended: false,
-    limit: config.www.postSize
-});
-
-module.exports.loggedIn = (req, res, next) => {
+const loggedIn = (req, res, next) => {
     if (!req.user) {
         next(new interoperableErrors.NotLoggedInError());
     } else {
@@ -86,7 +81,7 @@ module.exports.loggedIn = (req, res, next) => {
     }
 };
 
-module.exports.authByAccessToken = (req, res, next) => {
+const authByAccessToken = (req, res, next) => {
     const accessToken = req.get('access-token') || req.query.access_token;
 
     if (!accessToken) {
@@ -118,7 +113,14 @@ module.exports.authByAccessToken = (req, res, next) => {
     });
 };
 
-module.exports.tryAuthByRestrictedAccessToken = (req, res, next) => {
+const tryAuthByRestrictedAccessToken = (req, res, next) => {
+    // Static asset paths (client bundles, static files) don't carry a token prefix.
+    // Vite emits absolute imports like /client/node_modules/.vite/deps/react.js that
+    // the browser fetches directly without the /{token}/ prefix — pass them through.
+    if (req.url.startsWith('/client') || req.url.startsWith('/static')) {
+        return next();
+    }
+
     const pathComps = req.url.split('/');
 
     pathComps.shift();
@@ -137,18 +139,19 @@ module.exports.tryAuthByRestrictedAccessToken = (req, res, next) => {
     });
 };
 
-
-module.exports.setupRegularAuth = app => {
+const setupRegularAuth = (app) => {
     app.use(passport.initialize());
     app.use(passport.session());
 };
 
-module.exports.restLogout = (req, res) => {
-    req.logout({},()=>{log.info(`User logged out`);});
-    res.json();
+const restLogout = (req, res) => {
+    req.logout({}, () => {
+        log.info(`User logged out`);
+        res.json();
+    });
 };
 
-module.exports.restLogin = (req, res, next) => {
+const restLogin = (req, res, next) => {
     passport.authenticate(authMode, (err, user, info) => {
         if (err) {
             return next(err);
@@ -164,10 +167,8 @@ module.exports.restLogin = (req, res, next) => {
             }
 
             if (req.body.remember) {
-                // Cookie expires after 30 days
                 req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
             } else {
-                // Cookie expires at end of session
                 req.session.cookie.expires = false;
             }
 
@@ -175,6 +176,7 @@ module.exports.restLogin = (req, res, next) => {
         });
     })(req, res, next);
 };
+
 let CasStrategy;
 if (config.cas && config.cas.enabled === true) {
     try {
@@ -185,10 +187,16 @@ if (config.cas && config.cas.enabled === true) {
         log.info('CAS', 'Module passport-cas2 not installed.');
     }
 }
+
+let authMethod;
+let isAuthMethodLocal;
+let authenticateCas;
+let logoutCas;
+
 if (CasStrategy) {
     log.info('Using CAS auth (passport-cas2)');
-    module.exports.authMethod = 'cas';
-    module.exports.isAuthMethodLocal = false;
+    authMethod = 'cas';
+    isAuthMethodLocal = false;
 
     const cas = new CasStrategy({
         casURL: config.cas.url,
@@ -196,12 +204,12 @@ if (CasStrategy) {
             displayName: config.cas.nameTag,
             emails: config.cas.mailTag
         }
-    }, 
-    nodeifyFunction(async (username, profile) => { 
+    },
+    nodeifyFunction(async (username, profile) => {
         try {
             const user = await users.getByUsername(username);
 
-            log.info('CAS', 'Old User: '+JSON.stringify(profile));
+            log.info('CAS', 'Old User: ' + JSON.stringify(profile));
             return {
                 id: user.id,
                 username,
@@ -218,7 +226,7 @@ if (CasStrategy) {
                     name: profile.displayName,
                     email: profile.emails[0].value
                 });
-                log.info('CAS', 'New User: '+JSON.stringify(profile));
+                log.info('CAS', 'New User: ' + JSON.stringify(profile));
 
                 return {
                     id: userId,
@@ -236,15 +244,15 @@ if (CasStrategy) {
     passport.serializeUser((user, done) => done(null, user));
     passport.deserializeUser((user, done) => done(null, user));
 
-    module.exports.authenticateCas = passport.authenticate('cas', { failureRedirect: '/login?cas-login-error' });
-    module.exports.logoutCas = function (req, res) {
-        cas.logout(req, res, config.www.trustedUrlBase+'/?cas-logout-success');
+    authenticateCas = passport.authenticate('cas', { failureRedirect: '/login?cas-login-error' });
+    logoutCas = (req, res) => {
+        cas.logout(req, res, config.www.trustedUrlBase + '/?cas-logout-success');
     };
 
 } else if (LdapStrategy) {
-    log.info('Using LDAP auth (passport-' + authMode === 'ldap' ? 'ldapjs' : authMode + ')');
-    module.exports.authMethod = 'ldap';
-    module.exports.isAuthMethodLocal = false;
+    log.info('Using LDAP auth (passport-' + (authMode === 'ldap' ? 'ldapjs' : authMode) + ')');
+    authMethod = 'ldap';
+    isAuthMethodLocal = false;
 
     passport.use(new LdapStrategy(ldapStrategyOpts, nodeifyFunction(async profile => {
         try {
@@ -284,8 +292,8 @@ if (CasStrategy) {
 
 } else {
     log.info('Using local auth');
-    module.exports.authMethod = 'local';
-    module.exports.isAuthMethodLocal = true;
+    authMethod = 'local';
+    isAuthMethodLocal = true;
 
     passport.use(new LocalStrategy(nodeifyFunction(async (username, password) => await users.getByUsernameIfPasswordMatch(contextHelpers.getAdminContext(), username, password))));
 
@@ -293,3 +301,17 @@ if (CasStrategy) {
     passport.deserializeUser((id, done) => nodeifyPromise(users.getById(contextHelpers.getAdminContext(), id), done));
 }
 
+export default {
+    csrfProtection,
+    parseForm,
+    loggedIn,
+    authByAccessToken,
+    tryAuthByRestrictedAccessToken,
+    setupRegularAuth,
+    restLogout,
+    restLogin,
+    authMethod,
+    isAuthMethodLocal,
+    authenticateCas,
+    logoutCas
+};

@@ -1,6 +1,4 @@
-'use strict';
-
-const {TagLanguages} = require('./templates');
+import { TagLanguages } from './templates.js';
 
 const UnsubscriptionMode = {
     MIN: 0,
@@ -46,11 +44,20 @@ function getFieldColumn(field) {
 
 const toNameTagLangauge = TagLanguages.SIMPLE;
 
-module.exports = {
+export {
     UnsubscriptionMode,
     SubscriptionStatus,
     SubscriptionSource,
     FieldWizard,
+    getFieldColumn,
+    toNameTagLangauge,
+};
+
+export default {
+    FieldWizard,
+    SubscriptionSource,
+    SubscriptionStatus,
+    UnsubscriptionMode,
     getFieldColumn,
     toNameTagLangauge
 };

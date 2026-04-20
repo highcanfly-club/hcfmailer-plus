@@ -1,9 +1,8 @@
-'use strict';
+import config from '../lib/config.js';
+import web from '../lib/web.js';
+import mail from '../lib/mail.js';
+import expect from 'chai';
 
-const config = require('../lib/config');
-const web = require('../lib/web');
-const mail = require('../lib/mail');
-const expect = require('chai').expect;
 
 const fieldHelpers = list => ({
     async fillFields(subscription) {
@@ -47,7 +46,7 @@ const fieldHelpers = list => ({
     }
 });
 
-module.exports = list => ({
+export default list; => ({
 
     webSubscribe: web({
         baseUrl: config.basePublicUrl,

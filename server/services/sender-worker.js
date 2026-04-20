@@ -1,14 +1,12 @@
-'use strict';
-
-const config = require('../lib/config');
-const log = require('../lib/log');
-const mailers = require('../lib/mailers');
-const messageSender = require('../lib/message-sender');
-const {CampaignTrackerActivityType} = require('../../shared/activity-log');
-const activityLog = require('../lib/activity-log');
+import { CampaignTrackerActivityType } from '../../shared/activity-log.js';
+import config from '../lib/config.js';
+import log from '../lib/log.js';
+import mailers from '../lib/mailers.js';
+import messageSender from '../lib/message-sender.js';
+import activityLog from '../lib/activity-log.js';
+import '../lib/fork.js';
 
 // TODO - use extension manager to add check to cleanExit (in fork) that waits for sendRegularCampaignMessage or sendQueuedMessage to finish
-require('../lib/fork');
 
 const MessageType = messageSender.MessageType;
 
@@ -146,5 +144,4 @@ if (config.title) {
 }
 
 sendToMaster('worker-started');
-
 

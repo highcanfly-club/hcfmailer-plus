@@ -1,9 +1,8 @@
-'use strict';
-
-const passport = require('../../lib/passport');
-const mosaicoTemplates = require('../../models/mosaico-templates');
-const router = require('../../lib/router-async').create();
-const {castToInteger} = require('../../lib/helpers');
+import { castToInteger } from '../../lib/helpers.js';
+import passport from '../../lib/passport.js';
+import mosaicoTemplates from '../../models/mosaico-templates.js';
+import routerFactory from '../../lib/router-async.js'
+const router = routerFactory.create();
 
 
 router.getAsync('/mosaico-templates/:mosaicoTemplateId', passport.loggedIn, async (req, res) => {
@@ -37,5 +36,4 @@ router.postAsync('/mosaico-templates-by-tag-language-table/:tagLanguage', passpo
     return res.json(await mosaicoTemplates.listByTagLanguageDTAjax(req.context, req.params.tagLanguage, req.body));
 });
 
-
-module.exports = router;
+export default router;

@@ -1,20 +1,17 @@
-'use strict';
-
-const log = require('../lib/log');
-const knex = require('../lib/knex');
-const triggers = require('../models/triggers');
-const campaigns = require('../models/campaigns');
-const subscriptions = require('../models/subscriptions');
-const segments = require('../models/segments');
-const { Entity, Event } = require('../../shared/triggers');
-const { SubscriptionStatus } = require('../../shared/lists');
-const links = require('../models/links');
-const contextHelpers = require('../lib/context-helpers');
-const messageSender = require('../lib/message-sender');
+import { Entity, Event } from '../../shared/triggers.js';
+import { SubscriptionStatus } from '../../shared/lists.js';
+import log from '../lib/log.js';
+import knex from '../lib/knex.js';
+import triggers from '../models/triggers.js';
+import campaigns from '../models/campaigns.js';
+import subscriptions from '../models/subscriptions.js';
+import segments from '../models/segments.js';
+import links from '../models/links.js';
+import contextHelpers from '../lib/context-helpers.js';
+import messageSender from '../lib/message-sender.js';
 
 const triggerCheckPeriod = 30 * 1000;
 const triggerFirePeriod = 120 * 1000;
-
 
 async function run() {
     while (true) {
@@ -167,12 +164,10 @@ async function run() {
                 }
             }
 
-
             await tx('triggers').update('last_check', new Date(currentTs)).where('id', trigger.id);
 
             return true;
         });
-
 
         if (!fired) {
             const nextCycle = new Promise(resolve => {
@@ -191,4 +186,8 @@ function start() {
     });
 }
 
-module.exports.start = start;
+export { start };
+
+export default {
+    start
+};

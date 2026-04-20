@@ -1,34 +1,29 @@
-'use strict';
+import { tUI } from '../lib/translate.js';
+import { getTrustedUrl, getPublicUrl } from '../lib/urls.js';
+import { SubscriptionStatus, SubscriptionSource } from '../../shared/lists.js';
+import { cleanupFromPost } from '../lib/helpers.js';
+import log from '../lib/log.js';
+import config from '../lib/config.js';
+import routerFactory from '../lib/router-async.js'
+const router = routerFactory.create();
+import confirmations from '../models/confirmations.js';
+import subscriptions from '../models/subscriptions.js';
+import lists from '../models/lists.js';
+import fields from '../models/fields.js';
+import shares from '../models/shares.js';
+import settings from '../models/settings.js';
+import contextHelpers from '../lib/context-helpers.js';
+import forms from '../models/forms.js';
+import bluebird from 'bluebird';
+import * as openpgp from 'openpgp';
+import cors from 'cors';
+import cache from 'memory-cache';
+import geoip from 'geoip-ultralight';
+import passport from '../lib/passport.js';
+import tools from '../lib/tools.js';
+import mailHelpers from '../lib/subscription-mail-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
 
-const log = require('../lib/log');
-const config = require('../lib/config');
-const router = require('../lib/router-async').create();
-const confirmations = require('../models/confirmations');
-const subscriptions = require('../models/subscriptions');
-const lists = require('../models/lists');
-const fields = require('../models/fields');
-const shares = require('../models/shares');
-const settings = require('../models/settings');
-const { tUI } = require('../lib/translate');
-const contextHelpers = require('../lib/context-helpers');
-const forms = require('../models/forms');
-const {getTrustedUrl, getPublicUrl} = require('../lib/urls');
-const bluebird = require('bluebird');
-
-const { SubscriptionStatus, SubscriptionSource } = require('../../shared/lists');
-
-const openpgp = require('openpgp');
-const cors = require('cors');
-const cache = require('memory-cache');
-const geoip = require('geoip-ultralight');
-const passport = require('../lib/passport');
-
-const tools = require('../lib/tools');
-const mailHelpers = require('../lib/subscription-mail-helpers');
-
-const interoperableErrors = require('../../shared/interoperable-errors');
-
-const { cleanupFromPost } = require('../lib/helpers');
 
 const originWhitelist = config.cors && config.cors.origins || [];
 
@@ -99,7 +94,6 @@ async function captureFlashMessages(res) {
     return await renderAsync('subscription/capture-flash-messages', { layout: null });
 }
 
-
 router.getAsync('/confirm/subscribe/:cid', async (req, res) => {
     const confirmation = await takeConfirmationAndValidate(req, 'subscribe', () => new interoperableErrors.InvalidConfirmationForSubscriptionError('Request invalid or already completed. If your subscription request is still pending, please subscribe again.'));
     const data = confirmation.data;
@@ -131,7 +125,6 @@ router.getAsync('/confirm/subscribe/:cid', async (req, res) => {
     res.redirect('/subscription/' + encodeURIComponent(list.cid) + '/subscribed-notice');
 });
 
-
 router.getAsync('/confirm/change-address/:cid', async (req, res) => {
     const confirmation = await takeConfirmationAndValidate(req, 'change-address', () => new interoperableErrors.InvalidConfirmationForAddressChangeError('Request invalid or already completed. If your address change request is still pending, please change the address again.'));
     const list = await lists.getById(contextHelpers.getAdminContext(), confirmation.list);
@@ -145,7 +138,6 @@ router.getAsync('/confirm/change-address/:cid', async (req, res) => {
     res.redirect('/subscription/' + encodeURIComponent(list.cid) + '/manage/' + subscription.cid);
 });
 
-
 router.getAsync('/confirm/unsubscribe/:cid', async (req, res) => {
     const confirmation = await takeConfirmationAndValidate(req, 'unsubscribe', () => new interoperableErrors.InvalidConfirmationForUnsubscriptionError('Request invalid or already completed. If your unsubscription request is still pending, please unsubscribe again.'));
     const list = await lists.getById(contextHelpers.getAdminContext(), confirmation.list);
@@ -157,7 +149,6 @@ router.getAsync('/confirm/unsubscribe/:cid', async (req, res) => {
 
     res.redirect('/subscription/' + encodeURIComponent(list.cid) + '/unsubscribed-notice');
 });
-
 
 async function _renderSubscribe(req, res, list, subscription) {
     const data = {};
@@ -218,7 +209,6 @@ router.getAsync('/:cid', passport.csrfProtection, async (req, res) => {
 
     await _renderSubscribe(req, res, list, subscription);
 });
-
 
 router.options('/:cid/subscribe', cors(corsOptions));
 
@@ -311,7 +301,6 @@ router.postAsync('/:cid/subscribe', passport.parseForm, corsOrCsrfProtection, as
     }
 });
 
-
 router.options('/:cid/widget', cors(corsOptions));
 
 router.getAsync('/:cid/widget', cors(corsOptions), async (req, res) => {
@@ -354,8 +343,6 @@ router.getAsync('/:cid/widget', cors(corsOptions), async (req, res) => {
     cache.put(req.path, response, 30000); // ms
     res.status(200).json(response);
 });
-
-
 
 router.getAsync('/:lcid/manage/:ucid', passport.csrfProtection, async (req, res) => {
     const list = await lists.getByCid(contextHelpers.getAdminContext(), req.params.lcid);
@@ -445,7 +432,6 @@ router.getAsync('/:lcid/manage-address/:ucid', passport.csrfProtection, async (r
     res.send(htmlRenderer(data));
 });
 
-
 router.postAsync('/:lcid/manage-address', passport.parseForm, passport.csrfProtection, async (req, res) => {
     const list = await lists.getByCid(contextHelpers.getAdminContext(), req.params.lcid);
 
@@ -497,7 +483,6 @@ router.postAsync('/:lcid/manage-address', passport.parseForm, passport.csrfProte
     res.redirect('/subscription/' + encodeURIComponent(req.params.lcid) + '/manage/' + encodeURIComponent(req.body.cid));
 });
 
-
 router.getAsync('/:lcid/unsubscribe/:ucid', passport.csrfProtection, async (req, res) => {
     const list = await lists.getByCid(contextHelpers.getAdminContext(), req.params.lcid);
 
@@ -547,7 +532,6 @@ router.getAsync('/:lcid/unsubscribe/:ucid', passport.csrfProtection, async (req,
     }
 });
 
-
 router.postAsync('/:lcid/unsubscribe', passport.parseForm, passport.csrfProtection, async (req, res) => {
     const list = await lists.getByCid(contextHelpers.getAdminContext(), req.params.lcid);
 
@@ -555,7 +539,6 @@ router.postAsync('/:lcid/unsubscribe', passport.parseForm, passport.csrfProtecti
 
     await handleUnsubscribe(list, req.body.ucid, false, campaignCid, req.ip, req, res);
 });
-
 
 async function handleUnsubscribe(list, subscriptionCid, autoUnsubscribe, campaignCid, ip, req, res) {
     if ((list.unsubscription_mode === lists.UnsubscriptionMode.ONE_STEP || list.unsubscription_mode === lists.UnsubscriptionMode.ONE_STEP_WITH_FORM) ||
@@ -599,7 +582,6 @@ async function handleUnsubscribe(list, subscriptionCid, autoUnsubscribe, campaig
     }
 }
 
-
 router.getAsync('/:cid/confirm-subscription-notice', async (req, res) => {
     await webNotice('confirm-subscription', req, res);
 });
@@ -627,7 +609,6 @@ router.getAsync('/:cid/manual-unsubscribe-notice', async (req, res) => {
 router.getAsync('/:cid/privacy-policy', async (req, res) => {
     await webNotice('privacy-policy', req, res);
 });
-
 
 router.postAsync('/publickey', passport.parseForm, async (req, res) => {
     const configItems = await settings.get(contextHelpers.getAdminContext(), ['pgpPassphrase', 'pgpPrivateKey']);
@@ -664,7 +645,6 @@ router.postAsync('/publickey', passport.parseForm, async (req, res) => {
     res.end(pubkey);
 });
 
-
 async function webNotice(type, req, res) {
     const list = await lists.getByCid(contextHelpers.getAdminContext(), req.params.cid);
 
@@ -691,4 +671,4 @@ async function webNotice(type, req, res) {
     res.send(htmlRenderer(data));
 }
 
-module.exports = router;
+export default router;

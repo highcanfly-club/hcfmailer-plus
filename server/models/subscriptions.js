@@ -1,21 +1,21 @@
-'use strict';
+import { SubscriptionSource, SubscriptionStatus, getFieldColumn } from '../../shared/lists.js';
+import { CampaignMessageStatus } from '../../shared/campaigns.js';
+import { enforce, filterObject, hashEmail, normalizeEmail } from '../lib/helpers.js';
+import { formatDate, formatBirthday } from '../../shared/date.js';
+import config from '../lib/config.js';
+import knex from '../lib/knex.js';
+import { hasher as hasherFactory } from 'node-object-hash';
+const hasher = hasherFactory();
+import shortid from '../lib/shortid.js';
+import dtHelpers from '../lib/dt-helpers.js';
+import interoperableErrors from '../../shared/interoperable-errors.js';
+import shares from './shares.js';
+import fields from './fields.js';
+import segments from './segments.js';
+import moment from 'moment';
+import campaigns from './campaigns.js';
+import lists from './lists.js';
 
-const config = require('../lib/config');
-const knex = require('../lib/knex');
-const hasher = require('node-object-hash')();
-const shortid = require('../lib/shortid');
-const dtHelpers = require('../lib/dt-helpers');
-const interoperableErrors = require('../../shared/interoperable-errors');
-const shares = require('./shares');
-const fields = require('./fields');
-const { SubscriptionSource, SubscriptionStatus, getFieldColumn } = require('../../shared/lists');
-const { CampaignMessageStatus } = require('../../shared/campaigns');
-const segments = require('./segments');
-const { enforce, filterObject, hashEmail, normalizeEmail } = require('../lib/helpers');
-const moment = require('moment');
-const { formatDate, formatBirthday } = require('../../shared/date');
-const campaigns = require('./campaigns');
-const lists = require('./lists');
 
 const allowedKeysBase = new Set(['email', 'tz', 'is_test', 'status']);
 
@@ -82,7 +82,6 @@ fieldTypes.option = {
     afterJSON: (groupedField, entity) => {},
     listRender: (groupedField, value) => value ? groupedField.settings.checkedLabel : groupedField.settings.uncheckedLabel
 };
-
 
 function getSubscriptionTableName(listId) {
     return `subscription__${listId}`;
@@ -180,7 +179,6 @@ function ungroupSubscription(groupedFieldsMap, entity) {
         }
     }
 }
-
 
 function getAllowedKeys(groupedFieldsMap) {
     return new Set([
@@ -572,8 +570,6 @@ function updateSourcesAndHashEmail(subscription, source, groupedFieldsMap) {
     }
 }
 
-
-
 function purgeSensitiveData(subscription, groupedFieldsMap) {
     subscription.email = null;
 
@@ -753,7 +749,6 @@ async function removeByEmailAndGet(context, listId, email) {
     });
 }
 
-
 async function _changeStatusTx(tx, context, listId, existing, newStatus) {
     enforce(newStatus !== SubscriptionStatus.SUBSCRIBED);
 
@@ -813,8 +808,6 @@ async function changeStatusTx(tx, context, listId, subscriptionId, subscriptionS
     await _changeStatusTx(tx, context, listId, existing, subscriptionStatus);
 }
 
-
-
 async function updateAddressAndGet(context, listId, subscriptionId, emailNew) {
     return await knex.transaction(async tx => {
         await shares.enforceEntityPermissionTx(tx, context, 'list', listId, 'manageSubscriptions');
@@ -861,7 +854,6 @@ async function updateManaged(context, listId, cid, entity) {
     });
 }
 
-
 async function getListsWithEmail(context, email) {
     // FIXME - this methods is rather suboptimal if there are many lists. It quite needs permission caching in shares.js
 
@@ -882,30 +874,60 @@ async function getListsWithEmail(context, email) {
     });
 }
 
-module.exports.getSubscriptionTableName = getSubscriptionTableName;
-module.exports.hashByList = hashByList;
-module.exports.getById = getById;
-module.exports.getByCidTx = getByCidTx;
-module.exports.getByCid = getByCid;
-module.exports.getByEmail = getByEmail;
-module.exports.list = list;
-module.exports.listIterator = listIterator;
-module.exports.listDTAjax = listDTAjax;
-module.exports.listTestUsersTx = listTestUsersTx;
-module.exports.listTestUsersDTAjax = listTestUsersDTAjax;
-module.exports.serverValidate = serverValidate;
-module.exports.create = create;
-module.exports.getGroupedFieldsMapTx = getGroupedFieldsMapTx;
-module.exports.createTxWithGroupedFieldsMap = createTxWithGroupedFieldsMap;
-module.exports.updateWithConsistencyCheck = updateWithConsistencyCheck;
-module.exports.remove = remove;
-module.exports.removeByEmailAndGet = removeByEmailAndGet;
-module.exports.unsubscribeByCidAndGet = unsubscribeByCidAndGet;
-module.exports.unsubscribeByIdAndGet = unsubscribeByIdAndGet;
-module.exports.unsubscribeByEmailAndGet = unsubscribeByEmailAndGet;
-module.exports.unsubscribeByEmailAndGetTx = unsubscribeByEmailAndGetTx;
-module.exports.updateAddressAndGet = updateAddressAndGet;
-module.exports.updateManaged = updateManaged;
-module.exports.getListsWithEmail = getListsWithEmail;
-module.exports.changeStatusTx = changeStatusTx;
-module.exports.purgeSensitiveData = purgeSensitiveData;
+export { getSubscriptionTableName };
+export { hashByList };
+export { getById };
+export { getByCidTx };
+export { getByCid };
+export { getByEmail };
+export { list };
+export { listIterator };
+export { listDTAjax };
+export { listTestUsersTx };
+export { listTestUsersDTAjax };
+export { serverValidate };
+export { create };
+export { getGroupedFieldsMapTx };
+export { createTxWithGroupedFieldsMap };
+export { updateWithConsistencyCheck };
+export { remove };
+export { removeByEmailAndGet };
+export { unsubscribeByCidAndGet };
+export { unsubscribeByIdAndGet };
+export { unsubscribeByEmailAndGet };
+export { unsubscribeByEmailAndGetTx };
+export { updateAddressAndGet };
+export { updateManaged };
+export { getListsWithEmail };
+export { changeStatusTx };
+export { purgeSensitiveData };
+
+export default {
+    changeStatusTx,
+    create,
+    createTxWithGroupedFieldsMap,
+    getByCid,
+    getByCidTx,
+    getByEmail,
+    getById,
+    getGroupedFieldsMapTx,
+    getListsWithEmail,
+    getSubscriptionTableName,
+    hashByList,
+    list,
+    listDTAjax,
+    listIterator,
+    listTestUsersDTAjax,
+    listTestUsersTx,
+    purgeSensitiveData,
+    remove,
+    removeByEmailAndGet,
+    serverValidate,
+    unsubscribeByCidAndGet,
+    unsubscribeByEmailAndGet,
+    unsubscribeByEmailAndGetTx,
+    unsubscribeByIdAndGet,
+    updateAddressAndGet,
+    updateManaged,
+    updateWithConsistencyCheck
+};

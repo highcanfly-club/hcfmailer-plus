@@ -1,5 +1,3 @@
-'use strict';
-
 function convertToFake(dict) {
     function convertValueToFakeLang(str) {
         let from = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+\\|`~[{]};:'\",<.>/?";
@@ -82,5 +80,9 @@ function getLang(lng) {
     return langCodes[lng];
 }
 
-module.exports.convertToFake = convertToFake;
-module.exports.getLang = getLang;
+export { convertToFake, getLang };
+
+export default {
+    convertToFake,
+    getLang
+};
