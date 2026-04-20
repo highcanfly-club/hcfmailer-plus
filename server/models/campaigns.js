@@ -1,5 +1,5 @@
 import knex from '../lib/knex.js';
-import hasherLib from 'node-object-hash';
+import { hasher as hasherLib } from 'node-object-hash';
 const hasher = hasherLib();
 import * as dtHelpers from '../lib/dt-helpers.js';
 import * as interoperableErrors from '../../shared/interoperable-errors.js';

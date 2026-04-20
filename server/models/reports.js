@@ -2,7 +2,7 @@ import { enforce, filterObject } from '../lib/helpers.js';
 import { LinkId } from './links.js';
 import { Readable } from 'stream';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import dtHelpers from '../lib/dt-helpers.js';
 import interoperableErrors from '../../shared/interoperable-errors.js';

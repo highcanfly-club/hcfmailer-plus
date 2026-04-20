@@ -5,7 +5,7 @@ import knex from '../lib/knex.js';
 import dtHelpers from '../lib/dt-helpers.js';
 import interoperableErrors from '../../shared/interoperable-errors.js';
 import shares from './shares.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import moment from 'moment';
 import fields from './fields.js';

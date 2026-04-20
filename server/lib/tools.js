@@ -7,13 +7,14 @@ import { tUI, tLog, getLangCodeFromExpressLocale } from './translate.js';
 import { TagLanguages } from '../../shared/templates.js';
 import isemail from 'isemail';
 import path from 'path';
-import hasher from 'node-object-hash';
+import { hasher as createHasher } from 'node-object-hash';
 import mjml2html from 'mjml';
 import hbs from 'hbs';
 import juice from 'juice';
 import he from 'he';
 import htmlToText from 'html-to-text';
 import fs from 'fs-extra';
+const hasher = createHasher();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

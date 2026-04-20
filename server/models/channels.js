@@ -3,7 +3,7 @@ import { allTagLanguages } from '../../shared/templates.js';
 import { CampaignSource, } from '../../shared/campaigns.js';
 import { EntityActivityType, CampaignActivityType } from '../../shared/activity-log.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import dtHelpers from '../lib/dt-helpers.js';
 import interoperableErrors from '../../shared/interoperable-errors.js';

@@ -1,6 +1,6 @@
 import { enforce, filterObject } from '../lib/helpers.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import interoperableErrors from '../../shared/interoperable-errors.js';
 import shares from './shares.js';

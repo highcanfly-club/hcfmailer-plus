@@ -2,7 +2,7 @@ import { enforce, filterObject } from '../lib/helpers.js';
 import { EntityActivityType } from '../../shared/activity-log.js';
 import { UnsubscriptionMode, FieldWizard } from '../../shared/lists.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import dtHelpers from '../lib/dt-helpers.js';
 import shortid from '../lib/shortid.js';

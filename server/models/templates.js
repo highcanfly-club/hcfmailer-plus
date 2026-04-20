@@ -2,7 +2,7 @@ import { enforce, filterObject } from '../lib/helpers.js';
 import { convertFileURLs } from '../lib/campaign-content.js';
 import { allTagLanguages } from '../../shared/templates.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import dtHelpers from '../lib/dt-helpers.js';
 import interoperableErrors from '../../shared/interoperable-errors.js';

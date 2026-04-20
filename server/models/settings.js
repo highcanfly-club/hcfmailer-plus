@@ -1,6 +1,6 @@
 import { filterObject } from '../lib/helpers.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import shares from './shares.js';
 

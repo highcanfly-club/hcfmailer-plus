@@ -4,7 +4,7 @@ import { enforce, filterObject, hashEmail, normalizeEmail } from '../lib/helpers
 import { formatDate, formatBirthday } from '../../shared/date.js';
 import config from '../lib/config.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import shortid from '../lib/shortid.js';
 import dtHelpers from '../lib/dt-helpers.js';

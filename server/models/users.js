@@ -4,7 +4,7 @@ import { tUI } from '../lib/translate.js';
 import { getSystemSendConfigurationId } from '../../shared/send-configurations.js';
 import config from '../lib/config.js';
 import knex from '../lib/knex.js';
-import hasherFactory from 'node-object-hash';
+import { hasher as hasherFactory } from 'node-object-hash';
 const hasher = hasherFactory();
 import interoperableErrors from '../../shared/interoperable-errors.js';
 import passwordValidator from '../../shared/password-validator.js';
