@@ -23,7 +23,7 @@ spec:
         io.kompose.service: mongo
     spec:
       containers:
-        - image: mongo:latest
+        - image: mongo:7
           name: mongo
           ports:
             - containerPort: 27019
