@@ -39,6 +39,13 @@ export default function List(props) {
                 link: `/users/${data[0]}/edit`
             });
 
+            if (mailtrainConfig.isAuthMethodLocal) {
+                actions.push({
+                    label: <Icon icon="key" title={t('setPassword')}/>,
+                    link: `/users/${data[0]}/password`
+                });
+            }
+
             actions.push({
                 label: <Icon icon="share-square" title={t('share')}/>,
                 link: `/users/${data[0]}/shares`

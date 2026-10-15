@@ -28,6 +28,11 @@ router.deleteAsync('/users/:userId', passport.loggedIn, passport.csrfProtection,
     return res.json();
 });
 
+router.putAsync('/users/:userId/password', passport.loggedIn, passport.csrfProtection, async (req, res) => {
+    await users.setPassword(req.context, castToInteger(req.params.userId), req.body.password);
+    return res.json();
+});
+
 router.postAsync('/users-validate', passport.loggedIn, async (req, res) => {
     return res.json(await users.serverValidate(req.context, req.body));
 });

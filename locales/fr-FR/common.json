@@ -1102,7 +1102,7 @@
   "userName": "Nom d'utilisateur",
   "repeatPassword": "Répéter le mot de passe",
   "deleteUser": "Supprimer l'utilisateur",
-  "userName-1": "Nom d'utilisateur}}\"",
+  "userName-1": "Utilisateur \"{{name}}\"",
   "shares": "Actions",
   "subscriptionConfirmed": "Inscription Confirmée",
   "listEmailAddressAlreadyRegistered": "L'adresse email est déjà enregistrée",
@@ -1174,5 +1174,7 @@
   "statsInfo":"Ci-dessous, vous pouvez télécharger des rapports prédéfinis liés à cette campagne. Chaque lien génère un fichier CSV qui peut être visualisé dans un éditeur de tableur. Les rapports personnalisés et les rapports qui couvrent plusieurs campagnes peuvent être créés via cette fonctionnalité",
   "functionnalityOfProduct":"fonctionnalité de HCFMailer+",
   "bugmodal":"BUG: Utilisez actuellement [Supprimer] de la vue de liste, cliquez en dehors de cette modale pour la fermer. ",
-  "noEmailConfirmation":"Cette personne ne recevra pas d’e-mail de confirmation, alors assurez-vous d’avoir la permission de lui envoyer un e-mail."
+  "noEmailConfirmation":"Cette personne ne recevra pas d’e-mail de confirmation, alors assurez-vous d’avoir la permission de lui envoyer un e-mail.",
+  "setPassword": "Définir le mot de passe",
+  "passwordUpdated": "Mot de passe mis à jour"
 }

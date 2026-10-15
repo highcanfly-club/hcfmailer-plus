@@ -235,6 +235,29 @@ async function updateWithConsistencyCheck(context, user, isOwnAccount) {
     });
 }
 
+async function setPassword(context, userId, password) {
+    enforce(passport.isAuthMethodLocal, 'Local user management is required');
+    enforce(typeof password === 'string' && password.length > 0, 'Password not set');
+
+    if (passwordValidator().test(password).errors.length > 0) {
+        // This is not an interoperable error because this is not supposed to happen unless the client is tampered with.
+        throw new Error('Invalid password');
+    }
+
+    const passwordHash = await bcryptHash(password);
+
+    await knex.transaction(async tx => {
+        const existing = await tx('users').where('id', userId).first();
+        if (!existing) {
+            shares.throwPermissionDenied();
+        }
+
+        await shares.enforceEntityPermissionTx(tx, context, 'namespace', existing.namespace, 'manageUsers');
+
+        await tx('users').where('id', userId).update({ password: passwordHash });
+    });
+}
+
 async function remove(context, userId) {
     enforce(userId !== 1, 'Admin cannot be deleted');
     enforce(context.user.id !== userId, 'User cannot delete himself/herself');
@@ -430,6 +453,7 @@ async function getByRestrictedAccessToken(token) {
 
 export { listDTAjax };
 export { remove };
+export { setPassword };
 export { updateWithConsistencyCheck };
 export { create };
 export { hash };
@@ -449,6 +473,7 @@ export { refreshRestrictedAccessToken };
 export { registerRestrictedAccessTokenMethod };
 
 export default {
+    setPassword,
     create,
     getAccessToken,
     getByAccessToken,

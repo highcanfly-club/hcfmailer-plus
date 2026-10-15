@@ -3,6 +3,7 @@
 import React from 'react';
 import CUD from './CUD';
 import List from './List';
+import Password from './Password';
 import UserShares from '../shares/UserShares';
 import {ellipsizeBreadcrumbLabel} from "../lib/helpers";
 import {namespaceCheckPermissions} from "../lib/namespace";
@@ -29,6 +30,11 @@ function getMenus(t) {
                             title: t('edit'),
                             link: params => `/users/${params.userId}/edit`,
                             panelRender: props => <CUD action={props.match.params.action} entity={props.resolved.user} permissions={props.permissions} />
+                        },
+                        password: {
+                            title: t('setPassword'),
+                            link: params => `/users/${params.userId}/password`,
+                            panelRender: props => <Password entity={props.resolved.user} />
                         },
                         shares: {
                             title: t('shares'),

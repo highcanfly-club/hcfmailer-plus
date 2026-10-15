@@ -1310,7 +1310,7 @@
   "userName": "Nome de usuário",
   "repeatPassword": "Repetir Senha",
   "deleteUser": "Excluir usuário",
-  "userName-1": "Usuário \"{{name}} \"",
+  "userName-1": "Usuário \"{{name}}\"",
   "shares": "Compartilhamentos",
   "subscriptionConfirmed": "Assinatura Confirmada",
   "listEmailAddressAlreadyRegistered": "{{list}}: Endereço de e-mail já registrado",
