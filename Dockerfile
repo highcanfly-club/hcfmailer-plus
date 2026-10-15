@@ -86,11 +86,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN ARCH=$(uname -m)\
     && if [ "$ARCH" = "x86_64" ]; then\
-        curl -L https://dl.min.io/client/mc/release/linux-amd64/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
+        curl -L https://dl.min.io/aistor/mc/release/linux-amd64/mc.RELEASE.2026-09-19T15-24-59Z > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
     elif [ "$ARCH" = "aarch64" ]; then\
-        curl -L https://dl.min.io/client/mc/release/linux-arm64/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
+        curl -L https://dl.min.io/aistor/mc/release/linux-arm64/mc.RELEASE.2026-09-19T15-24-59Z > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
     else\
-        curl -L https://dl.min.io/client/mc/release/linux-arm/mc > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
+        curl -L https://dl.min.io/aistor/mc/release/linux-arm/mc.RELEASE.2026-09-19T15-24-59Z > /usr/local/bin/mc && chmod +x /usr/local/bin/mc;\
     fi
 
 EXPOSE 3000 3003 3004
