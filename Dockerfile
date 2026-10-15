@@ -1,6 +1,6 @@
 # Mutistaged Node.js Build
 # docker buildx build --platform linux/amd64,linux/arm64 --tag highcanfly/hcfmailer-plus:PREVIEW-v20260419.0 --push .
-FROM golang:1.21-bookworm AS gobuilder
+FROM golang:1.27-bookworm AS gobuilder
 WORKDIR /app
 COPY autocert/* ./
 RUN go mod tidy
