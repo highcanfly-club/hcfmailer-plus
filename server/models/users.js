@@ -150,7 +150,7 @@ async function _validateAndPreprocess(tx, entity, isCreate, isOwnAccount) {
     enforce(!isCreate || entity.password.length > 0, 'Password not set');
 
     if (entity.password) {
-        const passwordValidatorResults = passwordValidator.test(entity.password);
+        const passwordValidatorResults = passwordValidator().test(entity.password);
         if (passwordValidatorResults.errors.length > 0) {
             // This is not an interoperable error because this is not supposed to happen unless the client is tampered with.
             throw new Error('Invalid password');
@@ -354,7 +354,7 @@ async function resetPassword(username, resetToken, password) {
         }).andWhere('reset_expire', '>', new Date()).first();
 
         if (user) {
-            const passwordValidatorResults = passwordValidator.test(password);
+            const passwordValidatorResults = passwordValidator().test(password);
             if (passwordValidatorResults.errors.length > 0) {
                 // This is not an interoperable error because this is not supposed to happen unless the client is tampered with.
                 throw new Error('Invalid password');
