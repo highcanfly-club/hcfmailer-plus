@@ -24,3 +24,4 @@ start-dev.sh
 server/config/local.yaml
 server/config/local-*.yaml
 app/
+.kilo
