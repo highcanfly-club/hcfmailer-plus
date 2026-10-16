@@ -18,6 +18,11 @@ export default function API() {
     useRequiresAuthenticatedUser();
 
     const [accessToken, setAccessToken] = useState(null);
+    const [openCall, setOpenCall] = useState(null);
+
+    function toggleCall(id) {
+        setOpenCall(current => current === id ? null : id);
+    }
 
     useEffect(() => {
         loadAccessToken();
@@ -52,7 +57,7 @@ export default function API() {
 
             <div className="card mb-3">
                 <div className="card-body">
-                    <div className="float-right">
+                    <div className="float-end">
                         <Button label={accessToken ? t('resetAccessToken') : t('generateAccessToken')} icon="redo" className="btn-info" onClickAsync={resetAccessToken} />
                     </div>
                     {accessTokenMsg}
@@ -77,9 +82,9 @@ export default function API() {
 <div className="accordion" id="apicalls">
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moresubscribers"><h4>GET /api/subscriptions/:listCid – {t('getSubscribers')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moresubscribers')}><h4>GET /api/subscriptions/:listCid – {t('getSubscribers')}</h4></button>
         </div>
-        <div id="moresubscribers" className="collapse" data-parent="#apicalls">
+        <div id="moresubscribers" className={'collapse' + (openCall === 'moresubscribers' ? ' show' : '')}>
             <div className="card-body">
                <p>
                     {t('getSubscribers')}
@@ -109,9 +114,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <h4><button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moresubscribe"><h4>POST /api/subscribe/:listCid – {t('addSubscription')}</h4></button></h4>
+          <h4><button type="button" className="btn btn-link" onClick={() => toggleCall('moresubscribe')}><h4>POST /api/subscribe/:listCid – {t('addSubscription')}</h4></button></h4>
         </div>
-        <div id="moresubscribe" className="collapse" data-parent="#apicalls">
+        <div id="moresubscribe" className={'collapse' + (openCall === 'moresubscribe' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('thisApiCallEitherInsertsANewSubscription')}
@@ -167,9 +172,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moreunsubscribe"><h4>POST /api/unsubscribe/:listCId – {t('removeSubscription')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moreunsubscribe')}><h4>POST /api/unsubscribe/:listCId – {t('removeSubscription')}</h4></button>
         </div>
-        <div id="moreunsubscribe" className="collapse" data-parent="#apicalls">
+        <div id="moreunsubscribe" className={'collapse' + (openCall === 'moreunsubscribe' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('thisApiCallMarksASubscriptionAs')}
@@ -207,9 +212,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moredelete"><h4>POST /api/delete/:listCId – {t('deleteSubscription')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moredelete')}><h4>POST /api/delete/:listCId – {t('deleteSubscription')}</h4></button>
         </div>
-        <div id="moredelete" className="collapse" data-parent="#apicalls">
+        <div id="moredelete" className={'collapse' + (openCall === 'moredelete' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('thisApiCallDeletesASubscription')}
@@ -246,9 +251,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#morefield"><h4>POST /api/field/:listId – {t('addNewCustomField')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('morefield')}><h4>POST /api/field/:listId – {t('addNewCustomField')}</h4></button>
         </div>
-        <div id="morefield" className="collapse" data-parent="#apicalls">
+        <div id="morefield" className={'collapse' + (openCall === 'morefield' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('thisApiCallCreatesANewCustomFieldForA')}
@@ -305,9 +310,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moreblacklistget"><h4>GET /api/blacklist/get – {t('getListOfBlacklistedEmails')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moreblacklistget')}><h4>GET /api/blacklist/get – {t('getListOfBlacklistedEmails')}</h4></button>
         </div>
-        <div id="moreblacklistget" className="collapse" data-parent="#apicalls">
+        <div id="moreblacklistget" className={'collapse' + (openCall === 'moreblacklistget' ? ' show' : '')}>
             <div className="card-body">
                <p>
                     {t('thisApiCallGetListOfBlacklistedEmails')}
@@ -338,9 +343,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moreblacklistadd"><h4>POST /api/blacklist/add – {t('addEmailToBlacklist')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moreblacklistadd')}><h4>POST /api/blacklist/add – {t('addEmailToBlacklist')}</h4></button>
         </div>
-        <div id="moreblacklistadd" className="collapse" data-parent="#apicalls">
+        <div id="moreblacklistadd" className={'collapse' + (openCall === 'moreblacklistadd' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('thisApiCallEitherAddEmailsToBlacklist')}
@@ -372,9 +377,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moreblacklistdelete"><h4>POST /api/blacklist/delete – {t('deleteEmailFromBlacklist')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moreblacklistdelete')}><h4>POST /api/blacklist/delete – {t('deleteEmailFromBlacklist')}</h4></button>
         </div>
-        <div id="moreblacklistdelete" className="collapse" data-parent="#apicalls">
+        <div id="moreblacklistdelete" className={'collapse' + (openCall === 'moreblacklistdelete' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('thisApiCallEitherDeleteEmailsFrom')}
@@ -406,9 +411,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#morelistsemail"><h4>GET /api/lists/:email – {t('getTheListsAUserHasSubscribedTo')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('morelistsemail')}><h4>GET /api/lists/:email – {t('getTheListsAUserHasSubscribedTo')}</h4></button>
         </div>
-        <div id="morelistsemail" className="collapse" data-parent="#apicalls">
+        <div id="morelistsemail" className={'collapse' + (openCall === 'morelistsemail' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('retrieveTheListsThatTheUserWithEmailHas')}
@@ -432,9 +437,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#morelistsnamespace"><h4>GET /api/lists-by-namespace/:namespaceId – {t('getTheListsInANamespace')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('morelistsnamespace')}><h4>GET /api/lists-by-namespace/:namespaceId – {t('getTheListsInANamespace')}</h4></button>
         </div>
-        <div id="morelistsnamespace" className="collapse" data-parent="#apicalls">
+        <div id="morelistsnamespace" className={'collapse' + (openCall === 'morelistsnamespace' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                   {t('retrieveTheListsThatTheNamespaceWith')}
@@ -458,9 +463,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#morecreatelist"><h4>POST /api/list – {t('createList')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('morecreatelist')}><h4>POST /api/list – {t('createList')}</h4></button>
         </div>
-        <div id="morecreatelist" className="collapse" data-parent="#apicalls">
+        <div id="morecreatelist" className={'collapse' + (openCall === 'morecreatelist' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                   {t('createsANewListOfSubscribers')}
@@ -531,9 +536,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moredeletelist"><h4>DELETE /api/list/:listCId – {t('deleteList')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moredeletelist')}><h4>DELETE /api/list/:listCId – {t('deleteList')}</h4></button>
         </div>
-        <div id="moredeletelist" className="collapse" data-parent="#apicalls">
+        <div id="moredeletelist" className={'collapse' + (openCall === 'moredeletelist' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                   {t('deletesAListOfSubscribers')}
@@ -561,9 +566,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#morerss"><h4>GET /api/rss/fetch/:campaignCid – {t('triggerFetchOfACampaign')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('morerss')}><h4>GET /api/rss/fetch/:campaignCid – {t('triggerFetchOfACampaign')}</h4></button>
         </div>
-        <div id="morerss" className="collapse" data-parent="#apicalls">
+        <div id="morerss" className={'collapse' + (openCall === 'morerss' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('forcesTheRssFeedCheckToImmediatelyCheck')}
@@ -587,9 +592,9 @@ export default function API() {
     </div>
     <div className="card">
         <div className="card-header">
-          <button type="button" className="btn btn-link" data-toggle="collapse" data-target="#moretemplate"><h4>POST /api/templates/:templateId/send – {t('sendTransactionalEmail')}</h4></button>
+          <button type="button" className="btn btn-link" onClick={() => toggleCall('moretemplate')}><h4>POST /api/templates/:templateId/send – {t('sendTransactionalEmail')}</h4></button>
         </div>
-        <div id="moretemplate" className="collapse" data-parent="#apicalls">
+        <div id="moretemplate" className={'collapse' + (openCall === 'moretemplate' ? ' show' : '')}>
             <div className="card-body">
                 <p>
                     {t('sendSingleEmailByTemplateWithGiven')}

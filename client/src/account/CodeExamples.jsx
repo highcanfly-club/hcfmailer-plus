@@ -24,13 +24,13 @@ export default function CodeExamples({ method, url, query, form, token }) {
 
     return (
         <div className="code-examples mb-3">
-            <ul className="nav nav-tabs">
+            <ul className="code-tabs">
                 {languages.map(l => (
-                    <li className="nav-item" key={l.id}>
-                        <button type="button" className={'nav-link' + (l.id === active ? ' active' : '')} onClick={() => setActive(l.id)}>{l.label}</button>
+                    <li key={l.id}>
+                        <button type="button" className={'code-tab' + (l.id === active ? ' is-active' : '')} onClick={() => setActive(l.id)}>{l.label}</button>
                     </li>
                 ))}
-                <li className="nav-item ml-auto">
+                <li className="ms-auto">
                     <button type="button" className="btn btn-sm btn-outline-secondary" onClick={copy}>
                         <i className={'fas ' + (copied ? 'fa-check' : 'fa-copy')}/> {copied ? t('copied') : t('copy')}
                     </button>
