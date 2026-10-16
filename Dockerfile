@@ -66,7 +66,7 @@ RUN chmod ugo+x /app/scripts/init-cloudflare.sh &&\
     chmod ugo+x /app/scripts/backup-common.sh
 
 COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/package-lock.json /app/package-lock.json
+COPY --from=builder /app/bun.lock /app/bun.lock
 COPY --from=builder /app/docker-entrypoint.sh  /app/docker-entrypoint.sh 
 COPY --from=builder /app/client /app/client
 COPY --from=builder /app/locales /app/locales
