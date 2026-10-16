@@ -35,6 +35,7 @@ editors:
 - grapesjs
 - ckeditor4
 - ckeditor5
+- emailbuilder
 - codeeditor
 
 # Enabled tag languages

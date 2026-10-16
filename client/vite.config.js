@@ -168,6 +168,7 @@ export default defineConfig({
         'mosaico-root': 'src/lib/sandboxed-mosaico-root.jsx',
         'ckeditor-root': 'src/lib/sandboxed-ckeditor-root.jsx',
         'ckeditor5-root': 'src/lib/sandboxed-ckeditor5-root.jsx',
+        'emailbuilder-root': 'src/lib/sandboxed-emailbuilder-root.jsx',
         'grapesjs-root': 'src/lib/sandboxed-grapesjs-root.jsx',
         'codeeditor-root': 'src/lib/sandboxed-codeeditor-root.jsx'
       },

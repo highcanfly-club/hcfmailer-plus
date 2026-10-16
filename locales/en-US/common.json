@@ -1194,5 +1194,7 @@
   "copy": "Copy",
   "copied": "Copied",
   "ckEditor5": "CKEditor 5",
-  "ckEditor5TemplateDesigner": "CKEditor 5 Template Designer"
+  "ckEditor5TemplateDesigner": "CKEditor 5 Template Designer",
+  "emailBuilder": "Email Builder",
+  "emailBuilderTemplateDesigner": "Email Builder Template Designer"
 }

@@ -1180,5 +1180,7 @@
   "copy": "Copier",
   "copied": "Copié",
   "ckEditor5": "CKEditor 5",
-  "ckEditor5TemplateDesigner": "Concepteur de modèles CKEditor 5"
+  "ckEditor5TemplateDesigner": "Concepteur de modèles CKEditor 5",
+  "emailBuilder": "Email Builder",
+  "emailBuilderTemplateDesigner": "Concepteur de modèles Email Builder"
 }

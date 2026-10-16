@@ -629,6 +629,70 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
   };
 
 
+  templateTypes.emailbuilder = {
+    typeName: t('emailBuilder'),
+    getModals: (owner, isEdit) => null,
+    getTypeForm: (owner, isEdit) => null,
+    getHTMLEditor: (owner) =>
+    <AlignedRow
+      label={t('templateContentHtml')}>
+                <CKEditorHost
+        ref={owner.editorNodeRefHandler}
+        entity={owner.props.entity}
+        initialSource={owner.getFormValue(prefix + 'emailbuilderData').source}
+        entityTypeId={entityTypeId}
+        title={t('emailBuilderTemplateDesigner')}
+        onSave={(...args) => owner.save(...args)}
+        canSave={owner.isFormWithoutErrors()}
+        onTestSend={(...args) => owner.showTestSendModal(...args)}
+        onShowExport={(...args) => owner.showExportModal(...args)}
+        editorType="emailbuilder"
+        onFullscreenAsync={(...args) => owner.setElementInFullscreen(...args)} />
+      
+            </AlignedRow>,
+    exportHTMLEditorData: async (owner) => {
+      const state = await owner.editorNode.exportState();
+      // If the sandbox is still loading, the exportState returns null.
+      if (state) {
+        return {
+          [prefix + 'html']: state.html,
+          [prefix + 'emailbuilderData']: {
+            source: state.source
+          }
+        };
+      } else {
+        return null;
+      }
+    },
+    exportContent: async (owner, contentType) => {
+      const { html, source } = await owner.editorNode.exportState();
+      if (contentType === 'html') return html;
+      return null;
+    },
+    initData: () => ({
+      [prefix + 'emailbuilderData']: {}
+    }),
+    afterLoad: (data) => {
+      data[prefix + 'emailbuilderData'] = {
+        source: data[prefix + 'data'].source
+      };
+    },
+    beforeSave: (data) => {
+      data[prefix + 'data'] = {
+        source: data[prefix + 'emailbuilderData'].source
+      };
+      clearBeforeSave(data);
+    },
+    afterTypeChange: (mutState) => {
+      initFieldsIfMissing(mutState, 'emailbuilder');
+    },
+    afterTagLanguageChange: (mutState, isEdit) => {
+    },
+    validate: (state) => {
+    }
+  };
+
+
   const codeEditorSourceTypes = getCodeEditorSourceTypeOptions(t);
   const codeEditorSourceTypeLabels = {};
   for (const srcType of codeEditorSourceTypes) {
