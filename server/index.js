@@ -5,7 +5,6 @@ import { filesDir } from './models/files.js';
 import config from './lib/config.js';
 import log from './lib/log.js';
 import appBuilder from './app-builder.js';
-import translate from './lib/translate.js';
 import http from 'http';
 import triggers from './services/triggers.js';
 import gdprCleanup from './services/gdpr-cleanup.js';
@@ -68,7 +67,7 @@ async function startHTTPServer(appType, appName, port) {
     });
 
     const serverListenAsync = bluebird.promisify(server.listen.bind(server));
-    await serverListenAsync({port, host});
+    await serverListenAsync({ port, host });
 }
 
 // ---------------------------------------------------------------------------------------
@@ -121,5 +120,5 @@ async function init() {
     appBuilder.setReady();
 }
 
-init().catch(err => {log.error('', err); process.exit(1); });
+init().catch(err => { log.error('', err); process.exit(1); });
 

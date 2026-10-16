@@ -16,7 +16,7 @@
     "dev:server": "set -a && source .env.dev && set +a && bun run --filter ./server dev",
     "dev:preview": "set -a && source .env.dev && set +a && bun run build && VITE_PREVIEW=true bun run --filter ./server dev",
     "dev:zone-mta": "set -a && source .env.dev && set +a && bun run --filter ./zone-mta start",
-    "dev:restore:s3": "set -a && source .env.dev && set +a && bunx tsx scripts/dev-restore-s3.ts",
+    "dev:restore:s3": "set -a && source .env.dev && set +a && bunx scripts/dev-restore-s3.ts",
     "build": "bun run --filter ./client build",
     "build:all": "bun run --filter '*' build",
     "install:all": "bun install",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "3.1032.0",
     "@napi-rs/lzma": "^1.5.1",
-    "concurrently": "^9.2.5",
+    "concurrently": "^10.0.6",
     "mariadb": "^3.5.4",
     "nanotar": "0.3.0",
     "tsx": "^4.23.15"

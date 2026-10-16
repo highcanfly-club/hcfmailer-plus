@@ -12,6 +12,9 @@
 
     <title>HCFMailer+</title>
 
+    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/grapesjs-root.css">{{/unless}}
+    {{#unless isDev}}<link rel="stylesheet" href="{{publicPath}}client/sandboxed-grapesjs-shared.css">{{/unless}}
+
     <script src="{{publicPath}}static-npm/jquery.min.js"></script>
 
     {{#if mailtrainConfig}}
