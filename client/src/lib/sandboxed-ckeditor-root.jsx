@@ -11,7 +11,7 @@ import "./sandboxed-ckeditor.scss";
 import { getPublicUrl, getSandboxUrl, getTrustedUrl } from "./urls";
 import { base, unbase } from "../../../shared/templates";
 
-import CKEditor from "react-ckeditor-component";
+import CKEditor from "./ckeditor4";
 
 import { initialHeight } from "./sandboxed-ckeditor-shared";
 import { withComponentMixins } from "./decorator-helpers";const CKEditorSandbox =
