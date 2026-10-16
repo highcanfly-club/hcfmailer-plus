@@ -1192,5 +1192,7 @@
   "setPassword": "Set password",
   "passwordUpdated": "Password updated",
   "copy": "Copy",
-  "copied": "Copied"
+  "copied": "Copied",
+  "ckEditor5": "CKEditor 5",
+  "ckEditor5TemplateDesigner": "CKEditor 5 Template Designer"
 }

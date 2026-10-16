@@ -27,6 +27,7 @@ import campaigns from './routes/campaigns.js';
 import subscription from './routes/subscription.js';
 import sandboxedMosaico from './routes/sandboxed-mosaico.js';
 import sandboxedCKEditor from './routes/sandboxed-ckeditor.js';
+import sandboxedCKEditor5 from './routes/sandboxed-ckeditor5.js';
 import sandboxedGrapesJS from './routes/sandboxed-grapesjs.js';
 import sandboxedCodeEditor from './routes/sandboxed-codeeditor.js';
 import files from './routes/files.js';
@@ -318,6 +319,7 @@ async function createApp(appType) {
 
     useWith404Fallback('/mosaico', await sandboxedMosaico.getRouter(appType));
     useWith404Fallback('/ckeditor', await sandboxedCKEditor.getRouter(appType));
+    useWith404Fallback('/ckeditor5', await sandboxedCKEditor5.getRouter(appType));
     useWith404Fallback('/grapesjs', await sandboxedGrapesJS.getRouter(appType));
     useWith404Fallback('/codeeditor', await sandboxedCodeEditor.getRouter(appType));
 

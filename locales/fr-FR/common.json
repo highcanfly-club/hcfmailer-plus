@@ -1178,5 +1178,7 @@
   "setPassword": "Définir le mot de passe",
   "passwordUpdated": "Mot de passe mis à jour",
   "copy": "Copier",
-  "copied": "Copié"
+  "copied": "Copié",
+  "ckEditor5": "CKEditor 5",
+  "ckEditor5TemplateDesigner": "Concepteur de modèles CKEditor 5"
 }

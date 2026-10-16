@@ -565,6 +565,70 @@ export function getTemplateTypes(t, prefix = '', entityTypeId = ResourceType.TEM
   };
 
 
+  templateTypes.ckeditor5 = {
+    typeName: t('ckEditor5'),
+    getModals: (owner, isEdit) => null,
+    getTypeForm: (owner, isEdit) => null,
+    getHTMLEditor: (owner) =>
+    <AlignedRow
+      label={t('templateContentHtml')}>
+                <CKEditorHost
+        ref={owner.editorNodeRefHandler}
+        entity={owner.props.entity}
+        initialSource={owner.getFormValue(prefix + 'ckeditor5Data').source}
+        entityTypeId={entityTypeId}
+        title={t('ckEditor5TemplateDesigner')}
+        onSave={(...args) => owner.save(...args)}
+        canSave={owner.isFormWithoutErrors()}
+        onTestSend={(...args) => owner.showTestSendModal(...args)}
+        onShowExport={(...args) => owner.showExportModal(...args)}
+        editorType="ckeditor5"
+        onFullscreenAsync={(...args) => owner.setElementInFullscreen(...args)} />
+      
+            </AlignedRow>,
+    exportHTMLEditorData: async (owner) => {
+      const state = await owner.editorNode.exportState();
+      // If the sandbox is still loading, the exportState returns null.
+      if (state) {
+        return {
+          [prefix + 'html']: state.html,
+          [prefix + 'ckeditor5Data']: {
+            source: state.source
+          }
+        };
+      } else {
+        return null;
+      }
+    },
+    exportContent: async (owner, contentType) => {
+      const { html, source } = await owner.editorNode.exportState();
+      if (contentType === 'html') return html;
+      return null;
+    },
+    initData: () => ({
+      [prefix + 'ckeditor5Data']: {}
+    }),
+    afterLoad: (data) => {
+      data[prefix + 'ckeditor5Data'] = {
+        source: data[prefix + 'data'].source
+      };
+    },
+    beforeSave: (data) => {
+      data[prefix + 'data'] = {
+        source: data[prefix + 'ckeditor5Data'].source
+      };
+      clearBeforeSave(data);
+    },
+    afterTypeChange: (mutState) => {
+      initFieldsIfMissing(mutState, 'ckeditor5');
+    },
+    afterTagLanguageChange: (mutState, isEdit) => {
+    },
+    validate: (state) => {
+    }
+  };
+
+
   const codeEditorSourceTypes = getCodeEditorSourceTypeOptions(t);
   const codeEditorSourceTypeLabels = {};
   for (const srcType of codeEditorSourceTypes) {

@@ -39,7 +39,8 @@ CKEditorHost extends Component {
     canSave: PropTypes.bool,
     onTestSend: PropTypes.func,
     onShowExport: PropTypes.func,
-    onFullscreenAsync: PropTypes.func
+    onFullscreenAsync: PropTypes.func,
+    editorType: PropTypes.string // 'ckeditor' (CKEditor 4, default) or 'ckeditor5'
   };
 
   async toggleFullscreenAsync() {
@@ -80,6 +81,7 @@ CKEditorHost extends Component {
 
   render() {
     const t = this.props.t;
+    const editorType = this.props.editorType || 'ckeditor';
 
     const editorData = {
       entityTypeId: this.props.entityTypeId,
@@ -107,7 +109,7 @@ CKEditorHost extends Component {
                         <a className={"btn"} onClick={(...args) => this.toggleFullscreenAsync(...args)} title={t('maximizeEditor')}><Icon icon="window-maximize" /></a>
                     </div>
                 </div>
-                <UntrustedContentHost ref={this.contentNodeRefHandler} className={"host"} singleToken={true} contentProps={editorData} contentSrc="ckeditor/editor" tokenMethod="ckeditor" tokenParams={editorData} />
+                <UntrustedContentHost ref={this.contentNodeRefHandler} className={"host"} singleToken={true} contentProps={editorData} contentSrc={`${editorType}/editor`} tokenMethod={editorType} tokenParams={editorData} />
             </div>);
 
   }

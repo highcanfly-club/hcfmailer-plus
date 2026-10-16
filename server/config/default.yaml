@@ -34,6 +34,7 @@ editors:
 - mosaicoWithFsTemplate
 - grapesjs
 - ckeditor4
+- ckeditor5
 - codeeditor
 
 # Enabled tag languages
