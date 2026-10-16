@@ -21,13 +21,11 @@
 # SOFTWARE.
 
 # =============================================================================
-# Secure Backup Script for Sensitive Data version 2.7
+# Secure Backup Script for Sensitive Data
 # =============================================================================
 #
 # This script creates an encrypted backup of sensitive project files including:
 # - Environment variables (.env files)
-# - SSH keys (if BACKUP_SSH=1 or true)
-# - GPG keys (if BACKUP_GPG=1 or true)
 # - Cloudflare Worker configuration (.wrangler)
 # - VS Code settings and launch configurations
 # - Launch scripts
@@ -58,9 +56,8 @@
 # Configuration Section
 # ====================
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# List of files and directories to include in the backup (relative to PROJECT_ROOT)
+# List of files and directories to include in the backup
+# Uses glob patterns for flexible file matching
 FILES_TO_BACKUP=(
     "Tiltfile"                            
     "private"                             
@@ -70,66 +67,8 @@ FILES_TO_BACKUP=(
     "zone-mta/dkim.rsa" 
     "devspace*" 
     "dev-values.yaml"   
-    ".env.dev"                                   
+    ".env.dev"   
 )
-
-# .env file is located one level from this script
-# load it
-if [ -f "$SCRIPT_DIR/../.env" ]; then
-    set -a
-    source "$SCRIPT_DIR/../.env"
-    set +a
-fi
-
-# Determine SSH key to backup
-if [ "${BACKUP_SSH}" = "1" ] || [ "${BACKUP_SSH}" = "true" ]; then
-    SSH_CMD=$(git config --local core.sshCommand 2>/dev/null)
-    if [ -z "$SSH_CMD" ]; then
-        SSH_CMD=$(git config --global core.sshCommand 2>/dev/null)
-    fi
-    if [ -n "$SSH_CMD" ]; then
-        SSH_KEY_PATH=$(echo "$SSH_CMD" | sed -n 's/.*-i \([^ ]*\).*/\1/p')
-        if [ -n "$SSH_KEY_PATH" ] && [ -f "$SSH_KEY_PATH" ] && [ -f "${SSH_KEY_PATH}.pub" ]; then
-            # Copy SSH keys to _sensitive_datas for security
-            cp "$SSH_KEY_PATH" _sensitive_datas/ssh_private.key
-            cp "${SSH_KEY_PATH}.pub" _sensitive_datas/ssh_public.key
-            # Save original path for restoration
-            SSH_KEY_FILENAME=$(basename "$SSH_KEY_PATH")
-            echo "$SSH_KEY_FILENAME" > _sensitive_datas/ssh_key_filename.txt
-            FILES_TO_BACKUP+=("_sensitive_datas/ssh_private.key" "_sensitive_datas/ssh_public.key" "_sensitive_datas/ssh_key_filename.txt")
-            echo "✓ SSH key configured for backup: $SSH_KEY_PATH"
-        else
-            echo "⚠️  SSH key path not found or invalid: $SSH_KEY_PATH"
-        fi
-    else
-        echo "⚠️  No SSH command configured in git config"
-    fi
-fi
-
-# Determine GPG key to backup
-if [ "${BACKUP_GPG}" = "1" ] || [ "${BACKUP_GPG}" = "true" ]; then
-    GPG_KEY_ID=$(git config --local user.signingkey 2>/dev/null)
-    if [ -z "$GPG_KEY_ID" ]; then
-        GPG_KEY_ID=$(git config --global user.signingkey 2>/dev/null)
-    fi
-    if [ -n "$GPG_KEY_ID" ]; then
-        # Export public key
-        gpg --export $GPG_KEY_ID > _sensitive_datas/gpg_public.key 2>/dev/null
-        # Export private key
-        gpg --export-secret-keys $GPG_KEY_ID > _sensitive_datas/gpg_private.key 2>/dev/null
-        if [ -s "_sensitive_datas/gpg_public.key" ] && [ -s "_sensitive_datas/gpg_private.key" ]; then
-            FILES_TO_BACKUP+=("_sensitive_datas/gpg_public.key" "_sensitive_datas/gpg_private.key")
-            echo "$GPG_KEY_ID" > _sensitive_datas/gpg_key_id.txt
-            FILES_TO_BACKUP+=("_sensitive_datas/gpg_key_id.txt")
-            echo "✓ GPG key configured for backup: $GPG_KEY_ID"
-        else
-            echo "⚠️  Failed to export GPG key: $GPG_KEY_ID"
-            rm -f $SCRIPT_DIR/../_sensitive_datas/gpg_*.key $SCRIPT_DIR/../_sensitive_datas/gpg_key_id.txt
-        fi
-    else
-        echo "⚠️  No GPG signing key configured in git config"
-    fi
-fi
 
 # Encryption configuration
 # AES-256-CBC with PBKDF2 provides strong encryption with key derivation
@@ -140,6 +79,12 @@ CIPHER_ALGO="aes-256-cbc"
 # PBKDF2 iterations for key derivation (higher = more secure but slower)
 # 100,000 iterations provides good security while remaining practical
 PBKDF2_ITERATIONS=100000
+
+# Maximum file size before splitting (48MB in bytes)
+MAX_FILE_SIZE=$((48 * 1024 * 1024))
+
+# Split chunk size for splitting large files
+SPLIT_CHUNK_SIZE=$((48 * 1024 * 1024))
 
 # =============================================================================
 # Main Script Logic
@@ -153,27 +98,10 @@ if [ -z "${PROJECT_ROOT}" ]; then
     exit -1
 fi
 
-cd $PROJECT_ROOT
+# Remove trailing spaces and slashes from PROJECT_ROOT
+PROJECT_ROOT="${PROJECT_ROOT%"${PROJECT_ROOT##*[![:space:]/]}"}"
 
-# Sanitize FILES_TO_BACKUP: expand globs and produce relative paths (no '..')
-sanitized_files=()
-shopt -s nullglob
-for pattern in "${FILES_TO_BACKUP[@]}"; do
-    for f in $pattern; do
-        if [ -e "$f" ]; then
-            abs="$(cd "$(dirname "$f")" && pwd -P)/$(basename "$f")"
-            rel="${abs#$PROJECT_ROOT/}"
-            sanitized_files+=("$rel")
-        fi
-    done
-done
-shopt -u nullglob
-
-if [ ${#sanitized_files[@]} -eq 0 ]; then
-    echo "ERROR: No files matched for backup"
-    exit 1
-fi
-FILES_TO_BACKUP=("${sanitized_files[@]}")
+cd "$PROJECT_ROOT"
 
 if [ -z "${CRYPTOKEN}" ]; then
     echo "ERROR: CRYPTOKEN is empty: $CRYPTOKEN"
@@ -184,12 +112,12 @@ fi
 # Step 2: Create compressed archive
 # ---------------------------------
 echo "Creating compressed archive of sensitive files..."
-rm -f _sensitive_datas/_sensitive_datas.tar.xz
-tar -cvJf _sensitive_datas/_sensitive_datas.tar.xz \
+rm -f "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
+tar -cvJf "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz" \
     "${FILES_TO_BACKUP[@]}"
 
 # Verify archive was created successfully
-if [ -z _sensitive_datas/_sensitive_datas.tar.xz ]; then
+if [ ! -f "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz" ]; then
     echo "ERROR: Failed to create archive"
     exit 1
 fi
@@ -197,8 +125,8 @@ fi
 # Step 3: Calculate integrity hash
 # -----------------------------------
 echo "Calculating SHA256 integrity hash..."
-ARCHIVE_HASH=$(sha256sum _sensitive_datas/_sensitive_datas.tar.xz | cut -d' ' -f1)
-echo "$ARCHIVE_HASH" > _sensitive_datas/_sensitive_datas.tar.xz.sha256
+ARCHIVE_HASH=$(sha256sum "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz" | cut -d' ' -f1)
+echo "$ARCHIVE_HASH" > "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.sha256"
 echo "✓ Integrity hash saved: $ARCHIVE_HASH"
 
 # Step 4: Ensure .gitignore excludes the archive
@@ -218,26 +146,12 @@ else
     echo "✓ Archive exclusion already present in .gitignore"
 fi
 
-# Ensure .gitignore excludes GPG key files
-if ! grep -q "^gpg_.*\.key$" "$GITIGNORE_FILE"; then
-    echo "Adding GPG key files exclusion to existing .gitignore..."
-    echo "gpg_*.key" >> "$GITIGNORE_FILE"
-    echo "✓ Updated $GITIGNORE_FILE with GPG key exclusion rules"
-fi
-
-# Ensure .gitignore excludes SSH key files
-if ! grep -q "^ssh_.*\.key$" "$GITIGNORE_FILE"; then
-    echo "Adding SSH key files exclusion to existing .gitignore..."
-    echo "ssh_*.key" >> "$GITIGNORE_FILE"
-    echo "✓ Updated $GITIGNORE_FILE with SSH key exclusion rules"
-fi
-
 # Step 5: Encrypt the archive
 # ---------------------------
 echo "Encrypting archive with ${CIPHER_ALGO}..."
 openssl enc -${CIPHER_ALGO} -a -pbkdf2 -iter ${PBKDF2_ITERATIONS} -salt -pass pass:"$CRYPTOKEN" \
-    -in _sensitive_datas/_sensitive_datas.tar.xz \
-    -out _sensitive_datas/_sensitive_datas.tar.xz.enc
+    -in "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz" \
+    -out "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc"
 
 # Verify encryption was successful
 if [ $? -ne 0 ]; then
@@ -246,22 +160,39 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 6: Clean up unencrypted archive
+# Step 6: Split encrypted file if larger than MAX_FILE_SIZE
+# --------------------------------------------------------
+ENCRYPTED_FILE="$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc"
+ENCRYPTED_FILE_SIZE=$(stat -f%z "$ENCRYPTED_FILE" 2>/dev/null || stat -c%s "$ENCRYPTED_FILE")
+
+if [ "$ENCRYPTED_FILE_SIZE" -gt "$MAX_FILE_SIZE" ]; then
+    echo "Encrypted file is larger than ${MAX_FILE_SIZE} bytes, splitting into chunks..."
+    split -b "$SPLIT_CHUNK_SIZE" "$ENCRYPTED_FILE" "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc."
+    
+    # Verify split was successful
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to split encrypted file"
+        exit 1
+    fi
+    
+    # Remove the original encrypted file
+    rm "$ENCRYPTED_FILE"
+    echo "✓ Encrypted file split into chunks of ${SPLIT_CHUNK_SIZE} bytes"
+else
+    echo "✓ Encrypted file size is within limit (${ENCRYPTED_FILE_SIZE} bytes)"
+fi
+
+# Step 7: Clean up unencrypted archive
 # ------------------------------------
 echo "Removing unencrypted archive for security..."
-rm _sensitive_datas/_sensitive_datas.tar.xz
+rm "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
 
-# Step 7: Confirmation
+# Step 8: Confirmation
 # -------------------
 echo "✓ Backup completed successfully!"
-echo "Encrypted backup saved as: _sensitive_datas/_sensitive_datas.tar.xz.enc"
-echo "Algorithm used: ${CIPHER_ALGO} with PBKDF2 (${PBKDF2_ITERATIONS} iterations and Passowrd=$CRYPTOKEN)"
-
-# Clean up GPG key files for security
-echo "Removing temporary GPG key files for security..."
-rm -f _sensitive_datas/gpg_*.key _sensitive_datas/gpg_key_id.txt
-
-# Clean up SSH key files for security
-echo "Removing temporary SSH key files for security..."
-rm -f _sensitive_datas/ssh_*.key
-rm -f _sensitive_datas/ssh_key_filename.txt
+if [ "$ENCRYPTED_FILE_SIZE" -gt "$MAX_FILE_SIZE" ]; then
+    echo "Encrypted backup split into chunks: _sensitive_datas/_sensitive_datas.tar.xz.enc.*"
+else
+    echo "Encrypted backup saved as: _sensitive_datas/_sensitive_datas.tar.xz.enc"
+fi
+echo "Algorithm used: ${CIPHER_ALGO} with PBKDF2 (${PBKDF2_ITERATIONS} iterations)"

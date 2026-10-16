@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 # =============================================================================
-# Secure Restore Script for Sensitive Data version 2.6
+# Secure Restore Script for Sensitive Data
 # =============================================================================
 #
 # This script decrypts and displays the contents of an encrypted backup archive
@@ -34,9 +34,7 @@
 # 3. Decrypts the AES-256-CBC encrypted archive
 # 4. Verifies archive integrity using SHA256 hash
 # 5. Lists the contents of the decrypted archive
-# 6. Automatically restores SSH/GPG keys if present and not already on system
-# 7. Configures Git local settings to use the restored keys
-# 8. Provides manual restoration instructions
+# 6. Provides manual restoration instructions
 #
 # Requirements:
 # - PROJECT_ROOT environment variable must be set
@@ -50,7 +48,7 @@
 #   export CRYPTOKEN="your-encryption-key"  # Only if backup was encrypted
 #   ./restore_sensitive_datas
 #
-# Note: This script decrypts, shows contents, automatically restores keys, configures Git, and provides manual restoration instructions for other files.
+# Note: This script only decrypts and shows contents. Manual restoration required.
 # =============================================================================
 
 # Configuration Section
@@ -65,18 +63,12 @@ CIPHER_ALGO="aes-256-cbc"
 # PBKDF2 iterations for key derivation (must match encryption settings)
 PBKDF2_ITERATIONS=100000
 
+# Split file pattern for detecting split archives
+SPLIT_FILE_PATTERN="_sensitive_datas.tar.xz.enc."
+
 # =============================================================================
 # Main Script Logic
 # =============================================================================
-
-# .env file is located one level from this script
-# load it
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ -f "$SCRIPT_DIR/../.env" ]; then
-    set -a
-    source "$SCRIPT_DIR/../.env"
-    set +a
-fi
 
 # Step 1: Validate PROJECT_ROOT
 # -----------------------------
@@ -86,6 +78,9 @@ if [ ! -n "$PROJECT_ROOT" ]; then
     echo "Example: export PROJECT_ROOT=\"/path/to/project\""
     exit 0
 fi
+
+# Remove trailing spaces and slashes from PROJECT_ROOT
+PROJECT_ROOT="${PROJECT_ROOT%"${PROJECT_ROOT##*[![:space:]/]}"}"
 
 echo "PROJECT_ROOT is set to '$PROJECT_ROOT'"
 
@@ -115,7 +110,30 @@ else
     echo "✓ Archive exclusion already present in .gitignore"
 fi
 
-# Step 3: Decrypt the archive
+# Step 3: Check for split files and reassemble if needed
+# -----------------------------------------------------------
+echo "Checking for split backup files..."
+
+# Check if split files exist
+SPLIT_FILES=$(ls "$PROJECT_ROOT/_sensitive_datas/"${SPLIT_FILE_PATTERN}* 2>/dev/null)
+
+if [ -n "$SPLIT_FILES" ]; then
+    echo "Found split backup files. Reassembling..."
+    
+    # Reassemble split files into the original encrypted file
+    cat "$PROJECT_ROOT/_sensitive_datas/"${SPLIT_FILE_PATTERN}* > "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc"
+    
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Failed to reassemble split files"
+        exit 1
+    fi
+    
+    echo "✓ Split files reassembled successfully"
+else
+    echo "No split files found, using single backup file"
+fi
+
+# Step 4: Decrypt the archive
 # ---------------------------
 echo "Decrypting backup archive..."
 
@@ -124,15 +142,14 @@ DECRYPT=""
 if [ -n "$CRYPTOKEN" ]; then
     DECRYPT="-pass pass:$CRYPTOKEN"
     echo "Using encryption key for decryption..."
-    echo "Command: openssl enc -${CIPHER_ALGO} -d -pbkdf2 -iter ${PBKDF2_ITERATIONS} $DECRYPT -in $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc -out $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
 else
     echo "No encryption key provided - attempting unencrypted restore..."
 fi
 
 # Perform the decryption
 openssl enc -${CIPHER_ALGO} -a -d -pbkdf2 -iter ${PBKDF2_ITERATIONS} $DECRYPT \
-    -in $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc \
-    -out $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz
+    -in "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.enc" \
+    -out "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
 
 # Check if decryption was successful
 if [ $? -ne 0 ]; then
@@ -144,7 +161,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 4: Verify archive integrity
+# Step 5: Verify archive integrity
 # ----------------------------------
 echo "Verifying archive integrity..."
 if [ -f "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz.sha256" ]; then
@@ -163,170 +180,13 @@ else
     echo "⚠️  WARNING: No integrity hash file found. Cannot verify archive integrity."
 fi
 
-# Step 5: Display archive contents
+# Step 6: Display archive contents
 # --------------------------------
 echo ""
 echo "=================================================================================="
 echo "✓ Decryption successful! Archive contents:"
 echo "=================================================================================="
-tar -tvJf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz
-
-# If archive contains '..' components, use a safe per-file extraction into a temp dir
-if tar -tf "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz" | grep -q '\.\.'; then
-    echo "⚠️ Archive contains '..' path components. Using safe per-file extraction method."
-    SAFE_EXTRACT_DIR="$(mktemp -d)"
-    echo "Extracting files to temporary directory: $SAFE_EXTRACT_DIR"
-    # Use process substitution to avoid subshell issues
-    while IFS= read -r entry; do
-        # Compute a safe relative path (strip leading ./ or / and remove '..' segments)
-        if command -v python3 >/dev/null 2>&1; then
-            safe=$(python3 -c 'import os,sys
-e=sys.argv[-1]
-s=os.path.normpath(e)
-s=s.lstrip("/.")
-parts=[p for p in s.split(os.sep) if p and p!=".."]
-print(os.path.join(*parts) if parts else "")' -- "$entry")
-        else
-            # POSIX shell fallback: split on / and drop '..' and empty parts
-            tmp="${entry#./}"
-            IFS='/' read -r -a _seg <<< "$tmp"
-            parts=()
-            for p in "${_seg[@]}"; do
-                [ "$p" = ".." ] && continue
-                [ -z "$p" ] && continue
-                parts+=("$p")
-            done
-            safe=$(IFS=/; echo "${parts[*]}")
-        fi
-
-        # Normalize safe path to be relative to PROJECT_ROOT when possible
-        ROOT_STRIP="${PROJECT_ROOT#/}"
-        safe="${safe#./}"
-        safe="${safe#/}"
-        safe="${safe#$ROOT_STRIP/}"
-
-        [ -z "$safe" ] && continue
-
-        # If it's a directory (ends with '/'), create dir and continue
-        if [[ "$entry" == */ ]]; then
-            mkdir -p "$SAFE_EXTRACT_DIR/$safe"
-            continue
-        fi
-
-        # create target dir using parameter expansion (avoid external dirname command)
-        dir="${safe%/*}"
-        if [ "$dir" = "$safe" ]; then
-            dir="."
-        fi
-        mkdir -p "$SAFE_EXTRACT_DIR/$dir"
-        if ! tar -xJf "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz" -O -- "$entry" > "$SAFE_EXTRACT_DIR/$safe" 2>/dev/null; then
-            echo "⚠️  Failed to extract '$entry' — skipping"
-            rm -f "$SAFE_EXTRACT_DIR/$safe"
-            continue
-        fi
-    done < <(tar -tf "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz")
-    echo "✓ Safe extraction complete. Files available in $SAFE_EXTRACT_DIR"
-else
-    echo "✓ No suspicious path components detected"
-fi
-
-# Step 6: Automatically restore keys if present and not already on system
-# -------------------------------------------------------------------------
-echo ""
-echo "=================================================================================="
-echo "AUTOMATIC KEY RESTORATION"
-echo "=================================================================================="
-
-# Restore SSH keys
-if tar -tf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz | grep -q "ssh_key_filename.txt"; then
-    if [ -n "$SAFE_EXTRACT_DIR" ] && [ -f "$SAFE_EXTRACT_DIR/_sensitive_datas/ssh_key_filename.txt" ]; then
-        SSH_KEY_FILENAME=$(cat "$SAFE_EXTRACT_DIR/_sensitive_datas/ssh_key_filename.txt")
-    else
-        SSH_KEY_FILENAME=$(tar -xJf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz -O "_sensitive_datas/ssh_key_filename.txt" 2>/dev/null)
-    fi
-    if [ -n "$SSH_KEY_FILENAME" ]; then
-        TARGET_KEY="$HOME/.ssh/$SSH_KEY_FILENAME"
-        if [ ! -f "$TARGET_KEY" ]; then
-            echo "Restoring SSH key: $SSH_KEY_FILENAME"
-            mkdir -p "$HOME/.ssh"
-            if [ -n "$SAFE_EXTRACT_DIR" ] && [ -f "$SAFE_EXTRACT_DIR/_sensitive_datas/ssh_private.key" ]; then
-                cp "$SAFE_EXTRACT_DIR/_sensitive_datas/ssh_private.key" "$TARGET_KEY"
-                cp "$SAFE_EXTRACT_DIR/_sensitive_datas/ssh_public.key" "${TARGET_KEY}.pub"
-            else
-                # Extract to temp dir first
-                mkdir -p /tmp/restore_ssh
-                tar -xJf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz -C /tmp/restore_ssh "_sensitive_datas/ssh_private.key" "_sensitive_datas/ssh_public.key"
-                mv /tmp/restore_ssh/_sensitive_datas/ssh_private.key "$TARGET_KEY"
-                mv /tmp/restore_ssh/_sensitive_datas/ssh_public.key "${TARGET_KEY}.pub"
-                rm -rf /tmp/restore_ssh
-            fi
-            chmod 600 "$TARGET_KEY"
-            chmod 644 "${TARGET_KEY}.pub"
-            echo "✓ SSH key restored successfully as $SSH_KEY_FILENAME"
-        else
-            echo "✓ SSH key $SSH_KEY_FILENAME already exists, skipping restore"
-        fi
-    fi
-else
-    echo "✓ No SSH keys found in backup"
-fi
-
-# Restore GPG keys
-if tar -tf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz | grep -q "gpg_key_id.txt"; then
-    if [ -n "$SAFE_EXTRACT_DIR" ] && [ -f "$SAFE_EXTRACT_DIR/_sensitive_datas/gpg_key_id.txt" ]; then
-        GPG_KEY_ID=$(cat "$SAFE_EXTRACT_DIR/_sensitive_datas/gpg_key_id.txt")
-    else
-        GPG_KEY_ID=$(tar -xJf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz -O "_sensitive_datas/gpg_key_id.txt" 2>/dev/null)
-    fi
-    if [ -n "$GPG_KEY_ID" ] && ! gpg --list-keys "$GPG_KEY_ID" >/dev/null 2>&1; then
-        echo "Restoring GPG key: $GPG_KEY_ID"
-        if [ -n "$SAFE_EXTRACT_DIR" ] && [ -f "$SAFE_EXTRACT_DIR/_sensitive_datas/gpg_public.key" ]; then
-            gpg --import "$SAFE_EXTRACT_DIR/_sensitive_datas/gpg_public.key"
-            gpg --import "$SAFE_EXTRACT_DIR/_sensitive_datas/gpg_private.key"
-        else
-            mkdir -p /tmp/restore_gpg
-            tar -xJf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz -C /tmp/restore_gpg "_sensitive_datas/gpg_public.key" "_sensitive_datas/gpg_private.key"
-            gpg --import /tmp/restore_gpg/_sensitive_datas/gpg_public.key
-            gpg --import /tmp/restore_gpg/_sensitive_datas/gpg_private.key
-            rm -rf /tmp/restore_gpg
-        fi
-        echo "✓ GPG key restored successfully"
-    else
-        echo "✓ GPG key $GPG_KEY_ID already exists or not found in backup, skipping restore"
-    fi
-else
-    echo "✓ No GPG keys found in backup"
-fi
-
-# Configure Git with restored keys
-echo "Configuring Git with restored keys..."
-cd "$PROJECT_ROOT"  # Ensure we're in the git repository
-
-# Configure SSH for Git
-if [ -n "$SSH_KEY_FILENAME" ] && [ -f "$HOME/.ssh/$SSH_KEY_FILENAME" ]; then
-    CURRENT_SSH_CMD=$(git config --local core.sshCommand 2>/dev/null)
-    DESIRED_SSH_CMD="ssh -i $HOME/.ssh/$SSH_KEY_FILENAME -o IdentitiesOnly=yes"
-    if [ "$CURRENT_SSH_CMD" != "$DESIRED_SSH_CMD" ]; then
-        git config --local core.sshCommand "$DESIRED_SSH_CMD"
-        echo "✓ Configured Git SSH command: $DESIRED_SSH_CMD"
-    else
-        echo "✓ Git SSH command already correctly configured"
-    fi
-fi
-
-# Configure GPG for Git
-if [ -n "$GPG_KEY_ID" ] && gpg --list-keys "$GPG_KEY_ID" >/dev/null 2>&1; then
-    CURRENT_GPG_KEY=$(git config --local user.signingkey 2>/dev/null)
-    if [ "$CURRENT_GPG_KEY" != "$GPG_KEY_ID" ]; then
-        git config --local user.signingkey "$GPG_KEY_ID"
-        git config --local commit.gpgsign true
-        echo "✓ Configured Git GPG signing key: $GPG_KEY_ID"
-    else
-        echo "✓ Git GPG signing key already correctly configured"
-    fi
-fi
-
-echo "=================================================================================="
+tar -tvJf "$PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
 
 # Step 7: Provide restoration instructions
 # ----------------------------------------
@@ -339,6 +199,12 @@ echo ""
 echo "  cd $PROJECT_ROOT"
 echo "  tar -xvJf $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
 echo "  rm $PROJECT_ROOT/_sensitive_datas/_sensitive_datas.tar.xz"
+echo ""
+# Clean up split files if they were reassembled
+if [ -n "$SPLIT_FILES" ]; then
+    echo "  # Clean up split files (optional):"
+    echo "  rm $PROJECT_ROOT/_sensitive_datas/${SPLIT_FILE_PATTERN}*"
+fi
 echo ""
 echo "WARNING: This will overwrite existing files with the same names!"
 echo "=================================================================================="
