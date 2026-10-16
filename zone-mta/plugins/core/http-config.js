@@ -1,1 +1,1 @@
-../../node_modules/@zone-eu/zone-mta/plugins/core/http-config.js
+../../../node_modules/@zone-eu/zone-mta/plugins/core/http-config.js

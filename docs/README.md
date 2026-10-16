@@ -190,9 +190,9 @@ If you run Mailtrain on a VPS, you will have to find the PTR configuration somew
 ### Manual Install (any OS that supports Node.js)
 
   1. Download Mailtrain files using git: `git clone git://github.com/Mailtrain-org/mailtrain.git` (or download [zipped repo](https://github.com/Mailtrain-org/mailtrain/archive/master.zip)) and open Mailtrain folder `cd mailtrain`
-  2. Run `npm install --production` in the Mailtrain folder to install required dependencies
+  2. Run `bun install --production` in the Mailtrain folder to install required dependencies
   3. Copy [config/default.toml](config/default.toml) as `config/production.toml` and update MySQL and any other settings in it
-  4. Run the server `NODE_ENV=production npm start`
+  4. Run the server `NODE_ENV=production bun run --filter server start`
   5. Open [http://localhost:3000/](http://localhost:3000/)
   6. Authenticate as `admin`:`test`
   7. Navigate to [http://localhost:3000/settings](http://localhost:3000/settings) and update service configuration
@@ -201,7 +201,7 @@ If you run Mailtrain on a VPS, you will have to find the PTR configuration somew
 ## Upgrade
 
   * Replace old files with new ones by running in the Mailtrain folder `git pull origin master` if you used Git to set Mailtrain up or just download [new files](https://github.com/Mailtrain-org/mailtrain/archive/master.zip) and replace old ones with these
-  * Run `npm install --production` in the Mailtrain folder
+  * Run `bun install --production` in the Mailtrain folder
 
 ## Using Environment Variables
 

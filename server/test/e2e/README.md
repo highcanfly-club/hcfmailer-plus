@@ -12,15 +12,15 @@ Both can be created by running `sudo sh test/e2e/install.sh` from within your ma
 
 For tests to succeed Mailtrian must be started in `test` mode on port 3000 (as http://localhost:3000/ is the predefined service url). The tests itself have to be started in a second Terminal window.
 
-1. Start Mailtrain with `npm run starttest`
-2. Start e2e tests with `npm run e2e`
+1. Start Mailtrain with `bun run starttest`
+2. Start e2e tests with `bun run e2e`
 
 ## Using Different Browsers
 
 By default e2e tests use `phantomjs`. If you want to use a different browser you need to install its driver and adjust your `config/test.toml`.
 
-* Install the `firefox` driver with `npm install geckodriver`
-* Install the `chrome` driver with `npm install chromedriver`
+* Install the `firefox` driver with `bun add --no-save geckodriver`
+* Install the `chrome` driver with `bun add --no-save chromedriver`
 * Other drivers can be found [here](https://seleniumhq.github.io/selenium/docs/api/javascript/)
 
 Then adjust your config:
@@ -38,7 +38,7 @@ You should spend your time on features rather than writing tests, yet in some ca
 
 Available commands:
 
-* `npm run sqldumptest` - exports the test DB to `setup/sql/mailtrain-test.sql`
-* `npm run sqlresettest` - drops all tables then loads `setup/sql/mailtrain-test.sql`
-* `npm run _e2e` - just runs e2e tests
-* `npm run e2e` - runs `sqlresettest` then `_e2e`
+* `bun run sqldumptest` - exports the test DB to `setup/sql/mailtrain-test.sql`
+* `bun run sqlresettest` - drops all tables then loads `setup/sql/mailtrain-test.sql`
+* `bun run _e2e` - just runs e2e tests
+* `bun run e2e` - runs `sqlresettest` then `_e2e`

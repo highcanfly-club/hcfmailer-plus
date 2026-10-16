@@ -13,12 +13,12 @@
     "sqlinit": "node setup/sql/init.js",
     "sqldump": "node setup/sql/dump.js | sed -e '/^\\/\\*.*\\*\\/;$/d' -e 's/.[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]./NOW()/g' > setup/sql/mailtrain${DUMP_NAME_SUFFIX}.sql",
     "sqldrop": "node setup/sql/drop.js",
-    "sqlgen": "npm run sqldrop && DB_FROM_START=Y npm run sqlinit && npm run sqldump",
-    "sqldumptest": "NODE_ENV=test DUMP_NAME_SUFFIX=-test npm run sqldump",
-    "sqlresettest": "NODE_ENV=test npm run sqldrop && NODE_ENV=test npm run sqlinit",
+    "sqlgen": "bun run sqldrop && DB_FROM_START=Y bun run sqlinit && bun run sqldump",
+    "sqldumptest": "NODE_ENV=test DUMP_NAME_SUFFIX=-test bun run sqldump",
+    "sqlresettest": "NODE_ENV=test bun run sqldrop && NODE_ENV=test bun run sqlinit",
     "starttest": "NODE_ENV=test node index.js",
     "_e2e": "NODE_ENV=test node test/e2e/index.js",
-    "e2e": "npm run sqlresettest && npm run _e2e"
+    "e2e": "bun run sqlresettest && bun run _e2e"
   },
   "repository": {
     "type": "git",

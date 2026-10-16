@@ -23,10 +23,11 @@ RUN set -ex; \
 
 COPY . /app
 
-RUN set -ex; \
+RUN npm install -g bun && \
+    set -ex; \
     cd /app && \
-    npm run install:all && \
-    npm run build
+    bun run install:all && \
+    bun run build
    
 RUN set -ex; \
    cd /app/client && \

@@ -1,1 +1,1 @@
-../../node_modules/@zone-eu/zone-mta/plugins/core/default-headers.js
+../../../node_modules/@zone-eu/zone-mta/plugins/core/default-headers.js

@@ -9,6 +9,7 @@ import { useRequiresAuthenticatedUser } from '../lib/hooks/useRequiresAuthentica
 import axios from '../lib/axios';
 import { Button } from '../lib/bootstrap-components';
 import { getUrl } from '../lib/urls';
+import CodeExamples from './CodeExamples';
 import './styles.scss';
 
 export default function API() {
@@ -101,6 +102,7 @@ export default function API() {
                 </p>
 
                 <pre>curl -XGET '{getUrl(`api/subscriptions/P5wKkz-e7?access_token=${token}&limit=10&start=10&search=gmail`)}' </pre>
+                <CodeExamples method="GET" url={getUrl('api/subscriptions/P5wKkz-e7')} token={token} query={{limit:'10',start:'10',search:'gmail'}} />
 
             </div>
         </div>
@@ -153,6 +155,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/subscribe/B16uVTdW?access_token=${token}`)}' \<br/>
 --data 'EMAIL=test@example.com&amp;MERGE_CHECKBOX=yes&amp;REQUIRE_CONFIRMATION=yes'</pre>
+                <CodeExamples method="POST" url={getUrl('api/subscribe/B16uVTdW')} token={token} form={{EMAIL:'test@example.com',MERGE_CHECKBOX:'yes',REQUIRE_CONFIRMATION:'yes'}} />
 
                 <p>
                     {t('responseExample')}:
@@ -192,6 +195,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/unsubscribe/B16uVTdW?access_token=${token}`)}' \<br/>
 --data 'EMAIL=test@example.com'</pre>
+                <CodeExamples method="POST" url={getUrl('api/unsubscribe/B16uVTdW')} token={token} form={{EMAIL:'test@example.com'}} />
 
                 <p>
                     {t('responseExample')}:
@@ -231,6 +235,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/delete/B16uVTdW?access_token=${token}`)}' \<br/>
 --data 'EMAIL=test@example.com'</pre>
+                <CodeExamples method="POST" url={getUrl('api/delete/B16uVTdW')} token={token} form={{EMAIL:'test@example.com'}} />
                 <p>
                     {t('responseExample')}:
                 </p>
@@ -290,6 +295,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/field/B16uVTdW?access_token=${token}`)}' \<br/>
 --data 'NAME=Comment&TYPE=text'</pre>
+                <CodeExamples method="POST" url={getUrl('api/field/B16uVTdW')} token={token} form={{NAME:'Comment',TYPE:'text'}} />
                 <p>
                     {t('responseExample')}:
                 </p>
@@ -325,6 +331,7 @@ export default function API() {
                 </p>
 
                 <pre>curl -XGET '{getUrl(`api/blacklist/get?access_token=${token}&limit=10&start=10&search=gmail`)}' </pre>
+                <CodeExamples method="GET" url={getUrl('api/blacklist/get')} token={token} query={{limit:'10',start:'10',search:'gmail'}} />
 
             </div>
         </div>
@@ -359,6 +366,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/blacklist/add?access_token=${token}`)}' \<br/>
 --data 'EMAIL=test@example.com'</pre>
+                <CodeExamples method="POST" url={getUrl('api/blacklist/add')} token={token} form={{EMAIL:'test@example.com'}} />
             </div>
         </div>
     </div>
@@ -392,6 +400,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/blacklist/delete?access_token=${token}`)}' \<br/>
 --data 'EMAIL=test@example.com'</pre>
+                <CodeExamples method="POST" url={getUrl('api/blacklist/delete')} token={token} form={{EMAIL:'test@example.com'}} />
             </div>
         </div>
     </div>
@@ -417,6 +426,7 @@ export default function API() {
                 </p>
 
                 <pre>curl -XGET '{getUrl(`api/lists/test@example.com?access_token=${token}`)}'</pre>
+                <CodeExamples method="GET" url={getUrl('api/lists/test@example.com')} token={token} />
             </div>
         </div>
     </div>
@@ -442,6 +452,7 @@ export default function API() {
                 </p>
 
                 <pre>curl -XGET '{getUrl(`api/lists-by-namespace/1?access_token=${token}`)}'</pre>
+                <CodeExamples method="GET" url={getUrl('api/lists-by-namespace/1')} token={token} />
             </div>
         </div>
     </div>
@@ -510,6 +521,7 @@ export default function API() {
                   -d 'PUBLIC_SUBSCRIBE=1' \<br/>
                   -d 'LISTUNSUBSCRIBE_DISABLED=0'
                 </pre>
+                <CodeExamples method="POST" url={getUrl('api/list')} token={token} form={{NAMESPACE:'1',UNSUBSCRIPTION_MODE:'0',NAME:'list1',DESCRIPTION:'a very nice list',CONTACT_EMAIL:'test@example.com',HOMEPAGE:'example.com',FIELDWIZARD:'first_last_name',SEND_CONFIGURATION:'1',PUBLIC_SUBSCRIBE:'1',LISTUNSUBSCRIBE_DISABLED:'0'}} />
                 <p>
                     {t('responseExample')}:
                 </p>
@@ -539,6 +551,7 @@ export default function API() {
                 </p>
 
                 <pre>curl -XDELETE '{getUrl(`api/list/WSGjaP1fY?access_token=${token}`)}'</pre>
+                <CodeExamples method="DELETE" url={getUrl('api/list/WSGjaP1fY')} token={token} />
                 <p>
                     {t('responseExample')}:
                 </p>
@@ -568,6 +581,7 @@ export default function API() {
                 </p>
 
                 <pre>curl -XGET '{getUrl(`api/rss/fetch/5OOnZKrp0?access_token=${token}`)}'</pre>
+                <CodeExamples method="GET" url={getUrl('api/rss/fetch/5OOnZKrp0')} token={token} />
             </div>
         </div>
     </div>
@@ -605,6 +619,7 @@ export default function API() {
 
                 <pre>curl -XPOST '{getUrl(`api/templates/1/send?access_token=${token}`)}' \<br/>
 --data 'EMAIL=test@example.com&amp;SUBJECT=Test&amp;TAGS[FOO]=bar&amp;TAGS[TEST]=example'</pre>
+                <CodeExamples method="POST" url={getUrl('api/templates/1/send')} token={token} form={{EMAIL:'test@example.com',SUBJECT:'Test','TAGS[FOO]':'bar','TAGS[TEST]':'example'}} />
             </div>
         </div>
     </div>

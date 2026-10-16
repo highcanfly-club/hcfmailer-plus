@@ -1,1 +1,1 @@
-../../node_modules/@zone-eu/zone-mta/plugins/core/image-hashes.js
+../../../node_modules/@zone-eu/zone-mta/plugins/core/image-hashes.js

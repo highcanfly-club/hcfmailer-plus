@@ -7,3 +7,12 @@
     margin-top: 45px;
   }
 }
+.code-examples {
+  pre {
+    margin-top: 0;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-top: 0;
+    overflow-x: auto;
+  }
+}

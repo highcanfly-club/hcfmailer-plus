@@ -1190,5 +1190,7 @@
   "bugmodal":"BUG: currently use delete from the list view, click outside the modal for closing. ",
   "noEmailConfirmation":"This person will not receive a confirmation email so make sure that you have permission to email them.",
   "setPassword": "Set password",
-  "passwordUpdated": "Password updated"
+  "passwordUpdated": "Password updated",
+  "copy": "Copy",
+  "copied": "Copied"
 }

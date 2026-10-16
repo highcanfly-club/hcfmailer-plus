@@ -276,7 +276,7 @@ This setup starts a stack like above, but is tweaked to be used for local develo
     ```
     cd /app
     bash setup/reinstall-modules.sh
-    cd /app/client && npm run build && cd /app
+    cd /app/client && bun run build && cd /app
 
 5. Start the server for the first time with this command, to generate the `server/config/production.yaml`
     ```
