@@ -13,7 +13,7 @@ import "./sandboxed-ckeditor.scss";
 import { getPublicUrl, getSandboxUrl, getTrustedUrl } from "./urls";
 import { base, unbase } from "../../../shared/templates";
 
-import EmailBuilderApp from './email-builder/App';
+import EmailBuilderApp from './email-builder/EditorApp';
 import theme from './email-builder/theme';
 import { getDocument, resetDocument } from './email-builder/documents/editor/EditorContext';
 import EMPTY_EMAIL_MESSAGE from './email-builder/getConfiguration/empty-email-message';
