@@ -6,7 +6,8 @@ import {
   VerticalAlignCenterOutlined,
   VerticalAlignTopOutlined,
 } from '@mui/icons-material';
-import { Stack, ToggleButton } from '@mui/material';
+import { Alert, Button, Stack, ToggleButton } from '@mui/material';
+import { UploadFileOutlined } from '@mui/icons-material';
 import { ImageProps, ImagePropsSchema } from '@usewaypoint/block-image';
 
 import BaseSidebarPanel from './helpers/BaseSidebarPanel';
@@ -14,6 +15,9 @@ import RadioGroupInput from './helpers/inputs/RadioGroupInput';
 import TextDimensionInput from './helpers/inputs/TextDimensionInput';
 import TextInput from './helpers/inputs/TextInput';
 import MultiStylePropertyPanel from './helpers/style-inputs/MultiStylePropertyPanel';
+import axios from '../../../../../axios';
+import { getSandboxUrl } from '../../../../../urls';
+import { getUploadConfig } from '../../../../uploadConfig';
 
 type ImageSidebarPanelProps = {
   data: ImageProps;
@@ -21,6 +25,8 @@ type ImageSidebarPanelProps = {
 };
 export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelProps) {
   const [, setErrors] = useState<ZodError | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const updateData = (d: unknown) => {
     const res = ImagePropsSchema.safeParse(d);
@@ -32,9 +38,47 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
     }
   };
 
+  const uploadImage = async (file: File | undefined) => {
+    if (!file) return;
+    const { entityTypeId, entityId } = getUploadConfig();
+    if (!entityTypeId || !entityId) {
+      setUploadError('Save the template once before uploading images.');
+      return;
+    }
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append('files[]', file);
+      // The server shrinks the image to at most 1200 px wide (2x the 600 px email width) before storing it
+      const res = await axios.post(getSandboxUrl(`emailbuilder/upload/${entityTypeId}/${entityId}`), form);
+      const url = res.data?.files?.[0]?.url;
+      if (!url) throw new Error('Upload failed');
+      updateData({ ...data, props: { ...data.props, url } });
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <BaseSidebarPanel title="Image block">
+      <Button component="label" variant="outlined" size="small" startIcon={<UploadFileOutlined />} disabled={uploading}>
+        {uploading ? 'Uploading…' : 'Upload an image'}
+        <input
+          hidden
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          onChange={(e) => {
+            uploadImage(e.target.files?.[0]);
+            e.target.value = '';
+          }}
+        />
+      </Button>
+      {uploadError && <Alert severity="error">{uploadError}</Alert>}
       <TextInput
+        key={data.props?.url ?? ''}
         label="Source URL"
         defaultValue={data.props?.url ?? ''}
         onChange={(v) => {

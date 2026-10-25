@@ -8,6 +8,7 @@ import files from '../models/files.js';
 import fileHelpers from '../lib/file-helpers.js';
 import templates from '../models/templates.js';
 import contextHelpers from '../lib/context-helpers.js';
+import { prepareUploadedImages } from '../lib/image-upload.js';
 
 users.registerRestrictedAccessTokenMethod('grapesjs', async ({entityTypeId, entityId}) => {
     if (entityTypeId === 'template') {
@@ -52,7 +53,7 @@ async function getRouter(appType) {
             return {
                 data: resp.files.map( f => ({type: 'image', src: f.url}) )
             };
-        });
+        }, prepareUploadedImages);
 
     }
 

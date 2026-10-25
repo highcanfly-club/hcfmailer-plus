@@ -14,14 +14,37 @@ import { base, unbase } from "../../../shared/templates";
 import {
   Alignment, Autoformat, AutoLink, BlockQuote, Bold, ClassicEditor, Essentials, FontBackgroundColor, FontColor,
   FontFamily, FontSize, GeneralHtmlSupport, Heading, HorizontalLine, Image, ImageCaption, ImageInsertViaUrl,
-  ImageResize, ImageStyle, ImageToolbar, Indent, IndentBlock, Italic, Link, LinkImage, List, ListProperties,
+  ImageResize, ImageStyle, ImageToolbar, ImageUpload, Indent, IndentBlock, Italic, Link, LinkImage, List, ListProperties,
   Paragraph, PasteFromOffice, RemoveFormat, SourceEditing, SpecialCharacters, SpecialCharactersEssentials,
   Strikethrough, Table, TableCellProperties, TableColumnResize, TableProperties, TableToolbar, Underline, Undo
 } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 
+import axios from './axios';
 import { initialHeight } from "./sandboxed-ckeditor-shared";
 import { withComponentMixins } from "./decorator-helpers";
+
+// Uploads go through the sandbox, which shrinks images to at most 1200 px wide before storing them
+function createUploadAdapterPlugin(entityTypeId, entityId) {
+  return function MailtrainUploadAdapter(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = loader => ({
+      async upload() {
+        if (!entityTypeId || !entityId) {
+          throw new Error('Save the template once before uploading images.');
+        }
+        const form = new FormData();
+        form.append('files[]', await loader.file);
+        const res = await axios.post(getSandboxUrl(`ckeditor5/upload/${entityTypeId}/${entityId}`), form);
+        const url = res.data && res.data.files && res.data.files[0] && res.data.files[0].url;
+        if (!url) {
+          throw new Error('Upload failed');
+        }
+        return { default: url };
+      },
+      abort() {}
+    });
+  };
+}
 
 const CKEditor5Sandbox =
 withComponentMixins([
@@ -78,11 +101,12 @@ CKEditor5Sandbox extends Component {
     try {
       const editor = await ClassicEditor.create(this.containerRef.current, {
         licenseKey: 'GPL',
+        extraPlugins: [createUploadAdapterPlugin(this.props.entityTypeId, this.props.entityId)],
         initialData: this.source,
         plugins: [
           Alignment, Autoformat, AutoLink, BlockQuote, Bold, Essentials, FontBackgroundColor, FontColor, FontFamily,
           FontSize, GeneralHtmlSupport, Heading, HorizontalLine, Image, ImageCaption, ImageInsertViaUrl, ImageResize,
-          ImageStyle, ImageToolbar, Indent, IndentBlock, Italic, Link, LinkImage, List, ListProperties, Paragraph,
+          ImageStyle, ImageToolbar, ImageUpload, Indent, IndentBlock, Italic, Link, LinkImage, List, ListProperties, Paragraph,
           PasteFromOffice, RemoveFormat, SourceEditing, SpecialCharacters, SpecialCharactersEssentials, Strikethrough,
           Table, TableCellProperties, TableColumnResize, TableProperties, TableToolbar, Underline, Undo
         ],
@@ -90,7 +114,7 @@ CKEditor5Sandbox extends Component {
           items: [
             'undo', 'redo', '|', 'heading', '|', 'bold', 'italic', 'underline', 'strikethrough', 'removeFormat', '|',
             'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor', '|', 'alignment', '|',
-            'bulletedList', 'numberedList', 'outdent', 'indent', '|', 'link', 'insertImageViaUrl', 'insertTable',
+            'bulletedList', 'numberedList', 'outdent', 'indent', '|', 'link', 'uploadImage', 'insertImageViaUrl', 'insertTable',
             'horizontalLine', 'blockQuote', 'specialCharacters', '|', 'sourceEditing'
           ],
           shouldNotGroupWhenFull: true

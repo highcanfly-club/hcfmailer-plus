@@ -10,8 +10,13 @@ const multer = multerFactory({
     dest: uploadedFilesDir
 });
 
-function installUploadHandler(router, url, replacementBehavior, type, subType, transformResponseFn) {
+function installUploadHandler(router, url, replacementBehavior, type, subType, transformResponseFn, preprocessFilesFn) {
     router.postAsync(url, passport.loggedIn, multer.array('files[]'), async (req, res) => {
+        if (preprocessFilesFn) {
+            // Lets the caller validate / transform the uploaded temporary files before they are stored
+            await preprocessFilesFn(req.files);
+        }
+
         return res.json(await files.createFiles(req.context, type || req.params.type, subType || req.params.subType, castToInteger(req.params.entityId), req.files, replacementBehavior, transformResponseFn));
     });
 }

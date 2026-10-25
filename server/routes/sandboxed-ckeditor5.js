@@ -8,6 +8,7 @@ import files from '../models/files.js';
 import fileHelpers from '../lib/file-helpers.js';
 import templates from '../models/templates.js';
 import contextHelpers from '../lib/context-helpers.js';
+import { prepareUploadedImages } from '../lib/image-upload.js';
 
 users.registerRestrictedAccessTokenMethod('ckeditor5', async ({entityTypeId, entityId}) => {
     if (entityTypeId === 'template') {
@@ -17,7 +18,7 @@ users.registerRestrictedAccessTokenMethod('ckeditor5', async ({entityTypeId, ent
             return {
                 permissions: {
                     'template': {
-                        [entityId]: new Set(['manageFiles', 'view'])
+                        [entityId]: new Set(['viewFiles', 'manageFiles', 'view'])
                     }
                 }
             };
@@ -47,6 +48,12 @@ async function getRouter(appType) {
                 publicPath: getSandboxUrl()
             });
         });
+
+        fileHelpers.installUploadHandler(router, '/upload/:type/:entityId', files.ReplacementBehavior.RENAME, null, 'file', resp => {
+            return {
+                files: resp.files.map(f => ({ name: f.name, url: f.url, size: f.size }))
+            };
+        }, prepareUploadedImages);
     }
 
     return router;

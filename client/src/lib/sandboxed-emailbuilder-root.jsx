@@ -17,6 +17,7 @@ import EmailBuilderApp from './email-builder/EditorApp';
 import theme from './email-builder/theme';
 import { getDocument, resetDocument } from './email-builder/documents/editor/EditorContext';
 import EMPTY_EMAIL_MESSAGE from './email-builder/getConfiguration/empty-email-message';
+import { setUploadConfig } from './email-builder/uploadConfig';
 
 import { withComponentMixins } from "./decorator-helpers";
 
@@ -40,6 +41,8 @@ EmailBuilderSandbox extends Component {
         console.error('Invalid Email Builder document', err);
       }
     }
+
+    setUploadConfig({ entityTypeId: this.props.entityTypeId, entityId: this.props.entityId });
 
     // The editor state lives in a module-level store, so it has to be loaded before the first render
     resetDocument(document);
