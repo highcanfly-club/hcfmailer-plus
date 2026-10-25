@@ -4,6 +4,7 @@ import aiModels from '../../models/ai.js';
 import { complete } from './providers.js';
 import { extractSlots, prepare, validateReply } from './slots.js';
 import { skeleton } from './skeletons.js';
+import { build as buildResponsive, sanitizeCss } from './responsive.js';
 
 const MAX_SOURCE_CHARS = 200000;
 const CHUNK_SLOTS = 25;
@@ -15,7 +16,8 @@ const MAX_GENERATE_CHARS = 30000;
 const TIER_PREFERENCE = {
     correct: ['basic', 'medium', 'high'],
     rewrite: ['medium', 'high', 'basic'],
-    generate: ['high', 'medium', 'basic']
+    generate: ['high', 'medium', 'basic'],
+    responsive: ['high', 'medium', 'basic']
 };
 
 const COMMON_RULES = `Règles impératives :
@@ -148,8 +150,42 @@ async function processSlots({ userId, action, tier, editorType, source, options 
     return { source: replies.size || usedSkeleton ? parsed.apply(replies) : source, changed: replies.size, rejected, tier, ...meta };
 }
 
+const RESPONSIVE_SYSTEM = `Tu es un expert en emails HTML responsives (Apple Mail iOS, Gmail, Outlook). Tu reçois la structure simplifiée d'un email : les textes sont tronqués, les images masquées, et chaque élément porte un attribut data-ai-r="ID". Les styles en ligne existants sont montrés : ils sont prioritaires, donc tes règles les surchargent.
+L'utilisateur décrit un problème d'affichage sur mobile ou une amélioration souhaitée. Réponds par une feuille de style minimale qui le règle.
+Contraintes impératives :
+- Uniquement des blocs @media only screen and (max-width:Npx){ ... } (N entre 320 et 768). Repères : petits téléphones ≤ 360px, iPhone et téléphones en général ≤ 430px (largeur de l'iPhone Pro Max : 428px), tablettes ≤ 768px. Si la demande dit « téléphone » ou « iPhone » sans précision, utilise max-width:430px ; tu peux ajouter un second bloc plus serré (≤ 375px) si le texte doit encore diminuer.
+- Sélecteurs autorisés : [data-ai-r="ID"] (ID existant dans le HTML montré), .classe déjà présente dans le HTML, ou h1/h2/h3 (uniquement pour les blocs Heading natifs, qui n'ont pas d'attribut). Rien d'autre : n'invente jamais un ID et n'utilise jamais l'identifiant d'un BLOC comme sélecteur.
+- Si « le titre » est ambigu (par exemple un grand titre dans l'en-tête ET des titres de section natifs), applique la règle à tous les titres plausibles : le titre de l'en-tête (cherche le grand texte de l'en-tête, souvent un div à gros font-size) ET les titres natifs h1/h2.
+- Propriétés autorisées : font-size, line-height, letter-spacing, text-align, padding*, margin*, width, max-width, min-width, height, min-height, display, word-break, overflow-wrap, hyphens, white-space, background-size, background-position, vertical-align. Valeurs simples (px, %, auto, nombres), sans url() ni guillemets. N'écris pas !important (ajouté automatiquement).
+- Change le moins possible : seulement ce qui répond à la demande.
+- Réponds uniquement avec un objet JSON {"css":"...","summary":"une phrase qui décrit les changements"}, sans bloc de code.`;
+
+async function responsive(userId, { tier, editorType, source: originalSource, style, instruction }) {
+    if (!['emailbuilder', 'grapesjs'].includes(editorType)) {
+        throw new Error('Responsive adjustments are only available in Email Builder and GrapesJS');
+    }
+    const { stripped, restore } = stashDataUris(originalSource);
+    const built = buildResponsive(editorType, stripped, style);
+    const request = `Demande : ${instruction}\n\nStructure de l'email :\n${built.digest}`;
+    let reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, request));
+    let reason = '';
+    let safe = sanitizeCss(reply.css, built.ids, r => { reason = r; });
+    if (!safe) {
+        // One more try, telling the model what was wrong with its answer
+        const retry = `${request}\n\nTa réponse précédente a été refusée : ${reason}. Rappel : sélecteurs autorisés uniquement [data-ai-r="ID"] avec un ID présent dans le HTML ci-dessus, une .classe présente dans le HTML, ou h1/h2/h3 pour les titres natifs.\nTa réponse précédente : ${String(reply.css).slice(0, 800)}`;
+        reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, retry));
+        safe = sanitizeCss(reply.css, built.ids, r => { reason = r; });
+    }
+    if (!safe) {
+        console.warn(`AI responsive: rejected CSS (${reason}):`, String(reply.css).slice(0, 600));
+        return { source: originalSource, style, changed: 0, rejected: 1, tier, summary: typeof reply.summary === 'string' ? reply.summary : null, message: `Les règles proposées ont été ignorées (${reason}). Reformulez la demande en précisant l'élément concerné.` };
+    }
+    const applied = built.apply(safe.css, safe.used);
+    return { source: restore(applied.source), style: applied.style, changed: safe.css.split('}\n').length, rejected: 0, tier, summary: typeof reply.summary === 'string' ? reply.summary.slice(0, 500) : null, css: safe.css };
+}
+
 const correct = (userId, args) => runOnSlots({ userId, action: 'correct', ...args, options: {} });
 const rewrite = (userId, args) => runOnSlots({ userId, action: 'rewrite', ...args });
 const generate = (userId, args) => runOnSlots({ userId, action: 'generate', ...args });
 
-export { correct, rewrite, generate, resolveTier, parseJsonReply, callModel };
+export { correct, rewrite, generate, responsive, resolveTier, parseJsonReply, callModel };

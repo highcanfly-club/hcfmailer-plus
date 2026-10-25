@@ -81,10 +81,10 @@ const preheaderBlock = `
 const headerInner = `
         <tr><td class="mcfly-header" background="${IMG.header}" bgcolor="${COLORS.blue800}" valign="top" height="260" style="height: 260px; background-color: ${COLORS.blue800}; background-image: url('${IMG.header}'); background-repeat: no-repeat; background-position: center bottom; background-size: 600px 260px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-            <td class="mcfly-pad" valign="top" width="130" style="padding: 24px 0 0 28px;"><a href="${SITE}" style="display: inline-block;"><img alt="McFly parapente" border="0" width="110" style="display: block; border: 0; width: 110px; height: auto;" src="${IMG.logoWhite}"></a></td>
+            <td class="mcfly-pad" valign="top" width="130" style="padding: 24px 0 0 28px;"><a href="${SITE}" style="display: inline-block;"><img class="mcfly-logo" alt="McFly parapente" border="0" width="110" style="display: block; border: 0; width: 110px; height: auto;" src="${IMG.logoWhite}"></a></td>
             <td class="mcfly-pad" valign="top" align="right" style="padding: 30px 28px 0 0;">
-              <div style="font-family: ${FONTS.demi}; font-size: 12px; line-height: 16px; letter-spacing: 3px; text-transform: uppercase; color: ${COLORS.yellow500}; -ko-font-size: @[kickerStyle.size]px; -ko-color: @kickerStyle.color; -ko-font-family: @kickerStyle.face"><span data-ko-editable="kickerText">Newsletter</span></div>
-              <div style="font-family: ${FONTS.sc}; font-variant: small-caps; font-size: 28px; line-height: 32px; letter-spacing: 1px; color: ${COLORS.white}; padding-top: 4px; -ko-font-size: @[bigTitleStyle.size]px; -ko-color: @bigTitleStyle.color; -ko-font-family: @bigTitleStyle.face"><span data-ko-editable="headerTitle">Les nouvelles de McFly</span></div>
+              <div class="mcfly-kicker" style="font-family: ${FONTS.demi}; font-size: 12px; line-height: 16px; letter-spacing: 3px; text-transform: uppercase; color: ${COLORS.yellow500}; -ko-font-size: @[kickerStyle.size]px; -ko-color: @kickerStyle.color; -ko-font-family: @kickerStyle.face"><span data-ko-editable="kickerText">Newsletter</span></div>
+              <div class="mcfly-title" style="font-family: ${FONTS.sc}; font-variant: small-caps; font-size: 28px; line-height: 32px; letter-spacing: 1px; color: ${COLORS.white}; padding-top: 4px; -ko-font-size: @[bigTitleStyle.size]px; -ko-color: @bigTitleStyle.color; -ko-font-family: @bigTitleStyle.face"><span data-ko-editable="headerTitle">Les nouvelles de McFly</span></div>
             </td></tr></table>
         </td></tr>`;
 

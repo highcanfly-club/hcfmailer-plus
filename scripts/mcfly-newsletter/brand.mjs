@@ -79,6 +79,15 @@ export const MOBILE_CSS = `
   .mcfly-col{display:block!important;width:100%!important;max-width:100%!important}
   .mcfly-header{background-size:cover!important}
   .mcfly-pad{padding-left:20px!important;padding-right:20px!important}
+  .mcfly-kicker{font-size:11px!important;letter-spacing:2px!important}
+  .mcfly-title{font-size:22px!important;line-height:26px!important;letter-spacing:.5px!important}
+}
+@media only screen and (max-width:380px){
+  .mcfly-title{font-size:18px!important;line-height:22px!important}
+  .mcfly-logo{width:84px!important;height:auto!important}
+}
+@media only screen and (max-width:340px){
+  .mcfly-title{font-size:16px!important;line-height:20px!important}
 }`;
 
 // ---------------------------------------------------------------------------------------------------
@@ -91,10 +100,10 @@ export function header({ kicker = 'Newsletter', title = 'Les nouvelles de McFly'
   return `<table role="presentation" class="mcfly-container" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:100%;border-collapse:collapse;">
 <tr><td class="mcfly-header" background="${IMG.header}" bgcolor="${COLORS.blue800}" valign="top" height="260" style="height:260px;background-color:${COLORS.blue800};background-image:url('${IMG.header}');background-repeat:no-repeat;background-position:center bottom;background-size:600px 260px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-<td class="mcfly-pad" valign="top" width="130" style="padding:24px 0 0 28px;"><a href="${SITE}" target="_blank"><img src="${IMG.logoWhite}" alt="McFly parapente" width="110" style="display:block;border:0;width:110px;height:auto;"></a></td>
+<td class="mcfly-pad" valign="top" width="130" style="padding:24px 0 0 28px;"><a href="${SITE}" target="_blank"><img class="mcfly-logo" src="${IMG.logoWhite}" alt="McFly parapente" width="110" style="display:block;border:0;width:110px;height:auto;"></a></td>
 <td class="mcfly-pad" valign="top" align="right" style="padding:30px 28px 0 0;">
-<div style="font-family:${FONTS.demi};font-size:12px;line-height:16px;letter-spacing:3px;text-transform:uppercase;color:${COLORS.yellow500};">${kicker}</div>
-<div style="font-family:${FONTS.sc};font-variant:small-caps;font-size:28px;line-height:32px;letter-spacing:1px;color:${COLORS.white};padding-top:4px;">${title}</div>
+<div class="mcfly-kicker" style="font-family:${FONTS.demi};font-size:12px;line-height:16px;letter-spacing:3px;text-transform:uppercase;color:${COLORS.yellow500};">${kicker}</div>
+<div class="mcfly-title" style="font-family:${FONTS.sc};font-variant:small-caps;font-size:28px;font-size:clamp(19px,6.2vw,28px);line-height:32px;letter-spacing:1px;color:${COLORS.white};padding-top:4px;">${title}</div>
 </td></tr></table>
 </td></tr></table>`;
 }

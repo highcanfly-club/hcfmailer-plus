@@ -9,7 +9,8 @@ import { UntrustedContentHost } from './untrusted';
 import { Icon } from "./bootstrap-components";
 import { getTrustedUrl } from "./urls";
 import { withComponentMixins } from "./decorator-helpers";
-import { getTagLanguageFromEntity } from "./sandbox-common";const MosaicoHost =
+import { getTagLanguageFromEntity } from "./sandbox-common";
+import { ResponsivePreview } from "./responsive-preview";const MosaicoHost =
 
 
 withComponentMixins([
@@ -79,6 +80,7 @@ MosaicoHost extends Component {
                         <div className={"title"}>{this.props.title}</div>
                     </div>
                     <div className={"navbarRight"}>
+                        <ResponsivePreview getHtml={() => this.contentNode.ask('exportState')} tagLanguage={getTagLanguageFromEntity(this.props.entity, this.props.entityTypeId)} />
                         {this.props.canSave ? <a className={"btn"} onClick={this.props.onSave} title={t('save')}><Icon icon="save" /></a> : <span className={"btnDisabled"}><Icon icon="save" /></span>}
                         <a className={"btn"} onClick={this.props.onTestSend} title={t('sendTestEmail-1')}><Icon icon="at" /></a>
                         <a className={"btn"} onClick={() => this.props.onShowExport('html', 'HTML')} title={t('showHtml')}><Icon icon="file-code" /></a>

@@ -7,7 +7,7 @@ import templates from '../../models/templates.js';
 import campaigns from '../../models/campaigns.js';
 import { isConfigured } from '../../lib/ai/crypto.js';
 import { PROTOCOLS, DEFAULT_BASE_URLS, ProviderError } from '../../lib/ai/providers.js';
-import { correct, rewrite, generate, resolveTier, callModel } from '../../lib/ai/features.js';
+import { correct, rewrite, generate, responsive, resolveTier, callModel } from '../../lib/ai/features.js';
 import * as cheerio from 'cheerio';
 
 const router = routerFactory.create();
@@ -110,6 +110,18 @@ router.postAsync('/ai/correct', passport.loggedIn, passport.csrfProtection, (req
 router.postAsync('/ai/rewrite', passport.loggedIn, passport.csrfProtection, (req, res) => {
     enforce(typeof req.body.instruction === 'string' && req.body.instruction.trim() && req.body.instruction.length <= 2000, 'Instruction required');
     return withTier(req, res, 'rewrite', tier => rewrite(req.user.id, { tier, editorType: req.body.editorType, source: req.body.source, options: { instruction: req.body.instruction.trim() } }));
+});
+
+router.postAsync('/ai/responsive', passport.loggedIn, passport.csrfProtection, (req, res) => {
+    enforce(typeof req.body.instruction === 'string' && req.body.instruction.trim() && req.body.instruction.length <= 2000, 'Instruction required');
+    enforce(['emailbuilder', 'grapesjs'].includes(req.body.editorType), 'Responsive adjustments are not available for this editor');
+    return withTier(req, res, 'responsive', tier => responsive(req.user.id, {
+        tier,
+        editorType: req.body.editorType,
+        source: req.body.source,
+        style: typeof req.body.style === 'string' ? req.body.style : '',
+        instruction: req.body.instruction.trim()
+    }));
 });
 
 // Past newsletters used as style references. Reads go through the regular model layer with the user's own context,

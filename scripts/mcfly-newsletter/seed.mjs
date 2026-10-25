@@ -3,11 +3,12 @@
 // Usage :
 //   bun scripts/mcfly-newsletter/build.mjs
 //   set -a && source .env.dev && set +a
-//   bun scripts/mcfly-newsletter/seed.mjs [--namespace 2] [--dry-run]
+//   bun scripts/mcfly-newsletter/seed.mjs [--namespace 2] [--dry-run] [--update]
 //
 // Variables : MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE (celles de .env.dev).
 // Pour la production : ouvrir un `kubectl port-forward` vers MySQL et pointer MYSQL_HOST/MYSQL_PORT dessus.
-// Le script est idempotent : un modèle existant (même nom, même namespace) est mis à jour, pas dupliqué.
+// Par défaut, un modèle qui existe déjà (même nom, même namespace) est laissé tel quel : les utilisateurs peuvent l'avoir personnalisé.
+// --update remplace le contenu des modèles existants (à n'utiliser que pour déployer une nouvelle version du design).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,7 @@ const dist = (f) => fs.readFileSync(path.join(here, 'dist', f), 'utf8');
 const args = process.argv.slice(2);
 const namespace = Number(args.includes('--namespace') ? args[args.indexOf('--namespace') + 1] : 2);
 const dryRun = args.includes('--dry-run');
+const update = args.includes('--update');
 
 const PREFIX = 'McFly parapente';
 const NAMES = {
@@ -54,6 +56,10 @@ const conn = await mysql.createConnection({
 async function upsert(table, name, row) {
   const [found] = await conn.execute(`select id from ${table} where name = ? and namespace = ?`, [name, namespace]);
   if (dryRun) return found[0]?.id ?? 0;
+  if (found.length && !update) {
+    console.log(`  ${table} #${found[0].id} existe déjà, inchangé : ${name}`);
+    return found[0].id;
+  }
   if (found.length) {
     const cols = Object.keys(row);
     await conn.execute(`update ${table} set ${cols.map((c) => `\`${c}\` = ?`).join(', ')} where id = ?`, [...cols.map((c) => row[c]), found[0].id]);

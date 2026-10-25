@@ -15,6 +15,7 @@ const loadStatus = () => {
 };
 
 const TIER_LABELS = { basic: 'Basique', medium: 'Intermédiaire', high: 'Avancé' };
+const RESPONSIVE_HINTS = ['Réduire la taille du titre sur petit écran', 'Empiler les colonnes sur mobile', 'Réduire les marges latérales sur mobile', 'Agrandir les boutons sur mobile'];
 const STYLE_HINTS = ['Plus court', 'Plus chaleureux', 'Plus professionnel', 'Plus dynamique', 'Plus simple'];
 const BRAND_KEY = 'hcfmailer.ai.brand';
 
@@ -67,7 +68,8 @@ export function AIToolbar({ editorType, getState, onApplied }) {
         throw new Error('L’éditeur n’est pas encore prêt.');
       }
       const body = { editorType, source: state.source, tier: tier || undefined };
-      if (mode === 'rewrite') body.instruction = instruction;
+      if (mode === 'rewrite' || mode === 'responsive') body.instruction = instruction;
+      if (mode === 'responsive') body.style = state.style;
       if (mode === 'generate') {
         body.brief = brief;
         body.brand = brand;
@@ -77,6 +79,13 @@ export function AIToolbar({ editorType, getState, onApplied }) {
       const res = (await axios.post(getUrl(`rest/ai/${mode}`), body)).data;
       if (res.empty) {
         setMessage('Aucun texte à traiter dans ce contenu.');
+      } else if (mode === 'responsive') {
+        if (res.changed > 0) {
+          previous.current = state;
+          onApplied({ source: res.source, style: res.style !== undefined ? res.style : state.style });
+        }
+        setResult(null);
+        setMessage(res.message || (res.summary ? `${res.summary} Vérifiez avec l’aperçu à plusieurs largeurs.` : 'Réglages ajoutés. Vérifiez avec l’aperçu à plusieurs largeurs.'));
       } else {
         previous.current = state;
         onApplied({ source: res.source, style: state.style });
@@ -100,7 +109,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
     }
   };
 
-  const canRun = !busy && (mode === 'correct' || (mode === 'rewrite' && instruction.trim()) || (mode === 'generate' && brief.trim()));
+  const canRun = !busy && (mode === 'correct' || ((mode === 'rewrite' || mode === 'responsive') && instruction.trim()) || (mode === 'generate' && brief.trim()));
   const tabButton = (key, label) => <button key={key} style={btnStyle(mode === key)} onClick={() => { setMode(key); setMessage(null); }}>{label}</button>;
 
   return (
@@ -108,7 +117,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
       <a className="btn" onClick={() => setOpen(!open)} title="Assistant IA"><Icon icon="magic" /></a>
       {open && (
         <div style={panelStyle}>
-          <div className="mb-2">{tabButton('correct', 'Corriger')}{tabButton('rewrite', 'Réécrire')}{tabButton('generate', 'Générer')}</div>
+          <div className="mb-2">{tabButton('correct', 'Corriger')}{tabButton('rewrite', 'Réécrire')}{tabButton('generate', 'Générer')}{(editorType === 'emailbuilder' || editorType === 'grapesjs') && tabButton('responsive', 'Mobile')}</div>
 
           {mode === 'correct' && <p>Corrige l’orthographe, la grammaire et la ponctuation sans toucher à la mise en page, aux liens ni aux balises de fusion.</p>}
 
@@ -116,6 +125,14 @@ export function AIToolbar({ editorType, getState, onApplied }) {
             <>
               <textarea className="form-control mb-1" rows={3} placeholder="Consigne : ex. rends le ton plus chaleureux" value={instruction} onChange={e => setInstruction(e.target.value)} />
               <div className="mb-2">{STYLE_HINTS.map(h => <button key={h} style={btnStyle(false)} onClick={() => setInstruction(h)}>{h}</button>)}</div>
+            </>
+          )}
+
+          {mode === 'responsive' && (
+            <>
+              <p className="mb-1">Décrivez le problème d’affichage : l’IA ajoute des règles pour les petits écrans, sans modifier vos textes ni la mise en page de bureau.</p>
+              <textarea className="form-control mb-1" rows={3} placeholder="Ex. sur iPhone le titre passe sur deux lignes : réduis la police sur petits téléphones" value={instruction} onChange={e => setInstruction(e.target.value)} />
+              <div className="mb-2">{RESPONSIVE_HINTS.map(h => <button key={h} style={btnStyle(false)} onClick={() => setInstruction(h)}>{h}</button>)}</div>
             </>
           )}
 

@@ -11,6 +11,7 @@ import { getTrustedUrl } from "./urls";
 import { withComponentMixins } from "./decorator-helpers";
 import { GrapesJSSourceType } from "./sandboxed-grapesjs-shared";
 import { getTagLanguageFromEntity } from "./sandbox-common";
+import { ResponsivePreview } from "./responsive-preview";
 import { AIToolbar } from "./ai-toolbar";
 
 const GrapesJSHost =
@@ -88,6 +89,7 @@ GrapesJSHost extends Component {
                         <div className={"title"}>{this.props.title}</div>
                     </div>
                     <div className={"navbarRight"}>
+                        <ResponsivePreview getHtml={() => this.contentNode.ask('exportState')} tagLanguage={getTagLanguageFromEntity(this.props.entity, this.props.entityTypeId)} />
                         <AIToolbar editorType="grapesjs" getState={() => this.contentNode.ask('exportState')} onApplied={(...args) => this.applyAI(...args)} />
                         {this.props.canSave ? <a className={"btn"} onClick={this.props.onSave} title={t('save')}><Icon icon="save" /></a> : <span className={"btnDisabled"}><Icon icon="save" /></span>}
                         <a className={"btn"} onClick={this.props.onTestSend} title={t('sendTestEmail-1')}><Icon icon="at" /></a>
