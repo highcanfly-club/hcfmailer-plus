@@ -16,6 +16,7 @@ jobs:
       context: .
       image: highcanfly/hcfmailer-plus
       artifact-prefix: hcfmailer-plus-${{ github.run_id }}
+      cleanup: false
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
