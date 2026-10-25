@@ -235,6 +235,12 @@ async function createApp(appType) {
         app.all('/api/*rest', passport.authByAccessToken);
     }
 
+    // Web fonts of the newsletter templates are loaded by the sandboxed editors, which live on another origin
+    app.use('/static/mcfly/fonts', (req, res, next) => {
+        res.set('Access-Control-Allow-Origin', '*');
+        next();
+    });
+
     useWith404Fallback('/static', express.static(path.join(__dirname, '..', 'client', 'static')));
 
     // In development, proxy to Vite dev server; in production, serve vite dist

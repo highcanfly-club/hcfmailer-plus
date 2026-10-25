@@ -154,6 +154,9 @@ async function getRouter(appType) {
         // This is a fallback to versafix-1 if the block thumbnail is not defined by the template
         router.use('/templates/:mosaicoTemplateId/edres', express.static(path.join(__dirname, '..', '..', 'client', 'static', 'mosaico', 'templates', 'versafix-1', 'edres')));
 
+        // Block thumbnails of the McFly parapente template (scripts/mcfly-newsletter)
+        router.use('/templates/:mosaicoTemplateId/edres', express.static(path.join(__dirname, '..', '..', 'client', 'static', 'mosaico', 'templates', 'mcfly-1', 'edres')));
+
         // This is the final fallback for a block thumbnail, so that at least something gets returned
         router.getAsync('/templates/:mosaicoTemplateId/edres/:fileName', await fileCache('mosaico-block-thumbnails', config.mosaico.fileCache.blockThumbnails, req => req.params.fileName), async (req, res) => {
             let labelText = req.params.fileName.replace(/\.png$/, '');
@@ -269,8 +272,17 @@ async function getRouter(appType) {
                 if (url.startsWith(mosaicoLegacyUrlPrefix)) {
                     filePath = path.join(__dirname, '..', '..', 'client', 'static' , 'mosaico', 'uploads', url.substring(mosaicoLegacyUrlPrefix.length));
                 } else {
-                    const file = await files.getFileByUrl(contextHelpers.getAdminContext(), url);
-                    filePath = file.path;
+                    // Images shipped with the application (e.g. static/mcfly/img/*): served from client/static
+                    const staticRoot = path.join(__dirname, '..', '..', 'client', 'static');
+                    const staticPrefix = [getTrustedUrl('static/'), getPublicUrl('static/'), getSandboxUrl('static/')].find(prefix => url.startsWith(prefix));
+                    const staticPath = staticPrefix && path.join(staticRoot, decodeURIComponent(url.substring(staticPrefix.length)));
+
+                    if (staticPath && staticPath.startsWith(staticRoot + path.sep) && await fs.pathExists(staticPath)) {
+                        filePath = staticPath;
+                    } else {
+                        const file = await files.getFileByUrl(contextHelpers.getAdminContext(), url);
+                        filePath = file.path;
+                    }
                 }
 
                 image = await resizedImage(filePath, method, width, height);

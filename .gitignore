@@ -25,3 +25,4 @@ server/config/local.yaml
 server/config/local-*.yaml
 app/
 .kilo
+scripts/mcfly-newsletter/dist/
