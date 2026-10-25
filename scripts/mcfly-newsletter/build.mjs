@@ -53,7 +53,7 @@ ${promo()}
 
 const page = () =>
   `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${COLORS.snow}" style="background-color:${COLORS.snow};"><tr><td align="center" style="padding:0 0 24px 0;">
-<table role="presentation" class="mcfly-container" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:100%;"><tr><td align="center" style="padding:14px 0 10px 0;font-family:${FONTS.book};font-size:12px;line-height:16px;color:${COLORS.grey800};"><a href="[LINK_BROWSER]" style="color:${COLORS.grey800};text-decoration:underline;">Voir cet email dans votre navigateur</a></td></tr></table>
+<table role="presentation" class="mcfly-container" width="600" cellpadding="0" cellspacing="0" border="0" align="center" style="width:600px;max-width:100%;"><tr><td data-ai-lock="1" align="center" style="padding:14px 0 10px 0;font-family:${FONTS.book};font-size:12px;line-height:16px;color:${COLORS.grey800};"><a href="[LINK_BROWSER]" style="color:${COLORS.grey800};text-decoration:underline;">Voir cet email dans votre navigateur</a></td></tr></table>
 ${header()}
 ${content()}
 ${footer()}
@@ -77,7 +77,7 @@ const ckH = (lvl, size, t, top = 0) => `<h${lvl} style="margin:0;${pad}padding-t
 const ckLink = (t, href, bg, fg) => `<p style="margin:0;${pad}padding-bottom:22px;"><a href="${href}" target="_blank" style="display:inline-block;padding:13px 26px;border-radius:6px;background-color:${bg};font-family:${FONTS.demi};font-size:15px;line-height:18px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;color:${fg};">${t}</a></p>`;
 const ckSection = (title, text, href) => `<div style="margin:0 40px 18px 40px;padding:6px 0 0 0;border-top:4px solid ${COLORS.yellow500};"><h3 style="margin:0;padding:12px 0 6px 0;font-family:${FONTS.sc};font-variant:small-caps;font-weight:normal;font-size:18px;line-height:24px;letter-spacing:1.5px;color:${COLORS.blue800};">${title}</h3><p style="margin:0;padding-bottom:8px;font-family:${FONTS.book};font-size:15px;line-height:22px;color:${COLORS.grey800};">${text}</p><p style="margin:0;"><a href="${href}" target="_blank" style="font-family:${FONTS.demi};font-size:14px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;color:${COLORS.blue100};">En savoir plus &rarr;</a></p></div>`;
 const ckPage = () => `<div style="background-color:${COLORS.snow};padding:0 0 24px 0;">
-<p style="margin:0;padding:14px 0 10px 0;text-align:center;font-family:${FONTS.book};font-size:12px;line-height:16px;color:${COLORS.grey800};"><a href="[LINK_BROWSER]" style="color:${COLORS.grey800};text-decoration:underline;">Voir cet email dans votre navigateur</a></p>
+<p data-ai-lock="1" style="margin:0;padding:14px 0 10px 0;text-align:center;font-family:${FONTS.book};font-size:12px;line-height:16px;color:${COLORS.grey800};"><a href="[LINK_BROWSER]" style="color:${COLORS.grey800};text-decoration:underline;">Voir cet email dans votre navigateur</a></p>
 ${inlineImg(header())}
 <div style="background-color:${COLORS.white};max-width:600px;margin:0 auto;padding:36px 0 36px 0;">
 ${ckP(SAMPLE.greeting)}
@@ -107,7 +107,7 @@ const P = (top, right, bottom, left) => ({ top, right, bottom, left });
 const blocks = {
   'block-browser': {
     type: 'Html',
-    data: { style: { color: COLORS.grey800, fontSize: 12, textAlign: 'center', fontFamily: 'GEOMETRIC_SANS', padding: P(14, 24, 10, 24) }, props: { contents: '<a href="[LINK_BROWSER]" style="color:#4e5861;text-decoration:underline">Voir cet email dans votre navigateur</a>' } },
+    data: { style: { color: COLORS.grey800, fontSize: 12, textAlign: 'center', fontFamily: 'GEOMETRIC_SANS', padding: P(14, 24, 10, 24) }, props: { contents: '<div data-ai-lock="1"><a href="[LINK_BROWSER]" style="color:#4e5861;text-decoration:underline">Voir cet email dans votre navigateur</a></div>' } },
   },
   'block-header': {
     type: 'Html',

@@ -453,3 +453,9 @@ defaultRoles:
       description: The user can use the Mosaico template, but cannot edit it or delete it.
       permissions: [view, viewFiles]
 
+ai:
+  # Secret used to encrypt the users' API keys (BYOK). The AI features are disabled until it is set.
+  # Prefer the AI_ENCRYPTION_KEY environment variable (Kubernetes secret) over this file.
+  encryptionKey: ""
+  # Only for local setups (e.g. Ollama on localhost): lets users point to http / private addresses. Never in production.
+  allowPrivateHosts: false

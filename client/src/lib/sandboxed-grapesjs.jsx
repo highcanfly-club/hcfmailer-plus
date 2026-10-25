@@ -10,7 +10,10 @@ import { Icon } from "./bootstrap-components";
 import { getTrustedUrl } from "./urls";
 import { withComponentMixins } from "./decorator-helpers";
 import { GrapesJSSourceType } from "./sandboxed-grapesjs-shared";
-import { getTagLanguageFromEntity } from "./sandbox-common";const GrapesJSHost =
+import { getTagLanguageFromEntity } from "./sandbox-common";
+import { AIToolbar } from "./ai-toolbar";
+
+const GrapesJSHost =
 
 withComponentMixins([
 withTranslation],
@@ -20,7 +23,10 @@ GrapesJSHost extends Component {
     super(props);
 
     this.state = {
-      fullscreen: false
+      fullscreen: false,
+      aiEpoch: 0,
+      aiSource: null,
+      aiStyle: null
     };
 
     this.contentNodeRefHandler = (node) => this.contentNode = node;
@@ -48,6 +54,11 @@ GrapesJSHost extends Component {
     await this.props.onFullscreenAsync(fullscreen);
   }
 
+  // Applying an AI result reloads the editor with the new source; it is saved with the normal Save button
+  applyAI({ source, style }) {
+    this.setState(state => ({ aiSource: source, aiStyle: style, aiEpoch: state.aiEpoch + 1 }));
+  }
+
   async exportState() {
     return await this.contentNode.ask('exportState');
   }
@@ -59,8 +70,8 @@ GrapesJSHost extends Component {
       entityTypeId: this.props.entityTypeId,
       entityId: this.props.entity.id,
       tagLanguage: getTagLanguageFromEntity(this.props.entity, this.props.entityTypeId),
-      initialSource: this.props.initialSource,
-      initialStyle: this.props.initialStyle,
+      initialSource: this.state.aiSource !== null ? this.state.aiSource : this.props.initialSource,
+      initialStyle: this.state.aiStyle !== null ? this.state.aiStyle : this.props.initialStyle,
       sourceType: this.props.sourceType
     };
 
@@ -77,6 +88,7 @@ GrapesJSHost extends Component {
                         <div className={"title"}>{this.props.title}</div>
                     </div>
                     <div className={"navbarRight"}>
+                        <AIToolbar editorType="grapesjs" getState={() => this.contentNode.ask('exportState')} onApplied={(...args) => this.applyAI(...args)} />
                         {this.props.canSave ? <a className={"btn"} onClick={this.props.onSave} title={t('save')}><Icon icon="save" /></a> : <span className={"btnDisabled"}><Icon icon="save" /></span>}
                         <a className={"btn"} onClick={this.props.onTestSend} title={t('sendTestEmail-1')}><Icon icon="at" /></a>
                         <a className={"btn"} onClick={() => this.props.onShowExport('html', 'HTML')} title={t('showHtml')}><Icon icon="file-code" /></a>
@@ -84,7 +96,7 @@ GrapesJSHost extends Component {
                         <a className={"btn"} onClick={(...args) => this.toggleFullscreenAsync(...args)} title={t('maximizeEditor')}><Icon icon="window-maximize" /></a>
                     </div>
                 </div>
-                <UntrustedContentHost ref={this.contentNodeRefHandler} className={"host"} singleToken={true} contentProps={editorData} contentSrc="grapesjs/editor" tokenMethod="grapesjs" tokenParams={tokenData} />
+                <UntrustedContentHost key={`ai-${this.state.aiEpoch}`} ref={this.contentNodeRefHandler} className={"host"} singleToken={true} contentProps={editorData} contentSrc="grapesjs/editor" tokenMethod="grapesjs" tokenParams={tokenData} />
             </div>);
 
   }

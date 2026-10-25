@@ -3,6 +3,7 @@
 import React from 'react';
 import Account from './Account';
 import API from './API';
+import AI from './AI';
 
 
 function getMenus(t) {
@@ -17,6 +18,11 @@ function getMenus(t) {
                     title: t('api'),
                     link: '/account/api',
                     panelComponent: API
+                },
+                ai: {
+                    title: 'IA',
+                    link: '/account/ai',
+                    panelComponent: AI
                 }
             }
         }

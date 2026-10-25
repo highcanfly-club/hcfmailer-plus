@@ -12,6 +12,7 @@ import { getTrustedUrl } from "./urls";
 import { initialHeight } from "./sandboxed-ckeditor-shared";
 import { withComponentMixins } from "./decorator-helpers";
 import { getTagLanguageFromEntity } from "./sandbox-common";
+import { AIToolbar } from "./ai-toolbar";
 
 const navbarHeight = 34; // Sync this with navbarheight in sandboxed-ckeditor.scss
 const CKEditorHost =
@@ -23,7 +24,9 @@ CKEditorHost extends Component {
     super(props);
 
     this.state = {
-      fullscreen: false
+      fullscreen: false,
+      aiEpoch: 0,
+      aiSource: null
     };
 
     this.onWindowResizeHandler = (...args) => this.onWindowResize(...args);
@@ -42,6 +45,11 @@ CKEditorHost extends Component {
     onFullscreenAsync: PropTypes.func,
     editorType: PropTypes.string // 'ckeditor' (CKEditor 4, default) or 'ckeditor5'
   };
+
+  // Applying an AI result reloads the editor with the new source; it is saved with the normal Save button
+  applyAI({ source }) {
+    this.setState(state => ({ aiSource: source, aiEpoch: state.aiEpoch + 1 }));
+  }
 
   async toggleFullscreenAsync() {
     const fullscreen = !this.state.fullscreen;
@@ -87,7 +95,7 @@ CKEditorHost extends Component {
       entityTypeId: this.props.entityTypeId,
       entityId: this.props.entity.id,
       tagLanguage: getTagLanguageFromEntity(this.props.entity, this.props.entityTypeId),
-      initialSource: this.props.initialSource
+      initialSource: this.state.aiSource !== null ? this.state.aiSource : this.props.initialSource
     };
 
     const tokenData = {
@@ -103,13 +111,14 @@ CKEditorHost extends Component {
                         <div className={"title"}>{this.props.title}</div>
                     </div>
                     <div className={"navbarRight"}>
+                        <AIToolbar editorType={editorType} getState={() => this.contentNode.ask('exportState')} onApplied={(...args) => this.applyAI(...args)} />
                         {this.props.canSave ? <a className={"btn"} onClick={this.props.onSave} title={t('save')}><Icon icon="save" /></a> : <span className={"btnDisabled"}><Icon icon="save" /></span>}
                         <a className={"btn"} onClick={this.props.onTestSend} title={t('sendTestEmail-1')}><Icon icon="at" /></a>
                         <a className={"btn"} onClick={() => this.props.onShowExport('html', 'HTML')} title={t('showHtml')}><Icon icon="file-code" /></a>
                         <a className={"btn"} onClick={(...args) => this.toggleFullscreenAsync(...args)} title={t('maximizeEditor')}><Icon icon="window-maximize" /></a>
                     </div>
                 </div>
-                <UntrustedContentHost ref={this.contentNodeRefHandler} className={"host"} singleToken={true} contentProps={editorData} contentSrc={`${editorType}/editor`} tokenMethod={editorType} tokenParams={editorData} />
+                <UntrustedContentHost key={`ai-${this.state.aiEpoch}`} ref={this.contentNodeRefHandler} className={"host"} singleToken={true} contentProps={editorData} contentSrc={`${editorType}/editor`} tokenMethod={editorType} tokenParams={editorData} />
             </div>);
 
   }

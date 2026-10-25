@@ -142,7 +142,7 @@ export function footer() {
   const h = (t) =>
     `<div style="font-family:${FONTS.demi};font-size:12px;letter-spacing:2px;text-transform:uppercase;color:${COLORS.yellow500};padding:0 0 12px 0;">${t}</div>`;
   const text = `font-family:${FONTS.book};font-size:13px;line-height:20px;color:#c9cdea;`;
-  return `<table role="presentation" class="mcfly-container" width="600" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="${COLORS.blue800}" style="width:600px;max-width:100%;border-collapse:collapse;background-color:${COLORS.blue800};">
+  return `<table role="presentation" data-ai-lock="1" class="mcfly-container" width="600" cellpadding="0" cellspacing="0" border="0" align="center" bgcolor="${COLORS.blue800}" style="width:600px;max-width:100%;border-collapse:collapse;background-color:${COLORS.blue800};">
 <tr><td class="mcfly-pad" style="padding:32px 28px 8px 28px;${text}">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
 <td class="mcfly-col" valign="top" width="200" style="width:200px;padding:0 0 20px 0;${text}">
