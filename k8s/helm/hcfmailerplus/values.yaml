@@ -173,6 +173,7 @@ app:
   ADMIN_PASSWORD: ""
   MYSQL_ROOT_PASSWORD: ""
   MYSQL_PASSWORD: ""
+  AI_ENCRYPTION_KEY: "454162c27503fbb023579272"
 
 cloudflared:
   enabled: false

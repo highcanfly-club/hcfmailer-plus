@@ -25,6 +25,11 @@ spec:
     {{- end }}
       containers:
         - env:
+            - name: AI_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mailtrain
+                  key: AI_ENCRYPTION_KEY
             - name: CERT_SECRET
               value: {{ .Values.app.CERT_SECRET | quote }}
             - name: CERT_DIR
