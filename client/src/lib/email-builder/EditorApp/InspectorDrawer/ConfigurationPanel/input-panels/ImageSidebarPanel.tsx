@@ -6,7 +6,7 @@ import {
   VerticalAlignCenterOutlined,
   VerticalAlignTopOutlined,
 } from '@mui/icons-material';
-import { Alert, Button, Stack, ToggleButton } from '@mui/material';
+import { Alert, Button, MenuItem, Stack, TextField, ToggleButton } from '@mui/material';
 import { UploadFileOutlined } from '@mui/icons-material';
 import { ImageProps, ImagePropsSchema } from '@usewaypoint/block-image';
 
@@ -15,8 +15,7 @@ import RadioGroupInput from './helpers/inputs/RadioGroupInput';
 import TextDimensionInput from './helpers/inputs/TextDimensionInput';
 import TextInput from './helpers/inputs/TextInput';
 import MultiStylePropertyPanel from './helpers/style-inputs/MultiStylePropertyPanel';
-import axios from '../../../../../axios';
-import { getSandboxUrl } from '../../../../../urls';
+import { DEFAULT_MAX_WIDTH, SIZE_PRESETS, sanitizeMaxWidth, uploadTemplateImage } from '../../../../../image-upload';
 import { getUploadConfig } from '../../../../uploadConfig';
 
 type ImageSidebarPanelProps = {
@@ -27,6 +26,8 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
   const [, setErrors] = useState<ZodError | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [sizeKey, setSizeKey] = useState('full');
+  const [customWidth, setCustomWidth] = useState(String(DEFAULT_MAX_WIDTH));
 
   const updateData = (d: unknown) => {
     const res = ImagePropsSchema.safeParse(d);
@@ -41,20 +42,15 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
   const uploadImage = async (file: File | undefined) => {
     if (!file) return;
     const { entityTypeId, entityId } = getUploadConfig();
-    if (!entityTypeId || !entityId) {
-      setUploadError('Save the template once before uploading images.');
-      return;
-    }
+    const preset = SIZE_PRESETS.find((p) => p.key === sizeKey);
+    const maxWidth = preset && preset.maxWidth ? preset.maxWidth : sanitizeMaxWidth(customWidth);
     setUploading(true);
     setUploadError(null);
     try {
-      const form = new FormData();
-      form.append('files[]', file);
-      // The server shrinks the image to at most 1200 px wide (2x the 600 px email width) before storing it
-      const res = await axios.post(getSandboxUrl(`emailbuilder/upload/${entityTypeId}/${entityId}`), form);
-      const url = res.data?.files?.[0]?.url;
-      if (!url) throw new Error('Upload failed');
-      updateData({ ...data, props: { ...data.props, url } });
+      const url = await uploadTemplateImage('emailbuilder', entityTypeId, entityId, file, maxWidth);
+      // Stored width is 2x the display width: also set the displayed width so a small image stays small in the email
+      const width = maxWidth >= DEFAULT_MAX_WIDTH ? data.props?.width ?? null : Math.round(maxWidth / 2);
+      updateData({ ...data, props: { ...data.props, url, width } });
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -64,6 +60,23 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
 
   return (
     <BaseSidebarPanel title="Image block">
+      <TextField select size="small" label="Upload size" value={sizeKey} onChange={(e) => setSizeKey(e.target.value)}>
+        {SIZE_PRESETS.map((p) => (
+          <MenuItem key={p.key} value={p.key}>
+            {p.label}
+          </MenuItem>
+        ))}
+      </TextField>
+      {sizeKey === 'custom' && (
+        <TextField
+          size="small"
+          type="number"
+          label="Max width (px)"
+          value={customWidth}
+          inputProps={{ min: 16, max: 2400 }}
+          onChange={(e) => setCustomWidth(e.target.value)}
+        />
+      )}
       <Button component="label" variant="outlined" size="small" startIcon={<UploadFileOutlined />} disabled={uploading}>
         {uploading ? 'Uploading…' : 'Upload an image'}
         <input

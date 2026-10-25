@@ -14,7 +14,7 @@ function installUploadHandler(router, url, replacementBehavior, type, subType, t
     router.postAsync(url, passport.loggedIn, multer.array('files[]'), async (req, res) => {
         if (preprocessFilesFn) {
             // Lets the caller validate / transform the uploaded temporary files before they are stored
-            await preprocessFilesFn(req.files);
+            await preprocessFilesFn(req.files, req);
         }
 
         return res.json(await files.createFiles(req.context, type || req.params.type, subType || req.params.subType, castToInteger(req.params.entityId), req.files, replacementBehavior, transformResponseFn));

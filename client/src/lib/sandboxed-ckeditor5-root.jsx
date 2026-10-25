@@ -20,25 +20,16 @@ import {
 } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 
-import axios from './axios';
+import { uploadTemplateImage, createSizeSelector } from './image-upload';
 import { initialHeight } from "./sandboxed-ckeditor-shared";
 import { withComponentMixins } from "./decorator-helpers";
 
-// Uploads go through the sandbox, which shrinks images to at most 1200 px wide before storing them
-function createUploadAdapterPlugin(entityTypeId, entityId) {
+// Uploads go through the sandbox, which shrinks images to the width chosen in the size picker (1200 px by default)
+function createUploadAdapterPlugin(entityTypeId, entityId, getMaxWidth) {
   return function MailtrainUploadAdapter(editor) {
     editor.plugins.get('FileRepository').createUploadAdapter = loader => ({
       async upload() {
-        if (!entityTypeId || !entityId) {
-          throw new Error('Save the template once before uploading images.');
-        }
-        const form = new FormData();
-        form.append('files[]', await loader.file);
-        const res = await axios.post(getSandboxUrl(`ckeditor5/upload/${entityTypeId}/${entityId}`), form);
-        const url = res.data && res.data.files && res.data.files[0] && res.data.files[0].url;
-        if (!url) {
-          throw new Error('Upload failed');
-        }
+        const url = await uploadTemplateImage('ckeditor5', entityTypeId, entityId, await loader.file, getMaxWidth());
         return { default: url };
       },
       abort() {}
@@ -61,6 +52,8 @@ CKEditor5Sandbox extends Component {
 
     this.source = source || '';
     this.containerRef = React.createRef();
+    this.sizeSelectorRef = React.createRef();
+    this.sizeSelector = createSizeSelector();
   }
 
   static propTypes = {
@@ -95,13 +88,15 @@ CKEditor5Sandbox extends Component {
   }
 
   async componentDidMount() {
+    this.sizeSelectorRef.current.appendChild(this.sizeSelector.element);
+
     parentRPC.setMethodHandler('exportState', (...args) => this.exportState(...args));
     parentRPC.setMethodHandler('setHeight', (...args) => this.setHeight(...args));
 
     try {
       const editor = await ClassicEditor.create(this.containerRef.current, {
         licenseKey: 'GPL',
-        extraPlugins: [createUploadAdapterPlugin(this.props.entityTypeId, this.props.entityId)],
+        extraPlugins: [createUploadAdapterPlugin(this.props.entityTypeId, this.props.entityId, () => this.sizeSelector.getMaxWidth())],
         initialData: this.source,
         plugins: [
           Alignment, Autoformat, AutoLink, BlockQuote, Bold, Essentials, FontBackgroundColor, FontColor, FontFamily,
@@ -148,6 +143,7 @@ CKEditor5Sandbox extends Component {
   render() {
     return (
       <div className="sandbox">
+        <div ref={this.sizeSelectorRef} />
         <div ref={this.containerRef} />
       </div>
     );

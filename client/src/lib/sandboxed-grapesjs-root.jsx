@@ -25,6 +25,7 @@ import grapePlugin from 'grapesjs-preset-newsletter';
 import "./sandboxed-grapesjs.scss";
 
 import axios from './axios';
+import { uploadTemplateImage, createSizeSelector } from './image-upload';
 import { GrapesJSSourceType } from "./sandboxed-grapesjs-shared";
 import { withComponentMixins } from "./decorator-helpers";
 
@@ -48,6 +49,7 @@ withTranslation]
 GrapesJSSandbox extends Component {
   constructor(props) {
     super(props);
+    this.sizeSelector = createSizeSelector();
 
     this.initialized = false;
 
@@ -157,6 +159,18 @@ GrapesJSSandbox extends Component {
       assetManager: {
         assets: this.state.assets,
         upload: getSandboxUrl(`grapesjs/upload/${this.props.entityTypeId}/${this.props.entityId}`),
+        // Custom handler so that the width chosen in the size picker is sent along with the files
+        uploadFile: async (ev) => {
+          const files = ev.dataTransfer ? ev.dataTransfer.files : ev.target.files;
+          try {
+            for (const file of files) {
+              const src = await uploadTemplateImage('grapesjs', this.props.entityTypeId, this.props.entityId, file, this.sizeSelector.getMaxWidth());
+              this.editor.AssetManager.add({ type: 'image', src });
+            }
+          } catch (err) {
+            window.alert(err.message);
+          }
+        },
         uploadText: 'Déposez des images ici ou cliquez pour télécharger',
         headers: {
           'X-CSRF-TOKEN': '{{csrfToken}}'
@@ -620,6 +634,15 @@ GrapesJSSandbox extends Component {
     config.plugins.push(mailtrainRemoveButtons);
 
     this.editor = grapesjs.init(config);
+
+    // Show the upload size picker at the top of the asset manager, whenever it gets rendered
+    const insertSizeSelector = () => {
+      const uploader = document.querySelector('.gjs-am-file-uploader');
+      if (uploader && uploader.parentNode && !uploader.parentNode.contains(this.sizeSelector.element)) {
+        uploader.parentNode.insertBefore(this.sizeSelector.element, uploader);
+      }
+    };
+    new MutationObserver(insertSizeSelector).observe(document.body, { childList: true, subtree: true });
   }
 
   render() {
