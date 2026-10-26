@@ -34,7 +34,7 @@ export default function Swatch({ paletteColors, value, onChange }: Props) {
     );
   };
   return (
-    <Box width="100%" sx={{ display: 'grid', gap: 1, gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr' }}>
+    <Box sx={{ width: '100%', display: 'grid', gap: 1, gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr' }}>
       {paletteColors.map((c) => renderButton(c))}
     </Box>
   );

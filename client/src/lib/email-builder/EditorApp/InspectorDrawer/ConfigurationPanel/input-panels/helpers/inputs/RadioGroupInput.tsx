@@ -11,7 +11,7 @@ type Props = {
 export default function RadioGroupInput({ label, children, defaultValue, onChange }: Props) {
   const [value, setValue] = useState(defaultValue);
   return (
-    <Stack alignItems="flex-start">
+    <Stack sx={{ alignItems: 'flex-start' }}>
       <InputLabel shrink>{label}</InputLabel>
       <ToggleButtonGroup
         exclusive

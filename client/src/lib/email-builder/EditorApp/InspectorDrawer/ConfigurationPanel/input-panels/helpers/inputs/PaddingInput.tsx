@@ -44,7 +44,7 @@ export default function PaddingInput({ label, defaultValue, onChange }: Props) {
   }
 
   return (
-    <Stack spacing={2} alignItems="flex-start" pb={1}>
+    <Stack spacing={2} sx={{ alignItems: 'flex-start', pb: 1 }}>
       <InputLabel shrink>{label}</InputLabel>
 
       <RawSliderInput

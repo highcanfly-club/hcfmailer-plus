@@ -79,12 +79,12 @@ export default function TemplatePanel() {
           top: 0,
           zIndex: 'appBar',
           px: 1,
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
       >
-        <Stack px={2} direction="row" gap={2} width="100%" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" sx={{ px: 2, gap: 2, width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
           <Stack direction="row" spacing={2}>
             <MainTabsGroup />
           </Stack>

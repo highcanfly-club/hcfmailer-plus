@@ -198,8 +198,10 @@ const THEME = createTheme(BASE_THEME, {
     },
     MuiDrawer: {
       defaultProps: {
-        PaperProps: {
-          elevation: 2,
+        slotProps: {
+          paper: {
+            elevation: 2,
+          },
         },
       },
     },

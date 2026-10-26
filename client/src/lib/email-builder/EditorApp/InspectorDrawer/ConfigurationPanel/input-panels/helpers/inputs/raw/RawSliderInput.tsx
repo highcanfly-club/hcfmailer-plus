@@ -17,7 +17,7 @@ type SliderInputProps = {
 
 export default function RawSliderInput({ iconLabel, value, setValue, units, ...props }: SliderInputProps) {
   return (
-    <Stack direction="row" alignItems="center" spacing={2} justifyContent="space-between" width="100%">
+    <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
       <Box sx={{ minWidth: 24, lineHeight: 1, flexShrink: 0 }}>{iconLabel}</Box>
       <Slider
         {...props}

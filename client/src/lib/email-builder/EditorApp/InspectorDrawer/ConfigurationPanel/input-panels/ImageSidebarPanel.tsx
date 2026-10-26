@@ -74,7 +74,7 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
           type="number"
           label={i18n.t('aiMaxWidthPx')}
           value={customWidth}
-          inputProps={{ min: 16, max: 2400 }}
+          slotProps={{ htmlInput: { min: 16, max: 2400 } }}
           onChange={(e) => setCustomWidth(e.target.value)}
         />
       )}

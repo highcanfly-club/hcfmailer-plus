@@ -23,7 +23,7 @@ export default function TextInput({ helperText, label, placeholder, rows, InputP
       label={label}
       placeholder={placeholder}
       helperText={helperText}
-      InputProps={InputProps}
+      slotProps={{ input: InputProps }}
       value={value}
       onChange={(ev) => {
         const v = ev.target.value;

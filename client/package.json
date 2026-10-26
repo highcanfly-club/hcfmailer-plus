@@ -20,7 +20,7 @@
     "@emotion/styled": "^11.14.1",
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@mui/icons-material": "^9.5.0",
-    "@mui/material": "^5",
+    "@mui/material": "^9.5.0",
     "@nosferatu500/react-sortable-tree": "^5.0.0",
     "@popperjs/core": "^2.11.8",
     "@usewaypoint/block-avatar": "^0.0.3",

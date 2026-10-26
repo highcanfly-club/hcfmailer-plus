@@ -21,7 +21,7 @@ type SliderInputProps = {
 export default function SliderInput({ label, defaultValue, onChange, ...props }: SliderInputProps) {
   const [value, setValue] = useState(defaultValue);
   return (
-    <Stack spacing={1} alignItems="flex-start">
+    <Stack spacing={1} sx={{ alignItems: 'flex-start' }}>
       <InputLabel shrink>{label}</InputLabel>
       <RawSliderInput
         value={value}

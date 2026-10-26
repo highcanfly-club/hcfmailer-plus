@@ -86,7 +86,7 @@ export default function Picker({ value, onChange }: Props) {
     <Stack spacing={1} sx={SX}>
       <HexColorPicker color={value} onChange={handleChange} />
       <Swatch paletteColors={DEFAULT_PRESET_COLORS} value={value} onChange={handleChange} />
-      <Box pt={1}>
+      <Box sx={{ pt: 1 }}>
         <HexColorInput prefixed color={internalValue} onChange={handleChange} />
       </Box>
     </Stack>

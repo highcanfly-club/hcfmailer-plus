@@ -65,7 +65,7 @@ export default function ColorInput({ label, defaultValue, onChange, nullable }: 
   };
 
   return (
-    <Stack alignItems="flex-start">
+    <Stack sx={{ alignItems: 'flex-start' }}>
       <InputLabel sx={{ mb: 0.5 }}>{label}</InputLabel>
       <Stack direction="row" spacing={1}>
         {renderOpenButton()}
