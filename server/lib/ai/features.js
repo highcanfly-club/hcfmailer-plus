@@ -2,6 +2,7 @@
 // layout of the template never goes through the model, and every reply is validated before it is applied.
 import aiModels from '../../models/ai.js';
 import { complete } from './providers.js';
+import { newMeter } from './session.js';
 import { extractSlots, prepare, validateReply } from './slots.js';
 import { skeleton } from './skeletons.js';
 import { build as buildResponsive, sanitizeCss } from './responsive.js';
@@ -74,18 +75,48 @@ async function resolveTier(owner, action, requested) {
     return TIER_PREFERENCE[action].find(t => status.tiers[t]) || null;
 }
 
-// `meter` collects the tokens consumed by every provider call of a request (several calls for chunks and retries)
-function newMeter() {
-    return { input: 0, output: 0, estimated: false, model: '' };
-}
-
-async function callModel(owner, tier, system, user, meter = newMeter()) {
-    const { text, usage, model } = await aiModels.withKey(owner, tier, async (modelRow, apiKey) => ({ ...(await complete(modelRow, apiKey, { system, user })), model: modelRow.model }));
-    meter.input += usage.input;
-    meter.output += usage.output;
-    meter.estimated = meter.estimated || usage.estimated;
-    meter.model = model;
-    return text;
+async function callModel(owner, tier, system, user, meter = newMeter(), purpose = '') {
+    if (meter.signal && meter.signal.aborted) {
+        throw Object.assign(new Error('Aborted'), { name: 'AbortError', aborted: true });
+    }
+    const prompt = { system, user };
+    const call = meter.begin({ purpose, tier, system, user });
+    const hooks = { signal: meter.signal };
+    if (meter.streaming) {
+        hooks.onText = delta => meter.delta(call, 'text', delta);
+        hooks.onReasoning = delta => meter.delta(call, 'reasoning', delta);
+    }
+    try {
+        const { text, usage, model } = await aiModels.withKey(owner, tier, async (modelRow, apiKey) => {
+            meter.secret(apiKey);
+            const attempt = meter.attempt(call, modelRow);
+            try {
+                const out = await complete(modelRow, apiKey, prompt, hooks);
+                if (!meter.streaming) { // the complete answer is known only now
+                    call.reply = out.text;
+                    call.reasoning = out.reasoning || '';
+                }
+                return { ...out, model: modelRow.model };
+            } catch (err) {
+                attempt.error = err.message;
+                throw err;
+            }
+        });
+        meter.input += usage.input;
+        meter.output += usage.output;
+        meter.estimated = meter.estimated || usage.estimated;
+        meter.model = model;
+        meter.end(call, { usage });
+        return text;
+    } catch (err) {
+        if (err.aborted) {
+            call.reply = (err.partial && err.partial.text) || call.reply;
+            call.reasoning = (err.partial && err.partial.reasoning) || call.reasoning;
+            meter.addAborted(call, prompt);
+        }
+        meter.end(call, { error: err });
+        throw err;
+    }
 }
 
 // Embedded images (data: URIs) can weigh hundreds of KB and mean nothing to the model: they are set aside while the
@@ -100,7 +131,7 @@ function stashDataUris(source) {
     return { stripped, restore };
 }
 
-async function runOnSlots({ userId, action, tier, editorType, source: originalSource, options, meter }) {
+async function runOnSlots({ userId, action, tier, editorType, source: originalSource, options, meter = newMeter() }) {
     if (typeof originalSource !== 'string') {
         throw new Error('Content missing');
     }
@@ -112,7 +143,7 @@ async function runOnSlots({ userId, action, tier, editorType, source: originalSo
     return { ...result, source: restore(result.source) };
 }
 
-async function processSlots({ userId, action, tier, editorType, source, options, meter }) {
+async function processSlots({ userId, action, tier, editorType, source, options, meter = newMeter() }) {
     let working = source;
     let parsed = extractSlots(editorType, working);
     let usedSkeleton = false;
@@ -140,10 +171,12 @@ async function processSlots({ userId, action, tier, editorType, source, options,
     }
 
     let rejected = 0;
-    for (const batch of batches) {
+    for (const [index, batch] of batches.entries()) {
+        meter.step('write', { action, batch: index + 1, of: batches.length });
         const payload = { slots: batch.map(s => ({ id: s.id, kind: s.kind, text: s.masked })) };
         const user = action === 'generate' ? `Brief :\n${options.brief}\n\nSlots du modèle :\n${JSON.stringify(payload)}` : JSON.stringify(payload);
-        const reply = parseJsonReply(await callModel(userId, tier, system, user, meter));
+        const reply = parseJsonReply(await callModel(userId, tier, system, user, meter, action));
+        meter.step('validate', { action });
         if (action === 'generate') {
             meta = { subject: typeof reply.subject === 'string' ? reply.subject.slice(0, 200) : null, preheader: typeof reply.preheader === 'string' ? reply.preheader.slice(0, 300) : null };
         }
@@ -153,6 +186,7 @@ async function processSlots({ userId, action, tier, editorType, source, options,
             const valid = validateReply(slot, item.text);
             if (valid === null) {
                 rejected++;
+                meter.note('rejected', { slot: slot.id, before: slot.masked, proposed: String(item.text).slice(0, 2000) });
             } else if (valid !== slot.text) {
                 replies.set(slot.id, valid);
                 diff.push({ id: slot.id, kind: slot.kind, before: slot.text, after: valid });
@@ -173,20 +207,23 @@ Contraintes impératives :
 - Change le moins possible : seulement ce qui répond à la demande.
 - Réponds uniquement avec un objet JSON {"css":"...","summary":"une phrase qui décrit les changements"}, sans bloc de code.`;
 
-async function responsive(userId, { tier, editorType, source: originalSource, style, instruction, meter }) {
+async function responsive(userId, { tier, editorType, source: originalSource, style, instruction, meter = newMeter() }) {
     if (!['emailbuilder', 'grapesjs'].includes(editorType)) {
         throw new Error('Responsive adjustments are only available in Email Builder and GrapesJS');
     }
     const { stripped, restore } = stashDataUris(originalSource);
     const built = buildResponsive(editorType, stripped, style);
     const request = `Demande : ${instruction}\n\nStructure de l'email :\n${built.digest}`;
-    let reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, request, meter));
+    meter.step('write', { action: 'responsive', batch: 1, of: 1 });
+    let reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, request, meter, 'responsive'));
     let reason = '';
     let safe = sanitizeCss(reply.css, built.ids, r => { reason = r; });
     if (!safe) {
         // One more try, telling the model what was wrong with its answer
         const retry = `${request}\n\nTa réponse précédente a été refusée : ${reason}. Rappel : sélecteurs autorisés uniquement [data-ai-r="ID"] avec un ID présent dans le HTML ci-dessus, une .classe présente dans le HTML, ou h1/h2/h3 pour les titres natifs.\nTa réponse précédente : ${String(reply.css).slice(0, 800)}`;
-        reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, retry, meter));
+        meter.note('rejected', { css: String(reply.css).slice(0, 800), reason });
+        meter.step('retry', { action: 'responsive' });
+        reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, retry, meter, 'responsive-retry'));
         safe = sanitizeCss(reply.css, built.ids, r => { reason = r; });
     }
     if (!safe) {

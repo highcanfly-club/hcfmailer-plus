@@ -6,6 +6,7 @@ import { useTranslation } from './i18n';
 import { getUrl } from './urls';
 import { Icon } from './bootstrap-components';
 import { formatMicro, formatMoney, formatNumber } from './ai-format';
+import { useAIRun, AIProgress, AIDebugToggle, AIDebugButton } from './ai-run';
 
 // The AI button exists for users with their own key (BYOK) or when the administrator offers a shared AI (then a click
 // opens the offer first). Without either, there is no button at all.
@@ -84,6 +85,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
   const [references, setReferences] = useState(null);
   const [selectedRefs, setSelectedRefs] = useState([]);
   const [busy, setBusy] = useState(false);
+  const aiRun = useAIRun();
   const [message, setMessage] = useState(null);
   const [result, setResult] = useState(null);
   const [offerOpen, setOfferOpen] = useState(false);
@@ -127,7 +129,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
         body.references = selectedRefs;
         try { window.localStorage.setItem(BRAND_KEY, brand); } catch (e) { /* storage unavailable */ }
       }
-      const res = (await axios.post(getUrl(`rest/ai/${mode}`), body)).data;
+      const res = await aiRun.run(`rest/ai/${mode}`, body);
       if (res.billing) {
         setLastBilling(res.billing);
         setStatus(current => (current && current.balance ? { ...current, balance: { ...current.balance, outstandingMicro: res.billing.outstandingMicro } } : current));
@@ -148,6 +150,10 @@ export function AIToolbar({ editorType, getState, onApplied }) {
         setMessage(`${t('aiTextsChanged', { n: res.changed })}${res.rejected ? t('aiTextsRejected', { n: res.rejected }) : ''}.`);
       }
     } catch (err) {
+      if (err.stopped) {
+        setMessage(t('aiStopped'));
+        return;
+      }
       const data = err.response && err.response.data;
       if (err.response && err.response.status === 402 && data && data.code === 'offer') {
         setOfferOpen(true);
@@ -252,7 +258,9 @@ export function AIToolbar({ editorType, getState, onApplied }) {
             {previous.current && <button style={{ ...btnStyle(false, busy), marginLeft: 8 }} disabled={busy} onClick={undo}>{t('aiUndo')}</button>}
           </div>
 
+          <AIProgress run={aiRun} />
           {message && <div className="mt-2">{message}</div>}
+          <AIDebugButton run={aiRun} />
           {result && (result.subject || result.preheader) && (
             <div className="mt-2">
               {result.subject && <div><strong>{t('aiSuggestedSubject')}</strong> <input className="form-control form-control-sm" readOnly value={result.subject} onFocus={e => e.target.select()} /></div>}
@@ -266,6 +274,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
               {lastBilling && <div className="text-muted">{t('aiLastRequestCost', { amount: formatMicro(lastBilling.costMicro, status.prices.currency), input: formatNumber(lastBilling.inputTokens), output: formatNumber(lastBilling.outputTokens) })}</div>}
             </div>
           )}
+          <AIDebugToggle run={aiRun} />
           <div className="text-muted mt-2" style={{ fontSize: 12 }}>{t('aiNotSavedNote')}</div>
         </div>
       )}

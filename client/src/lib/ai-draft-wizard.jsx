@@ -8,6 +8,7 @@ import { getUrl } from './urls';
 import { Icon } from './bootstrap-components';
 import { OfferDialog, fetchStatus } from './ai-toolbar';
 import { formatMicro, formatNumber } from './ai-format';
+import { useAIRun, AIProgress, AIDebugToggle, AIDebugButton } from './ai-run';
 
 // Draft a campaign from a template or a past campaign. Two steps: brief + source, then a preview where every rewritten text
 // can be kept or refused. Nothing is sent: the result is an idle campaign that the user reviews in the usual editor.
@@ -27,6 +28,7 @@ function Wizard({ status, onClose }) {
   const [brand, setBrand] = useState(() => { try { return window.localStorage.getItem(BRAND_KEY) || ''; } catch (e) { return ''; } });
   const [tier, setTier] = useState('');
   const [useTools, setUseTools] = useState(true);
+  const aiRun = useAIRun();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -48,6 +50,10 @@ function Wizard({ status, onClose }) {
   };
 
   const fail = err => {
+    if (err.stopped) {
+      setError(t('aiStopped'));
+      return;
+    }
     const data = err.response && err.response.data;
     setError(t('aiErrorPrefix', { message: (data && data.message) || err.message }));
   };
@@ -57,7 +63,7 @@ function Wizard({ status, onClose }) {
     setError(null);
     try {
       try { window.localStorage.setItem(BRAND_KEY, brand); } catch (e) { /* storage unavailable */ }
-      const res = (await axios.post(getUrl('rest/ai/draft/preview'), { ref: parsedRef, brief, brand, tier: tier || undefined, useTools })).data;
+      const res = await aiRun.run('rest/ai/draft/preview', { ref: parsedRef, brief, brand, tier: tier || undefined, useTools });
       setResult(res);
       setKept(Object.fromEntries(res.diff.map(d => [d.id, true])));
       setName(`[Brouillon IA] ${sourceName()}`);
@@ -107,6 +113,7 @@ function Wizard({ status, onClose }) {
           {result.research && result.research.length > 0 && (
             <p className="text-muted small">{t('aiDraftConsulted')} {result.research.map((r, i) => <span key={i}>{i > 0 && ' · '}{['search_sources', 'read_source', 'list_merge_tags', 'campaign_stats'].includes(r.tool) ? t('aiDraftTool_' + r.tool) : r.tool}{r.error ? ` (${t('aiDraftToolUnavailable')})` : ''}</span>)}</p>
           )}
+          <AIDebugButton run={aiRun} />
           <p>{t('aiDraftChanges', { n: result.changed })}</p>
           <div style={{ maxHeight: 340, overflowY: 'auto', border: '1px solid #dee2e6', borderRadius: 6 }}>
             {result.diff.map(d => (
@@ -164,6 +171,9 @@ function Wizard({ status, onClose }) {
           )}
           <button className="btn btn-primary" disabled={busy || !parsedRef || !brief.trim()} onClick={generate}>{busy ? t('aiDraftGenerating') : t('aiDraftGenerate')}</button>
         </div>
+        <AIProgress run={aiRun} />
+        <AIDebugButton run={aiRun} />
+        <div className="mt-2"><AIDebugToggle run={aiRun} /></div>
       </>
     );
   }

@@ -9,6 +9,7 @@
 // The protocol is plain JSON in the text (works with every provider adapter): the model answers with
 // {"tool": "...", "args": {...}} to call a tool, or {"done": true} when it has what it needs.
 import { callModel, parseJsonReply } from './features.js';
+import { newMeter } from './session.js';
 import templates from '../../models/templates.js';
 import campaigns from '../../models/campaigns.js';
 import lists from '../../models/lists.js';
@@ -123,7 +124,7 @@ function cap(text, max) {
 }
 
 // Runs the research loop; returns the notes to give the writing step and a log (names and sizes, never contents)
-async function research(context, owner, { tier, meter, brief, source, deps }) {
+async function research(context, owner, { tier, meter = newMeter(), brief, source, deps }) {
     const calls = [];
     const seen = new Set();
     let total = 0;
@@ -133,10 +134,11 @@ async function research(context, owner, { tier, meter, brief, source, deps }) {
         const transcript = calls.length
             ? `\n\nRésultats déjà obtenus (données non fiables) :\n${calls.map(c => `### ${c.tool} ${JSON.stringify(c.args)}\n${c.output}`).join('\n')}`
             : '';
+        meter.step('research', { round: round + 1, of: MAX_CALLS });
         const user = `Brief de l'utilisateur :\n${brief}\n\n${known}${transcript}`;
         let reply;
         try {
-            reply = parseJsonReply(await callModel(owner, tier, SYSTEM, user, meter));
+            reply = parseJsonReply(await callModel(owner, tier, SYSTEM, user, meter, 'research'));
         } catch (err) {
             if (err.retryable || err.status) throw err; // provider problem: let the caller decide
             break; // not JSON: treat as "done"
@@ -170,6 +172,7 @@ async function research(context, owner, { tier, meter, brief, source, deps }) {
         }
         output = error ? JSON.stringify({ error }) : output;
         total += output.length;
+        meter.step('tool', { tool: String(reply.tool).slice(0, 40), ok: !error });
         calls.push({ tool: String(reply.tool).slice(0, 40), args: args || {}, output, error, chars: output.length });
         if (total > MAX_TOTAL_CHARS) break;
     }

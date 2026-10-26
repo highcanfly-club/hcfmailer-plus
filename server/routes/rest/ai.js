@@ -113,12 +113,13 @@ function registerSettingsRoutes(base, getOwner, guards) {
 
     router.postAsync(`${base}/settings/:tier/test`, ...guards, passport.csrfProtection, async (req, res) => {
         rateLimit(req.user.id);
+        const meter = newMeter({ debug: req.body.debug === true });
         try {
-            const reply = await callModel(getOwner(req), req.params.tier, 'Réponds uniquement par le mot OK.', 'Test de connexion.');
-            return res.json({ ok: true, reply: reply.slice(0, 100) });
+            const reply = await callModel(getOwner(req), req.params.tier, 'Réponds uniquement par le mot OK.', 'Test de connexion.', meter, 'test');
+            return res.json({ ok: true, reply: reply.slice(0, 100), debug: meter.trace() });
         } catch (err) {
             if (err instanceof ProviderError) {
-                return res.json({ ok: false, message: err.message });
+                return res.json({ ok: false, message: err.message, debug: meter.trace() });
             }
             if (err instanceof interoperableErrors.NotFoundError) {
                 return res.json({ ok: false, message: 'No model or no key configured for this tier' });
@@ -184,6 +185,24 @@ async function withTier(req, res, action, handler) {
     return withPlan(req, res, action, handler);
 }
 
+// The request opts into a stream of progress events (text/event-stream) with `stream: true`; `debug: true` adds the trace of
+// the LLM session (prompts, raw replies, reasoning, tokens, rejections) to the final message. Without `stream` the answer is
+// a single JSON document as before.
+function openStream(res) {
+    res.status(200).set({
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform', // no-transform: the compression middleware must not buffer the events
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no'
+    });
+    res.flushHeaders();
+    return (event, data) => {
+        if (res.writableEnded || res.destroyed) return;
+        res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+        if (typeof res.flush === 'function') res.flush();
+    };
+}
+
 async function withPlan(req, res, action, handler) {
     rateLimit(req.user.id);
     const plan = await getPlan(req.user.id);
@@ -200,16 +219,34 @@ async function withPlan(req, res, action, handler) {
     if (!tier) {
         return res.status(400).json({ message: 'No AI model configured' });
     }
-    const meter = newMeter();
+
+    // closing the connection (the "Stop" button) aborts the call to the provider
+    const abort = new AbortController();
+    res.on('close', () => { if (!res.writableEnded) abort.abort(); });
+    const send = req.body.stream === true ? openStream(res) : null;
+    const meter = newMeter({ debug: req.body.debug === true, signal: abort.signal, onEvent: send ? event => send('progress', event) : null });
+
     try {
         const result = await handler({ owner: plan.owner, tier, meter, mode: plan.mode });
         if (plan.mode === 'shared') {
             Object.assign(result, await meteredBilling(req.user.id, action, tier, meter));
         }
+        if (meter.debug) result.debug = meter.trace();
+        if (send) {
+            send('result', result);
+            return res.end();
+        }
         return res.json(result);
     } catch (err) {
         if (plan.mode === 'shared') {
             await meteredBilling(req.user.id, action, tier, meter); // tokens of failed attempts were consumed too
+        }
+        if (abort.signal.aborted) {
+            return res.end();
+        }
+        if (send) {
+            send('error', { message: err.message || 'Error', status: err instanceof ProviderError ? 502 : 400, debug: meter.trace() });
+            return res.end();
         }
         return sendError(res, err);
     }

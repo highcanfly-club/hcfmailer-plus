@@ -6,6 +6,7 @@
 //    re-checked against the structure of the content before being written (same links, same merge tags, same tags);
 //  - nothing is sent: the campaign is created idle, with the source's lists kept for the user to review.
 import { generate, resolveTier } from './features.js';
+import { newMeter } from './session.js';
 import { research as runResearch } from './tools.js';
 import { extractSlots, prepare, validateFinal } from './slots.js';
 import { renderContent } from './render.js';
@@ -57,7 +58,7 @@ function unverifiedFacts(diff, brief, originalTexts) {
     return warnings;
 }
 
-async function preview(context, owner, { ref, brief, tier, meter, brand = '', useTools = true }) {
+async function preview(context, owner, { ref, brief, tier, meter = newMeter(), brand = '', useTools = true }) {
     const src = await loadSource(context, ref);
 
     // Optional research step: the model may consult (read-only, with the user's rights) other templates and campaigns
@@ -68,6 +69,7 @@ async function preview(context, owner, { ref, brief, tier, meter, brand = '', us
     }
 
     const result = await generate(owner, { tier, meter, editorType: src.editorType, source: src.source, options: { brief, references: [], brand, research: research.notes } });
+    meter.step('render');
     const originalTexts = extractSlots(src.editorType, src.source).slots.map(s => s.text);
     const { html } = await renderContent(src.editorType, result.source, src);
     return {
