@@ -11,7 +11,7 @@ import { hasher as createHasher } from 'node-object-hash';
 import mjml2html from 'mjml';
 import hbs from 'hbs';
 import juice from 'juice';
-import he from 'he';
+import * as he from 'he';
 import { htmlToText } from 'html-to-text';
 import fs from 'fs-extra';
 const hasher = createHasher();
@@ -55,7 +55,7 @@ async function getTemplate(template, locale) {
     }
 
     if (template.type === 'mjml') {
-        const compiled = mjml2html(source);
+        const compiled = await mjml2html(source);
 
         if (compiled.errors.length) {
             throw new Error(compiled.errors[0].message || compiled.errors[0]);

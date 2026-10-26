@@ -7,7 +7,7 @@ import subscriptions from './subscriptions.js';
 import contextHelpers from '../lib/context-helpers.js';
 import geoip from 'geoip-ultralight';
 import uaParser from 'device';
-import he from 'he';
+import * as he from 'he';
 import tools from '../lib/tools.js';
 import shortid from '../lib/shortid.js';
 

@@ -108,7 +108,7 @@ async function serverValidate(context, data) {
     const result = {};
 
     const form = filterObject(data, allowedKeysServerValidate);
-    const errs = checkForMjmlErrors(form);
+    const errs = await checkForMjmlErrors(form);
 
     for (const key in form) {
         result[key] = {};
@@ -138,7 +138,7 @@ async function create(context, entity) {
         await namespaceHelpers.validateEntity(tx, entity);
 
         const form = filterObject(entity, allowedFormKeys);
-        enforce(!Object.keys(checkForMjmlErrors(form)).length, 'Error(s) in form templates');
+        enforce(!Object.keys(await checkForMjmlErrors(form)).length, 'Error(s) in form templates');
 
         const ids = await tx('custom_forms').insert(filterObject(entity, formAllowedKeys));
         const id = ids[0];
@@ -171,7 +171,7 @@ async function updateWithConsistencyCheck(context, entity) {
         await namespaceHelpers.validateMoveTx(tx, context, entity, existing, 'customForm', 'createCustomForm', 'delete');
 
         const form = filterObject(entity, allowedFormKeys);
-        enforce(!Object.keys(checkForMjmlErrors(form)).length, 'Error(s) in form templates');
+        enforce(!Object.keys(await checkForMjmlErrors(form)).length, 'Error(s) in form templates');
 
         await tx('custom_forms').where('id', entity.id).update(filterObject(entity, formAllowedKeys));
 
@@ -229,15 +229,16 @@ async function getDefaultCustomFormValues() {
 }
 
 // TODO - this could run in the browser too - move to shared
-function checkForMjmlErrors(form) {
+// mjml 5 compiles asynchronously
+async function checkForMjmlErrors(form) {
     let testLayout = '<mjml><mj-body>{{{body}}}</mj-body></mjml>';
 
-    let hasMjmlError = (template, layout = testLayout) => {
+    let hasMjmlError = async (template, layout = testLayout) => {
         let source = layout.replace(/\{\{\{body\}\}\}/g, template);
         let compiled;
 
         try {
-            compiled = mjml2html(source);
+            compiled = await mjml2html(source);
         } catch (err) {
             return err;
         }
@@ -249,7 +250,7 @@ function checkForMjmlErrors(form) {
     for (const key in form) {
         if ((key.startsWith('mail_') && key.endsWith('_html')) || key.startsWith('web_')) {
             const template = form[key];
-            const errs = hasMjmlError(template);
+            const errs = await hasMjmlError(template);
 
             let msgs;
             if (Array.isArray(errs)) {
@@ -268,7 +269,7 @@ function checkForMjmlErrors(form) {
 
         } else if (key === 'layout') {
             const layout = form[key];
-            const errs = hasMjmlError('', layout);
+            const errs = await hasMjmlError('', layout);
 
             let msgs;
             if (Array.isArray(errs)) {
