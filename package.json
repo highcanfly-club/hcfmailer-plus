@@ -30,6 +30,10 @@
     "nanotar": "0.3.0",
     "tsx": "^4.23.15"
   },
+  "overrides": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
   "engines": {
     "node": ">=22.0.0"
   }

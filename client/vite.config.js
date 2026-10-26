@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import path from 'path'
+import fs from 'fs'
 
 function globalVirtualPlugin() {
   const globals = { mailtrainConfig: 'window.mailtrainConfig', csrfToken: 'window.csrfToken' };
@@ -35,10 +36,16 @@ function loggerPlugin() {
 // Returns the relative path to the package installation directory (e.g. "../node_modules/@fortawesome/fontawesome-free")
 // Works whether the package is in client/node_modules or root node_modules (npm link, hoisting, etc.)
 function resolvePackagePath(packageName) {
+  const searchDirs = [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, '../node_modules')];
   try {
-    const pkgJson = require.resolve(packageName + '/package.json', { paths: [path.resolve(__dirname, 'node_modules'), path.resolve(__dirname, '../node_modules')] });
+    const pkgJson = require.resolve(packageName + '/package.json', { paths: searchDirs });
     return path.relative(__dirname, path.dirname(pkgJson));
   } catch (err) {
+    // Packages with a strict "exports" map (e.g. jQuery 4) do not expose ./package.json: look for the folder itself
+    if (err.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED') {
+      const dir = searchDirs.map(d => path.join(d, packageName)).find(d => fs.existsSync(path.join(d, 'package.json')));
+      if (dir) return path.relative(__dirname, dir);
+    }
     console.error(`Failed to resolve package ${packageName}:`, err);
     throw err;
   }
