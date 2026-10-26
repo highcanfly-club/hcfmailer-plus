@@ -20,7 +20,7 @@ function getMenus(t) {
                     panelComponent: API
                 },
                 ai: {
-                    title: 'IA',
+                    title: t('aiMenu'),
                     link: '/account/ai',
                     panelComponent: AI
                 }

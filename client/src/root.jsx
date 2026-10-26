@@ -97,7 +97,7 @@ class Root extends Component {
                                 {getLanguageChooser(t)}
                                 <NavDropdown menuclassname="dropdown-menu-right" title={mailtrainConfig.user.username} icon="user">
                                     <DropdownLink to="/account"><Icon icon='user' /> {t('account')}</DropdownLink>
-                                    <DropdownLink to="/account/ai"><Icon icon='robot' /> IA</DropdownLink>
+                                    <DropdownLink to="/account/ai"><Icon icon='robot' /> {t('aiMenu')}</DropdownLink>
                                     {mailtrainConfig.authMethod == 'cas' && <DropdownLink to="/cas/logout" forceReload><Icon icon="sign-out-alt" /> {t('logOut')}</DropdownLink>}
                                     {mailtrainConfig.authMethod != 'cas' && <DropdownActionLink onClickAsync={(...args) => this.logout(...args)}><Icon icon='sign-out-alt' /> {t('logOut')}</DropdownActionLink>}
                                 </NavDropdown>
