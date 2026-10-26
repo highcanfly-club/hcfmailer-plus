@@ -113,7 +113,7 @@ function registerSettingsRoutes(base, getOwner, guards) {
 
     router.postAsync(`${base}/settings/:tier/test`, ...guards, passport.csrfProtection, async (req, res) => {
         rateLimit(req.user.id);
-        const meter = newMeter({ debug: req.body.debug === true });
+        const meter = newMeter({ debug: !!req.body && req.body.debug === true }); // the button posts without a body
         try {
             const reply = await callModel(getOwner(req), req.params.tier, 'Réponds uniquement par le mot OK.', 'Test de connexion.', meter, 'test');
             return res.json({ ok: true, reply: reply.slice(0, 100), debug: meter.trace() });
