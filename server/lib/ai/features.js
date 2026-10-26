@@ -178,7 +178,7 @@ async function responsive(userId, { tier, editorType, source: originalSource, st
     }
     if (!safe) {
         console.warn(`AI responsive: rejected CSS (${reason}):`, String(reply.css).slice(0, 600));
-        return { source: originalSource, style, changed: 0, rejected: 1, tier, summary: typeof reply.summary === 'string' ? reply.summary : null, message: `Les règles proposées ont été ignorées (${reason}). Reformulez la demande en précisant l'élément concerné.` };
+        return { source: originalSource, style, changed: 0, rejected: 1, tier, summary: typeof reply.summary === 'string' ? reply.summary : null, rejectedReason: reason };
     }
     const applied = built.apply(safe.css, safe.used);
     return { source: restore(applied.source), style: applied.style, changed: safe.css.split('}\n').length, rejected: 0, tier, summary: typeof reply.summary === 'string' ? reply.summary.slice(0, 500) : null, css: safe.css };

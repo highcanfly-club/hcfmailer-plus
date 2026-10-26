@@ -1,18 +1,22 @@
 'use strict';
 
 import axios from './axios';
+import i18n from './i18n';
 import { getSandboxUrl } from './urls';
 
 // Widths are in stored pixels, i.e. twice the width the image has in a 600 px wide email (sharp on high-density screens)
 export const DEFAULT_MAX_WIDTH = 1200;
 export const SIZE_PRESETS = [
-  { key: 'full', label: 'Pleine largeur (1200 px)', maxWidth: 1200 },
-  { key: 'half', label: '1/2 largeur (600 px)', maxWidth: 600 },
-  { key: 'third', label: '1/3 largeur (400 px)', maxWidth: 400 },
-  { key: 'quarter', label: '1/4 largeur (300 px)', maxWidth: 300 },
-  { key: 'icon', label: 'Icône (128 px)', maxWidth: 128 },
-  { key: 'custom', label: 'Personnalisée…', maxWidth: null }
+  { key: 'full', labelKey: 'aiSizeFull', maxWidth: 1200 },
+  { key: 'half', labelKey: 'aiSizeHalf', maxWidth: 600 },
+  { key: 'third', labelKey: 'aiSizeThird', maxWidth: 400 },
+  { key: 'quarter', labelKey: 'aiSizeQuarter', maxWidth: 300 },
+  { key: 'icon', labelKey: 'aiSizeIcon', maxWidth: 128 },
+  { key: 'custom', labelKey: 'aiSizeCustom', maxWidth: null }
 ];
+
+// The sandboxes are not React-hosted everywhere, so labels are resolved at call time through the shared i18n instance
+export const sizePresetLabel = preset => i18n.t(preset.labelKey);
 
 // The server clamps to 16..2400 px and never enlarges an image
 export function sanitizeMaxWidth(value) {
@@ -22,7 +26,7 @@ export function sanitizeMaxWidth(value) {
 
 export async function uploadTemplateImage(editorType, entityTypeId, entityId, file, maxWidth) {
   if (!entityTypeId || !entityId) {
-    throw new Error('Enregistrez d’abord le modèle avant d’envoyer des images.');
+    throw new Error(i18n.t('aiSaveTemplateFirst'));
   }
   const form = new FormData();
   form.append('files[]', file);
@@ -31,7 +35,7 @@ export async function uploadTemplateImage(editorType, entityTypeId, entityId, fi
   });
   const url = res.data && res.data.files && res.data.files[0] && res.data.files[0].url;
   if (!url) {
-    throw new Error('Échec de l’envoi de l’image');
+    throw new Error(i18n.t('aiUploadFailed'));
   }
   return url;
 }
@@ -41,12 +45,12 @@ export function createSizeSelector(doc = document) {
   const wrap = doc.createElement('div');
   wrap.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 8px;font:13px sans-serif;background:#f4f5f7;border-bottom:1px solid #ddd;';
   const label = doc.createElement('label');
-  label.textContent = 'Taille des images envoyées :';
+  label.textContent = i18n.t('aiUploadSizeLabel');
   const select = doc.createElement('select');
   SIZE_PRESETS.forEach((p) => {
     const o = doc.createElement('option');
     o.value = p.key;
-    o.textContent = p.label;
+    o.textContent = sizePresetLabel(p);
     select.appendChild(o);
   });
   const custom = doc.createElement('input');

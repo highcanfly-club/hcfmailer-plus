@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import axios from './axios';
+import { useTranslation } from './i18n';
 import { getUrl } from './urls';
 import { Icon } from './bootstrap-components';
 
@@ -14,9 +15,9 @@ const loadStatus = () => {
   return statusPromise;
 };
 
-const TIER_LABELS = { basic: 'Basique', medium: 'Intermédiaire', high: 'Avancé' };
-const RESPONSIVE_HINTS = ['Réduire la taille du titre sur petit écran', 'Empiler les colonnes sur mobile', 'Réduire les marges latérales sur mobile', 'Agrandir les boutons sur mobile'];
-const STYLE_HINTS = ['Plus court', 'Plus chaleureux', 'Plus professionnel', 'Plus dynamique', 'Plus simple'];
+const TIER_LABELS = { basic: 'aiTierBasic', medium: 'aiTierMedium', high: 'aiTierHigh' };
+const RESPONSIVE_HINTS = ['aiHintTitleSmaller', 'aiHintStackColumns', 'aiHintSmallerMargins', 'aiHintBiggerButtons'];
+const STYLE_HINTS = ['aiHintShorter', 'aiHintWarmer', 'aiHintProfessional', 'aiHintDynamic', 'aiHintSimpler'];
 const BRAND_KEY = 'hcfmailer.ai.brand';
 
 // The host navbar restyles every .btn (white on dark): the panel buttons carry their own colours
@@ -26,6 +27,7 @@ const btnStyle = (primary, disabled) => ({ ...BTN, ...(primary ? { background: '
 const panelStyle = { position: 'absolute', right: 0, top: '100%', zIndex: 2000, width: 400, background: '#fff', color: '#212529', border: '1px solid #ced4da', borderRadius: 6, boxShadow: '0 4px 16px rgba(0,0,0,.2)', padding: 12, textAlign: 'left', fontSize: 14 };
 
 export function AIToolbar({ editorType, getState, onApplied }) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState(null);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState('correct');
@@ -65,7 +67,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
     try {
       const state = await getState();
       if (!state || typeof state.source !== 'string') {
-        throw new Error('L’éditeur n’est pas encore prêt.');
+        throw new Error(t('aiEditorNotReady'));
       }
       const body = { editorType, source: state.source, tier: tier || undefined };
       if (mode === 'rewrite' || mode === 'responsive') body.instruction = instruction;
@@ -78,23 +80,23 @@ export function AIToolbar({ editorType, getState, onApplied }) {
       }
       const res = (await axios.post(getUrl(`rest/ai/${mode}`), body)).data;
       if (res.empty) {
-        setMessage('Aucun texte à traiter dans ce contenu.');
+        setMessage(t('aiNothingToProcess'));
       } else if (mode === 'responsive') {
         if (res.changed > 0) {
           previous.current = state;
           onApplied({ source: res.source, style: res.style !== undefined ? res.style : state.style });
         }
         setResult(null);
-        setMessage(res.message || (res.summary ? `${res.summary} Vérifiez avec l’aperçu à plusieurs largeurs.` : 'Réglages ajoutés. Vérifiez avec l’aperçu à plusieurs largeurs.'));
+        setMessage(res.rejectedReason ? t('aiResponsiveRejected', { reason: res.rejectedReason }) : (res.summary ? t('aiResponsiveDoneSummary', { summary: res.summary }) : t('aiResponsiveDone')));
       } else {
         previous.current = state;
         onApplied({ source: res.source, style: state.style });
         setResult(res);
-        setMessage(`${res.changed} texte(s) modifié(s)${res.rejected ? `, ${res.rejected} proposition(s) ignorée(s) car elles altéraient les liens ou les balises` : ''}.`);
+        setMessage(`${t('aiTextsChanged', { n: res.changed })}${res.rejected ? t('aiTextsRejected', { n: res.rejected }) : ''}.`);
       }
     } catch (err) {
       const data = err.response && err.response.data;
-      setMessage('Erreur : ' + ((data && data.message) || err.message));
+      setMessage(t('aiErrorPrefix', { message: (data && data.message) || err.message }));
     } finally {
       setBusy(false);
     }
@@ -105,7 +107,7 @@ export function AIToolbar({ editorType, getState, onApplied }) {
       onApplied({ source: previous.current.source, style: previous.current.style });
       previous.current = null;
       setResult(null);
-      setMessage('Modification annulée.');
+      setMessage(t('aiUndone'));
     }
   };
 
@@ -114,41 +116,41 @@ export function AIToolbar({ editorType, getState, onApplied }) {
 
   return (
     <span style={{ position: 'relative', display: 'inline-block' }}>
-      <a className="btn" onClick={() => setOpen(!open)} title="Assistant IA"><Icon icon="magic" /></a>
+      <a className="btn" onClick={() => setOpen(!open)} title={t('aiToolbarTitle')}><Icon icon="magic" /></a>
       {open && (
         <div style={panelStyle}>
-          <div className="mb-2">{tabButton('correct', 'Corriger')}{tabButton('rewrite', 'Réécrire')}{tabButton('generate', 'Générer')}{(editorType === 'emailbuilder' || editorType === 'grapesjs') && tabButton('responsive', 'Mobile')}</div>
+          <div className="mb-2">{tabButton('correct', t('aiTabCorrect'))}{tabButton('rewrite', t('aiTabRewrite'))}{tabButton('generate', t('aiTabGenerate'))}{(editorType === 'emailbuilder' || editorType === 'grapesjs') && tabButton('responsive', t('aiTabMobile'))}</div>
 
-          {mode === 'correct' && <p>Corrige l’orthographe, la grammaire et la ponctuation sans toucher à la mise en page, aux liens ni aux balises de fusion.</p>}
+          {mode === 'correct' && <p>{t('aiCorrectHelp')}</p>}
 
           {mode === 'rewrite' && (
             <>
-              <textarea className="form-control mb-1" rows={3} placeholder="Consigne : ex. rends le ton plus chaleureux" value={instruction} onChange={e => setInstruction(e.target.value)} />
-              <div className="mb-2">{STYLE_HINTS.map(h => <button key={h} style={btnStyle(false)} onClick={() => setInstruction(h)}>{h}</button>)}</div>
+              <textarea className="form-control mb-1" rows={3} placeholder={t('aiRewritePlaceholder')} value={instruction} onChange={e => setInstruction(e.target.value)} />
+              <div className="mb-2">{STYLE_HINTS.map(h => <button key={h} style={btnStyle(false)} onClick={() => setInstruction(t(h))}>{t(h)}</button>)}</div>
             </>
           )}
 
           {mode === 'responsive' && (
             <>
-              <p className="mb-1">Décrivez le problème d’affichage : l’IA ajoute des règles pour les petits écrans, sans modifier vos textes ni la mise en page de bureau.</p>
-              <textarea className="form-control mb-1" rows={3} placeholder="Ex. sur iPhone le titre passe sur deux lignes : réduis la police sur petits téléphones" value={instruction} onChange={e => setInstruction(e.target.value)} />
-              <div className="mb-2">{RESPONSIVE_HINTS.map(h => <button key={h} style={btnStyle(false)} onClick={() => setInstruction(h)}>{h}</button>)}</div>
+              <p className="mb-1">{t('aiResponsiveHelp')}</p>
+              <textarea className="form-control mb-1" rows={3} placeholder={t('aiResponsivePlaceholder')} value={instruction} onChange={e => setInstruction(e.target.value)} />
+              <div className="mb-2">{RESPONSIVE_HINTS.map(h => <button key={h} style={btnStyle(false)} onClick={() => setInstruction(t(h))}>{t(h)}</button>)}</div>
             </>
           )}
 
           {mode === 'generate' && (
             <>
-              <p className="mb-1">Remplit les textes du contenu actuel (votre modèle) à partir de votre demande. Sans contenu, un squelette est utilisé.</p>
-              <textarea className="form-control mb-1" rows={4} placeholder="Sujet, informations à inclure (dates, offres, liens), public visé…" value={brief} onChange={e => setBrief(e.target.value)} />
-              <textarea className="form-control mb-1" rows={2} placeholder="Ton / marque (optionnel, mémorisé)" value={brand} onChange={e => setBrand(e.target.value)} />
+              <p className="mb-1">{t('aiGenerateHelp')}</p>
+              <textarea className="form-control mb-1" rows={4} placeholder={t('aiBriefPlaceholder')} value={brief} onChange={e => setBrief(e.target.value)} />
+              <textarea className="form-control mb-1" rows={2} placeholder={t('aiBrandPlaceholder')} value={brand} onChange={e => setBrand(e.target.value)} />
               {references && (references.templates.length > 0 || references.campaigns.length > 0) && (
                 <details className="mb-2">
-                  <summary>Newsletters de référence pour le style ({selectedRefs.length}/3)</summary>
+                  <summary>{t('aiReferencesSummary', { n: selectedRefs.length })}</summary>
                   <div style={{ maxHeight: 130, overflowY: 'auto' }}>
                     {[...references.templates.map(r => ({ ...r, type: 'template' })), ...references.campaigns.map(r => ({ ...r, type: 'campaign' }))].map(r => (
                       <label key={r.type + r.id} className="d-block">
                         <input type="checkbox" className="me-1" checked={selectedRefs.some(s => s.type === r.type && s.id === r.id)} onChange={() => toggleRef({ type: r.type, id: r.id })} />
-                        {r.type === 'template' ? 'Modèle' : 'Campagne'} : {r.name}
+                        {r.type === 'template' ? t('aiRefTemplateName', { name: r.name }) : t('aiRefCampaignName', { name: r.name })}
                       </label>
                     ))}
                   </div>
@@ -159,23 +161,23 @@ export function AIToolbar({ editorType, getState, onApplied }) {
 
           <div className="d-flex align-items-center">
             {Object.keys(status.tiers).length > 1 && (
-              <select className="form-select form-select-sm me-2" style={{ width: 'auto' }} value={tier} onChange={e => setTier(e.target.value)} title="Modèle utilisé">
-                <option value="">Modèle : auto</option>
-                {Object.keys(status.tiers).map(t => <option key={t} value={t}>{TIER_LABELS[t]}</option>)}
+              <select className="form-select form-select-sm me-2" style={{ width: 'auto' }} value={tier} onChange={e => setTier(e.target.value)} title={t('aiModelUsed')}>
+                <option value="">{t('aiModelAuto')}</option>
+                {Object.keys(status.tiers).map(tierKey => <option key={tierKey} value={tierKey}>{t(TIER_LABELS[tierKey])}</option>)}
               </select>
             )}
-            <button style={btnStyle(true, !canRun)} disabled={!canRun} onClick={run}>{busy ? 'En cours…' : 'Lancer'}</button>
-            {previous.current && <button style={{ ...btnStyle(false, busy), marginLeft: 8 }} disabled={busy} onClick={undo}>Annuler</button>}
+            <button style={btnStyle(true, !canRun)} disabled={!canRun} onClick={run}>{busy ? t('aiRunning') : t('aiRun')}</button>
+            {previous.current && <button style={{ ...btnStyle(false, busy), marginLeft: 8 }} disabled={busy} onClick={undo}>{t('aiUndo')}</button>}
           </div>
 
           {message && <div className="mt-2">{message}</div>}
           {result && (result.subject || result.preheader) && (
             <div className="mt-2">
-              {result.subject && <div><strong>Objet suggéré :</strong> <input className="form-control form-control-sm" readOnly value={result.subject} onFocus={e => e.target.select()} /></div>}
-              {result.preheader && <div className="mt-1"><strong>Pré-en-tête :</strong> <input className="form-control form-control-sm" readOnly value={result.preheader} onFocus={e => e.target.select()} /></div>}
+              {result.subject && <div><strong>{t('aiSuggestedSubject')}</strong> <input className="form-control form-control-sm" readOnly value={result.subject} onFocus={e => e.target.select()} /></div>}
+              {result.preheader && <div className="mt-1"><strong>{t('aiPreheader')}</strong> <input className="form-control form-control-sm" readOnly value={result.preheader} onFocus={e => e.target.select()} /></div>}
             </div>
           )}
-          <div className="text-muted mt-2" style={{ fontSize: 12 }}>Le contenu modifié n’est enregistré qu’avec le bouton Enregistrer.</div>
+          <div className="text-muted mt-2" style={{ fontSize: 12 }}>{t('aiNotSavedNote')}</div>
         </div>
       )}
     </span>

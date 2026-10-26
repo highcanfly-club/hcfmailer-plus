@@ -15,7 +15,8 @@ import RadioGroupInput from './helpers/inputs/RadioGroupInput';
 import TextDimensionInput from './helpers/inputs/TextDimensionInput';
 import TextInput from './helpers/inputs/TextInput';
 import MultiStylePropertyPanel from './helpers/style-inputs/MultiStylePropertyPanel';
-import { DEFAULT_MAX_WIDTH, SIZE_PRESETS, sanitizeMaxWidth, uploadTemplateImage } from '../../../../../image-upload';
+import i18n from '../../../../../i18n';
+import { DEFAULT_MAX_WIDTH, SIZE_PRESETS, sanitizeMaxWidth, sizePresetLabel, uploadTemplateImage } from '../../../../../image-upload';
 import { getUploadConfig } from '../../../../uploadConfig';
 
 type ImageSidebarPanelProps = {
@@ -52,7 +53,7 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
       const width = maxWidth >= DEFAULT_MAX_WIDTH ? data.props?.width ?? null : Math.round(maxWidth / 2);
       updateData({ ...data, props: { ...data.props, url, width } });
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Upload failed');
+      setUploadError(err instanceof Error ? err.message : i18n.t('aiUploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -60,10 +61,10 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
 
   return (
     <BaseSidebarPanel title="Image block">
-      <TextField select size="small" label="Upload size" value={sizeKey} onChange={(e) => setSizeKey(e.target.value)}>
+      <TextField select size="small" label={i18n.t('aiUploadSize')} value={sizeKey} onChange={(e) => setSizeKey(e.target.value)}>
         {SIZE_PRESETS.map((p) => (
           <MenuItem key={p.key} value={p.key}>
-            {p.label}
+            {sizePresetLabel(p)}
           </MenuItem>
         ))}
       </TextField>
@@ -71,14 +72,14 @@ export default function ImageSidebarPanel({ data, setData }: ImageSidebarPanelPr
         <TextField
           size="small"
           type="number"
-          label="Max width (px)"
+          label={i18n.t('aiMaxWidthPx')}
           value={customWidth}
           inputProps={{ min: 16, max: 2400 }}
           onChange={(e) => setCustomWidth(e.target.value)}
         />
       )}
       <Button component="label" variant="outlined" size="small" startIcon={<UploadFileOutlined />} disabled={uploading}>
-        {uploading ? 'Uploading…' : 'Upload an image'}
+        {uploading ? i18n.t('aiUploading') : i18n.t('aiUploadImage')}
         <input
           hidden
           type="file"
