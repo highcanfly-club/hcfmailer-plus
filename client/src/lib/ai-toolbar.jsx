@@ -9,7 +9,7 @@ import { formatMicro, formatMoney, formatNumber } from './ai-format';
 
 // The AI button exists for users with their own key (BYOK) or when the administrator offers a shared AI (then a click
 // opens the offer first). Without either, there is no button at all.
-const fetchStatus = () => axios.get(getUrl('rest/ai/status')).then(r => r.data).catch(() => ({ enabled: false, tiers: {} }));
+export const fetchStatus = () => axios.get(getUrl('rest/ai/status')).then(r => r.data).catch(() => ({ enabled: false, tiers: {} }));
 
 const SEEN_KEY = 'hcfmailer.ai.seen';
 const wasSeen = () => { try { return window.localStorage.getItem(SEEN_KEY) === '1'; } catch (e) { return true; } };
@@ -39,7 +39,7 @@ const btnStyle = (primary, disabled) => ({ ...BTN, ...(primary ? { background: '
 const panelStyle = { position: 'absolute', right: 0, top: '100%', zIndex: 2000, width: 400, background: '#fff', color: '#212529', border: '1px solid #ced4da', borderRadius: 6, boxShadow: '0 4px 16px rgba(0,0,0,.2)', padding: 12, textAlign: 'left', fontSize: 14 };
 
 // Shown on click when the user has no key of their own: bring their own key, or accept the billed shared AI
-function OfferDialog({ status, onAccept, onClose }) {
+export function OfferDialog({ status, onAccept, onClose }) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const { prices } = status;

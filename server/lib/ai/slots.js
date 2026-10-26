@@ -30,14 +30,17 @@ function unmaskTags(text, tags) {
     return { text: result, ok: complete && count === tags.length };
 }
 
-// Inline structure that must survive: tag names (br ignored) and link targets
+// Inline structure that must survive: tag names (br ignored) AND all their attributes. Comparing the complete attribute
+// set means the model can neither retarget a link nor attach an event handler or a style to any element.
+const ATTR = /([a-zA-Z_:][-\w:.]*)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s"'>]+))?/g;
+
 function signature(html) {
     const sig = [];
-    for (const m of html.matchAll(/<\/?([a-zA-Z0-9]+)([^>]*)>/g)) {
-        const name = m[1].toLowerCase();
+    for (const m of html.matchAll(/<(\/?)([a-zA-Z0-9]+)([^>]*)>/g)) {
+        const name = m[2].toLowerCase();
         if (name === 'br') continue;
-        const href = /href\s*=\s*"([^"]*)"/i.exec(m[2]);
-        sig.push(name + (href ? '|' + href[1] : '') + (m[0].startsWith('</') ? '/' : ''));
+        const attrs = [...m[3].matchAll(ATTR)].map(a => `${a[1].toLowerCase()}=${(a[2] || '').replace(/^["']|["']$/g, '')}`).sort().join(',');
+        sig.push(`${m[1]}${name}[${attrs}]`);
     }
     return sig.join(',');
 }
@@ -167,4 +170,15 @@ function validateReply(slot, newText) {
     return ok ? text : null;
 }
 
-export { extractSlots, prepare, validateReply, maskTags, unmaskTags, signature };
+// Final check of a replacement text (real merge tags, not masked) before it is written into a document: same merge tags
+// and same inline structure (tags, link targets) as the original text of the slot
+const tagList = text => (text.match(MERGE_TAG) || []).slice().sort().join('\u0000');
+
+function validateFinal(slot, newText) {
+    if (typeof newText !== 'string' || newText.trim() === '' || newText.length > 20000) return null;
+    if (tagList(newText) !== tagList(slot.text)) return null;
+    if (slot.format === 'text') return stripTags(newText);
+    return signature(newText) === signature(slot.text) ? newText : null;
+}
+
+export { extractSlots, prepare, validateReply, validateFinal, maskTags, unmaskTags, signature };

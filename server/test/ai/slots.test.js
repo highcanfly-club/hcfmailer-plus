@@ -19,6 +19,9 @@ describe('AI slots', () => {
         expect(validateReply(slot, 'Salut §1§, <a href="https://a.b">voir</a>')).to.equal('Salut [MERGE_FIRST_NAME], <a href="https://a.b">voir</a>');
         expect(validateReply(slot, 'Salut, <a href="https://a.b">voir</a>')).to.equal(null);
         expect(validateReply(slot, 'Salut §1§, <a href="https://evil.example">voir</a>')).to.equal(null);
+        expect(validateReply(slot, 'Salut §1§, <a href="https://a.b" onmouseover="alert(1)">voir</a>')).to.equal(null);
+        expect(validateReply(slot, 'Salut §1§, <a style="x:y" href="https://a.b">voir</a>')).to.equal(null);
+        expect(validateReply(slot, 'Salut §1§, <a href=\'https://a.b\'>voir</a>')).to.not.equal(null); // quotes may change, not the attributes
     });
 
     it('handles Email Builder documents, including Html blocks', () => {

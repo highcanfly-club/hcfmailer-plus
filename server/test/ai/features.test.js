@@ -1,5 +1,5 @@
 // Integration test against the dev database (needs the dev stack: `bun run dev:infra`) and a local mock provider.
-// Run:  set -a && source .env.dev && set +a && NODE_ENV=development AI_ENCRYPTION_KEY=test-secret AI_ALLOW_PRIVATE_HOSTS=1 (cd server && npx mocha test/ai/features.test.js)
+// Run:  set -a && source .env.dev && set +a && NODE_ENV=development AI_ENCRYPTION_KEY=test-secret AI_ALLOW_PRIVATE_HOSTS=1 (cd server && npx mocha --exit test/ai/features.test.js)
 import http from 'http';
 import { expect } from 'chai';
 
@@ -16,45 +16,47 @@ let baseUrl;
 const seenKeys = [];
 
 // A fake OpenAI-compatible provider: "bad-key" is refused, otherwise it upper-cases the "Bonjor" typo fix and echoes slots
-before(async () => {
-    server = http.createServer((req, res) => {
-        let body = '';
-        req.on('data', c => { body += c; });
-        req.on('end', () => {
-            const key = (req.headers.authorization || '').replace('Bearer ', '');
-            seenKeys.push(key);
-            if (key === 'bad-key-0000') {
-                res.writeHead(401, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ error: { message: 'invalid key' } }));
-            }
-            const payload = JSON.parse(body);
-            const user = payload.messages[1].content;
-            const wantsSubject = payload.messages[0].content.includes('"subject"');
-            const input = JSON.parse(user.slice(user.indexOf('{"slots"')));
-            const slots = input.slots.map(s => ({ id: s.id, text: s.text.replace('Bonjor', 'Bonjour').replace('Texte', 'Nouveau texte') }));
-            const content = JSON.stringify({ slots, ...(wantsSubject ? { subject: 'Objet généré', preheader: 'Aperçu' } : {}) });
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ choices: [{ message: { content: '```json\n' + content + '\n```' } }] }));
-        });
-    });
-    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-    baseUrl = `http://127.0.0.1:${server.address().port}/v1`;
-});
 
-afterEach(async () => {
-    await aiModels.removeModel(USER, 'basic');
-    await aiModels.removeModel(USER, 'high');
-    seenKeys.length = 0;
-});
 
-after(async () => {
-    server.close();
-    await knex.destroy();
-});
 
 const settings = (keyMode) => ({ protocol: 'openai', baseUrl, model: 'mock', keyMode, temperature: '', maxTokens: '' });
 
 describe('AI features', () => {
+    before(async () => {
+        server = http.createServer((req, res) => {
+            let body = '';
+            req.on('data', c => { body += c; });
+            req.on('end', () => {
+                const key = (req.headers.authorization || '').replace('Bearer ', '');
+                seenKeys.push(key);
+                if (key === 'bad-key-0000') {
+                    res.writeHead(401, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: { message: 'invalid key' } }));
+                }
+                const payload = JSON.parse(body);
+                const user = payload.messages[1].content;
+                const wantsSubject = payload.messages[0].content.includes('"subject"');
+                const input = JSON.parse(user.slice(user.indexOf('{"slots"')));
+                const slots = input.slots.map(s => ({ id: s.id, text: s.text.replace('Bonjor', 'Bonjour').replace('Texte', 'Nouveau texte') }));
+                const content = JSON.stringify({ slots, ...(wantsSubject ? { subject: 'Objet généré', preheader: 'Aperçu' } : {}) });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ choices: [{ message: { content: '```json\n' + content + '\n```' } }] }));
+            });
+        });
+        await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+        baseUrl = `http://127.0.0.1:${server.address().port}/v1`;
+    });
+
+    afterEach(async () => {
+        await aiModels.removeModel(USER, 'basic');
+        await aiModels.removeModel(USER, 'high');
+        seenKeys.length = 0;
+    });
+
+    after(async () => {
+        server.close();
+    });
+
     it('is disabled until a model has a key', async () => {
         expect((await aiModels.getStatus(USER)).enabled).to.equal(false);
         await aiModels.saveModel(USER, 'basic', settings('failover'));

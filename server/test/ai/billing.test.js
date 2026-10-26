@@ -16,41 +16,43 @@ let server;
 let baseUrl;
 let originalSettings;
 
-before(async () => {
-    server = http.createServer((req, res) => {
-        let body = '';
-        req.on('data', c => { body += c; });
-        req.on('end', () => {
-            const payload = JSON.parse(body);
-            const user = payload.messages[1].content;
-            const i = user.indexOf('{"slots"');
-            const content = i >= 0 ? JSON.stringify({ slots: JSON.parse(user.slice(i)).slots.map(s => ({ id: s.id, text: s.text.replace('Bonjor', 'Bonjour') })) }) : 'OK';
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 1000, completion_tokens: 500 } }));
-        });
-    });
-    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-    baseUrl = `http://127.0.0.1:${server.address().port}/v1`;
-    originalSettings = await billing.getSettings();
-    await billing.saveSettings({ priceIn: 10, priceOut: 4, maxOutstanding: 0 });
-});
 
-afterEach(async () => {
-    await aiModels.removeModel(null, 'basic');
-    await knex('ai_usage').whereIn('user', [USER, OTHER]).del();
-    await knex('ai_settlements').whereIn('user', [USER, OTHER]).del();
-    await knex('ai_user_prefs').whereIn('user', [USER, OTHER]).del();
-});
 
-after(async () => {
-    await billing.saveSettings(originalSettings);
-    server.close();
-    await knex.destroy();
-});
 
 const shared = () => ({ protocol: 'openai', baseUrl, model: 'shared-mock', keyMode: 'failover', temperature: '', maxTokens: '' });
 
 describe('AI shared offer and billing', () => {
+    before(async () => {
+        server = http.createServer((req, res) => {
+            let body = '';
+            req.on('data', c => { body += c; });
+            req.on('end', () => {
+                const payload = JSON.parse(body);
+                const user = payload.messages[1].content;
+                const i = user.indexOf('{"slots"');
+                const content = i >= 0 ? JSON.stringify({ slots: JSON.parse(user.slice(i)).slots.map(s => ({ id: s.id, text: s.text.replace('Bonjor', 'Bonjour') })) }) : 'OK';
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ choices: [{ message: { content } }], usage: { prompt_tokens: 1000, completion_tokens: 500 } }));
+            });
+        });
+        await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+        baseUrl = `http://127.0.0.1:${server.address().port}/v1`;
+        originalSettings = await billing.getSettings();
+        await billing.saveSettings({ priceIn: 10, priceOut: 4, maxOutstanding: 0 });
+    });
+
+    afterEach(async () => {
+        await aiModels.removeModel(null, 'basic');
+        await knex('ai_usage').whereIn('user', [USER, OTHER]).del();
+        await knex('ai_settlements').whereIn('user', [USER, OTHER]).del();
+        await knex('ai_user_prefs').whereIn('user', [USER, OTHER]).del();
+    });
+
+    after(async () => {
+        await billing.saveSettings(originalSettings);
+        server.close();
+    });
+
     it('keeps the shared models apart from the users\' own models', async () => {
         await aiModels.saveModel(null, 'basic', shared());
         await aiModels.addKey(null, 'basic', 'admin key', 'admin-key-0001');

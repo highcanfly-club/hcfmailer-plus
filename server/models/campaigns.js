@@ -534,7 +534,9 @@ async function _createTx(tx, context, entity, content) {
         const ids = await tx('campaigns').insert(filteredEntity);
         const id = ids[0];
 
-        await tx('campaign_lists').insert(entity.lists.map(x => ({campaign: id, ...x})));
+        if (entity.lists.length > 0) { // a draft may have no list yet
+            await tx('campaign_lists').insert(entity.lists.map(x => ({campaign: id, ...x})));
+        }
 
         if (entity.source === CampaignSource.TEMPLATE) {
             await tx('template_dep_campaigns').insert({
@@ -614,7 +616,9 @@ async function updateWithConsistencyCheck(context, entity, content) {
 
         if (content === Content.ALL || content === Content.WITHOUT_SOURCE_CUSTOM) {
             await tx('campaign_lists').where('campaign', entity.id).del();
-            await tx('campaign_lists').insert(entity.lists.map(x => ({campaign: entity.id, ...x})));
+            if (entity.lists.length > 0) {
+                await tx('campaign_lists').insert(entity.lists.map(x => ({campaign: entity.id, ...x})));
+            }
 
             if (existing.source === CampaignSource.TEMPLATE) {
                 await tx('template_dep_campaigns')

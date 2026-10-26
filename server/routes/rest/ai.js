@@ -5,6 +5,10 @@ import { castToInteger, enforce } from '../../lib/helpers.js';
 import interoperableErrors from '../../../shared/interoperable-errors.js';
 import aiModels from '../../models/ai.js';
 import aiBilling from '../../models/ai-billing.js';
+import aiAudit from '../../models/ai-audit.js';
+import knex from '../../lib/knex.js';
+import { preview as draftPreview, createDraft, SUPPORTED_EDITORS } from '../../lib/ai/draft.js';
+import { CampaignSource, CampaignType } from '../../../shared/campaigns.js';
 import templates from '../../models/templates.js';
 import campaigns from '../../models/campaigns.js';
 import { isConfigured } from '../../lib/ai/crypto.js';
@@ -176,8 +180,12 @@ function checkContent(body) {
 
 // Runs an action on behalf of the user with the AI that serves them, and bills the shared AI usage
 async function withTier(req, res, action, handler) {
-    rateLimit(req.user.id);
     checkContent(req.body);
+    return withPlan(req, res, action, handler);
+}
+
+async function withPlan(req, res, action, handler) {
+    rateLimit(req.user.id);
     const plan = await getPlan(req.user.id);
     if (plan.mode === 'offer') {
         return res.status(402).json({ code: 'offer', message: 'The shared AI has to be accepted first' });
@@ -194,7 +202,7 @@ async function withTier(req, res, action, handler) {
     }
     const meter = newMeter();
     try {
-        const result = await handler({ owner: plan.owner, tier, meter });
+        const result = await handler({ owner: plan.owner, tier, meter, mode: plan.mode });
         if (plan.mode === 'shared') {
             Object.assign(result, await meteredBilling(req.user.id, action, tier, meter));
         }
@@ -270,6 +278,50 @@ router.postAsync('/ai/generate', passport.loggedIn, passport.csrfProtection, asy
         source: req.body.source,
         options: { brief: req.body.brief.trim(), references, brand }
     }));
+});
+
+// --- draft campaign from an existing template or campaign --------------------------------------------------------------
+// Sources the user may pick: only what they can view, and only editor types the tool supports
+router.getAsync('/ai/draft/sources', passport.loggedIn, async (req, res) => {
+    const cols = n => Array.from({ length: n }, (_, i) => ({ data: i }));
+    const [tmpl, camp] = await Promise.all([
+        templates.listDTAjax(req.context, { draw: 1, start: 0, length: 200, search: { value: '' }, order: [{ column: 5, dir: 'desc' }], columns: cols(7) }),
+        campaigns.listDTAjax(req.context, { draw: 1, start: 0, length: 200, search: { value: '' }, order: [{ column: 9, dir: 'desc' }], columns: cols(11) })
+    ]);
+    const customCampaigns = camp.data.filter(r => r[4] === CampaignType.REGULAR && [CampaignSource.CUSTOM, CampaignSource.CUSTOM_FROM_TEMPLATE, CampaignSource.CUSTOM_FROM_CAMPAIGN].includes(r[8]));
+    const types = customCampaigns.length
+        ? await knex('campaigns').whereIn('id', customCampaigns.map(r => r[0])).select('id', knex.raw("json_unquote(json_extract(data, '$.sourceCustom.type')) as editor"))
+        : [];
+    const editorOf = new Map(types.map(t => [t.id, t.editor]));
+    return res.json({
+        templates: tmpl.data.filter(r => SUPPORTED_EDITORS.includes(r[3])).map(r => ({ id: r[0], name: r[1], editor: r[3], created: r[5] })),
+        campaigns: customCampaigns.filter(r => SUPPORTED_EDITORS.includes(editorOf.get(r[0]))).map(r => ({ id: r[0], name: r[1], editor: editorOf.get(r[0]), created: r[9] }))
+    });
+});
+
+router.postAsync('/ai/draft/preview', passport.loggedIn, passport.csrfProtection, async (req, res) => {
+    enforce(typeof req.body.brief === 'string' && req.body.brief.trim() && req.body.brief.length <= 5000, 'Brief required');
+    enforce(req.body.ref && ['template', 'campaign'].includes(req.body.ref.type), 'Source required');
+    const brand = typeof req.body.brand === 'string' ? req.body.brand.slice(0, 2000) : '';
+    return withPlan(req, res, 'generate', async ({ owner, tier, meter, mode }) => {
+        const result = await draftPreview(req.context, owner, { ref: req.body.ref, brief: req.body.brief.trim(), brand, tier, meter, useTools: req.body.useTools !== false });
+        await aiAudit.record(req.user.id, {
+            action: 'draft-preview', sourceType: req.body.ref.type, sourceId: castToInteger(req.body.ref.id), mode, tier,
+            input: meter.input, output: meter.output, details: { changed: result.changed, rejected: result.rejected, warnings: result.warnings.length, tools: result.research }
+        });
+        return result;
+    });
+});
+
+router.postAsync('/ai/draft/create', passport.loggedIn, passport.csrfProtection, async (req, res) => {
+    rateLimit(req.user.id);
+    enforce(req.body.ref && ['template', 'campaign'].includes(req.body.ref.type), 'Source required');
+    const result = await createDraft(req.context, { ref: req.body.ref, replacements: req.body.replacements, name: req.body.name, subject: req.body.subject });
+    await aiAudit.record(req.user.id, {
+        action: 'draft-create', sourceType: req.body.ref.type, sourceId: castToInteger(req.body.ref.id), campaign: result.campaignId,
+        details: { replacements: Object.keys(req.body.replacements || {}).length, listsKept: result.listsKept, listsSkipped: result.listsSkipped, unmatched: result.unmatched }
+    });
+    return res.json(result);
 });
 
 // Candidates for the "style references" picker: only what the user is allowed to view

@@ -10,6 +10,7 @@ import {Table} from '../lib/table';
 import moment from 'moment';
 import {CampaignSource, CampaignStatus, CampaignType} from "../../../shared/campaigns";
 import {getCampaignLabels} from "./helpers";
+import {AIDraftButton} from "../lib/ai-draft-wizard";
 import {useTableActionDialog} from "../lib/modals";
 import "./styles.module.scss";
 import PropTypes from 'prop-types';
@@ -150,6 +151,7 @@ export default function List({ permissions, channel }) {
             createButton = (
                 <>
                     <LinkButton to={`/campaigns/clone`} className="btn-primary" icon="clone" label={t('cloneCampaign')}/>
+                    <AIDraftButton />
                     <ButtonDropdown buttonClassName="btn-primary" menuClassName="dropdown-menu-right" icon="plus" label={t('createCampaign')}>
                         <DropdownLink to="/campaigns/create-regular">{t('regular')}</DropdownLink>
                         <DropdownLink to="/campaigns/create-rss">{t('rss')}</DropdownLink>

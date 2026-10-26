@@ -40,6 +40,7 @@ import sendConfigurationsRest from './routes/rest/send-configurations.js';
 import usersRest from './routes/rest/users.js';
 import accountRest from './routes/rest/account.js';
 import aiRest from './routes/rest/ai.js';
+import aiAudit from './models/ai-audit.js';
 import reportTemplatesRest from './routes/rest/report-templates.js';
 import reportsRest from './routes/rest/reports.js';
 import channelsRest from './routes/rest/channels.js';
@@ -351,6 +352,7 @@ async function createApp(appType) {
         app.use('/rest', usersRest);
         app.use('/rest', accountRest);
         app.use('/rest', aiRest);
+        aiAudit.startPurgeSchedule();
         app.use('/rest', channelsRest);
         app.use('/rest', campaignsRest);
         app.use('/rest', triggersRest);
