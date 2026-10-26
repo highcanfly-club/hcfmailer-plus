@@ -1,13 +1,15 @@
 import passport from '../../lib/passport.js';
 import routerFactory from '../../lib/router-async.js';
+import config from '../../lib/config.js';
 import { castToInteger, enforce } from '../../lib/helpers.js';
 import interoperableErrors from '../../../shared/interoperable-errors.js';
 import aiModels from '../../models/ai.js';
+import aiBilling from '../../models/ai-billing.js';
 import templates from '../../models/templates.js';
 import campaigns from '../../models/campaigns.js';
 import { isConfigured } from '../../lib/ai/crypto.js';
 import { PROTOCOLS, DEFAULT_BASE_URLS, ProviderError } from '../../lib/ai/providers.js';
-import { correct, rewrite, generate, responsive, resolveTier, callModel } from '../../lib/ai/features.js';
+import { correct, rewrite, generate, responsive, resolveTier, callModel, newMeter } from '../../lib/ai/features.js';
 import * as cheerio from 'cheerio';
 
 const router = routerFactory.create();
@@ -35,88 +37,196 @@ function sendError(res, err) {
     throw err;
 }
 
-router.getAsync('/ai/status', passport.loggedIn, async (req, res) => {
-    return res.json(await aiModels.getStatus(req.user.id));
-});
+const isGlobalAdmin = user => !!((config.roles.global[user.role] || {}).admin);
 
-router.getAsync('/ai/settings', passport.loggedIn, async (req, res) => {
-    return res.json({
-        configured: isConfigured(),
-        protocols: PROTOCOLS,
-        defaultBaseUrls: DEFAULT_BASE_URLS,
-        models: await aiModels.getSettings(req.user.id)
-    });
-});
-
-router.putAsync('/ai/settings/:tier', passport.loggedIn, passport.csrfProtection, async (req, res) => {
-    enforce(isConfigured(), 'AI is not enabled on this server');
-    await aiModels.saveModel(req.user.id, req.params.tier, req.body);
-    return res.json();
-});
-
-router.deleteAsync('/ai/settings/:tier', passport.loggedIn, passport.csrfProtection, async (req, res) => {
-    await aiModels.removeModel(req.user.id, req.params.tier);
-    return res.json();
-});
-
-router.postAsync('/ai/settings/:tier/keys', passport.loggedIn, passport.csrfProtection, async (req, res) => {
-    enforce(isConfigured(), 'AI is not enabled on this server');
-    return res.json({ id: await aiModels.addKey(req.user.id, req.params.tier, req.body.label, req.body.apiKey) });
-});
-
-router.deleteAsync('/ai/keys/:keyId', passport.loggedIn, passport.csrfProtection, async (req, res) => {
-    await aiModels.removeKey(req.user.id, castToInteger(req.params.keyId));
-    return res.json();
-});
-
-router.postAsync('/ai/settings/:tier/test', passport.loggedIn, passport.csrfProtection, async (req, res) => {
-    rateLimit(req.user.id);
-    try {
-        const reply = await callModel(req.user.id, req.params.tier, 'Réponds uniquement par le mot OK.', 'Test de connexion.');
-        return res.json({ ok: true, reply: reply.slice(0, 100) });
-    } catch (err) {
-        if (err instanceof ProviderError) {
-            return res.json({ ok: false, message: err.message });
-        }
-        if (err instanceof interoperableErrors.NotFoundError) {
-            return res.json({ ok: false, message: 'No model or no key configured for this tier' });
-        }
-        throw err;
+function requireAdmin(req, res, next) {
+    if (!isGlobalAdmin(req.user)) {
+        return res.status(403).json({ message: 'Administrator only' });
     }
+    return next();
+}
+
+// Which AI serves this user: their own keys (BYOK) first; otherwise the administrator's shared AI, billed to the user once
+// they accepted the offer ("offer" = available but not accepted yet); otherwise nothing.
+async function getPlan(userId) {
+    const own = await aiModels.getStatus(userId);
+    if (own.enabled) {
+        return { mode: 'byok', owner: userId, tiers: own.tiers };
+    }
+    const shared = await aiModels.getStatus(null);
+    if (shared.enabled) {
+        const prefs = await aiBilling.getPrefs(userId);
+        return { mode: prefs.accepted ? 'shared' : 'offer', owner: null, tiers: shared.tiers };
+    }
+    return { mode: 'none', owner: userId, tiers: {} };
+}
+
+async function describeBilling(userId) {
+    const [settings, balance] = await Promise.all([aiBilling.getSettings(), aiBilling.getBalance(userId)]);
+    return { prices: { in: settings.priceIn, out: settings.priceOut, currency: settings.currency, maxOutstanding: settings.maxOutstanding }, balance };
+}
+
+router.getAsync('/ai/status', passport.loggedIn, async (req, res) => {
+    const plan = await getPlan(req.user.id);
+    const result = { enabled: plan.mode !== 'none', mode: plan.mode, tiers: plan.tiers };
+    if (plan.mode === 'shared' || plan.mode === 'offer') {
+        Object.assign(result, await describeBilling(req.user.id));
+    }
+    return res.json(result);
 });
 
+// --- the user's own models (BYOK) and the administrator's shared models share the same handlers -------------------------
+function registerSettingsRoutes(base, getOwner, guards) {
+    router.getAsync(`${base}/settings`, ...guards, async (req, res) => {
+        return res.json({
+            configured: isConfigured(),
+            protocols: PROTOCOLS,
+            defaultBaseUrls: DEFAULT_BASE_URLS,
+            models: await aiModels.getSettings(getOwner(req))
+        });
+    });
+
+    router.putAsync(`${base}/settings/:tier`, ...guards, passport.csrfProtection, async (req, res) => {
+        enforce(isConfigured(), 'AI is not enabled on this server');
+        await aiModels.saveModel(getOwner(req), req.params.tier, req.body);
+        return res.json();
+    });
+
+    router.deleteAsync(`${base}/settings/:tier`, ...guards, passport.csrfProtection, async (req, res) => {
+        await aiModels.removeModel(getOwner(req), req.params.tier);
+        return res.json();
+    });
+
+    router.postAsync(`${base}/settings/:tier/keys`, ...guards, passport.csrfProtection, async (req, res) => {
+        enforce(isConfigured(), 'AI is not enabled on this server');
+        return res.json({ id: await aiModels.addKey(getOwner(req), req.params.tier, req.body.label, req.body.apiKey) });
+    });
+
+    router.deleteAsync(`${base}/keys/:keyId`, ...guards, passport.csrfProtection, async (req, res) => {
+        await aiModels.removeKey(getOwner(req), castToInteger(req.params.keyId));
+        return res.json();
+    });
+
+    router.postAsync(`${base}/settings/:tier/test`, ...guards, passport.csrfProtection, async (req, res) => {
+        rateLimit(req.user.id);
+        try {
+            const reply = await callModel(getOwner(req), req.params.tier, 'Réponds uniquement par le mot OK.', 'Test de connexion.');
+            return res.json({ ok: true, reply: reply.slice(0, 100) });
+        } catch (err) {
+            if (err instanceof ProviderError) {
+                return res.json({ ok: false, message: err.message });
+            }
+            if (err instanceof interoperableErrors.NotFoundError) {
+                return res.json({ ok: false, message: 'No model or no key configured for this tier' });
+            }
+            throw err;
+        }
+    });
+}
+
+registerSettingsRoutes('/ai', req => req.user.id, [passport.loggedIn]);
+registerSettingsRoutes('/ai/admin', () => null, [passport.loggedIn, requireAdmin]);
+
+// --- shared AI: offer, consent, balance --------------------------------------------------------------------------------
+router.postAsync('/ai/shared/accept', passport.loggedIn, passport.csrfProtection, async (req, res) => {
+    enforce((await aiModels.getStatus(null)).enabled, 'No shared AI is available');
+    await aiBilling.setAccepted(req.user.id, true);
+    return res.json();
+});
+
+router.postAsync('/ai/shared/decline', passport.loggedIn, passport.csrfProtection, async (req, res) => {
+    await aiBilling.setAccepted(req.user.id, false);
+    return res.json();
+});
+
+router.getAsync('/ai/billing', passport.loggedIn, async (req, res) => {
+    const [billing, prefs, shared, usage, settlements] = await Promise.all([
+        describeBilling(req.user.id),
+        aiBilling.getPrefs(req.user.id),
+        aiModels.getStatus(null),
+        aiBilling.recentUsage(req.user.id),
+        aiBilling.recentSettlements(req.user.id)
+    ]);
+    return res.json({ ...billing, accepted: prefs.accepted, sharedAvailable: shared.enabled, usage, settlements });
+});
+
+// --- administrator: prices, balances, settlement -----------------------------------------------------------------------
+router.getAsync('/ai/admin/pricing', passport.loggedIn, requireAdmin, async (req, res) => {
+    return res.json(await aiBilling.getSettings());
+});
+
+router.putAsync('/ai/admin/pricing', passport.loggedIn, requireAdmin, passport.csrfProtection, async (req, res) => {
+    await aiBilling.saveSettings(req.body);
+    return res.json();
+});
+
+router.getAsync('/ai/admin/billing', passport.loggedIn, requireAdmin, async (req, res) => {
+    return res.json({ balances: await aiBilling.listBalances(), settlements: await aiBilling.listSettlements() });
+});
+
+router.postAsync('/ai/admin/billing/:userId/settle', passport.loggedIn, requireAdmin, passport.csrfProtection, async (req, res) => {
+    return res.json(await aiBilling.settle(req.user.id, castToInteger(req.params.userId)));
+});
+
+// --- editor actions ------------------------------------------------------------------------------------------------------
 function checkContent(body) {
     enforce(EDITOR_TYPES.includes(body.editorType), 'Unsupported editor');
     enforce(typeof body.source === 'string', 'Content is missing');
 }
 
+// Runs an action on behalf of the user with the AI that serves them, and bills the shared AI usage
 async function withTier(req, res, action, handler) {
     rateLimit(req.user.id);
     checkContent(req.body);
-    const tier = await resolveTier(req.user.id, action, req.body.tier);
+    const plan = await getPlan(req.user.id);
+    if (plan.mode === 'offer') {
+        return res.status(402).json({ code: 'offer', message: 'The shared AI has to be accepted first' });
+    }
+    if (plan.mode === 'none') {
+        return res.status(400).json({ message: 'No AI model configured' });
+    }
+    if (plan.mode === 'shared') {
+        await aiBilling.assertWithinLimit(req.user.id);
+    }
+    const tier = await resolveTier(plan.owner, action, req.body.tier);
     if (!tier) {
         return res.status(400).json({ message: 'No AI model configured' });
     }
+    const meter = newMeter();
     try {
-        return res.json(await handler(tier));
+        const result = await handler({ owner: plan.owner, tier, meter });
+        if (plan.mode === 'shared') {
+            Object.assign(result, await meteredBilling(req.user.id, action, tier, meter));
+        }
+        return res.json(result);
     } catch (err) {
+        if (plan.mode === 'shared') {
+            await meteredBilling(req.user.id, action, tier, meter); // tokens of failed attempts were consumed too
+        }
         return sendError(res, err);
     }
 }
 
+async function meteredBilling(userId, action, tier, meter) {
+    const costMicro = await aiBilling.recordUsage(userId, { action, tier, model: meter.model, input: meter.input, output: meter.output, estimated: meter.estimated });
+    const balance = await aiBilling.getBalance(userId);
+    return { billing: { costMicro: costMicro || 0, inputTokens: meter.input, outputTokens: meter.output, outstandingMicro: balance.outstandingMicro } };
+}
+
 router.postAsync('/ai/correct', passport.loggedIn, passport.csrfProtection, (req, res) =>
-    withTier(req, res, 'correct', tier => correct(req.user.id, { tier, editorType: req.body.editorType, source: req.body.source })));
+    withTier(req, res, 'correct', ({ owner, tier, meter }) => correct(owner, { tier, meter, editorType: req.body.editorType, source: req.body.source })));
 
 router.postAsync('/ai/rewrite', passport.loggedIn, passport.csrfProtection, (req, res) => {
     enforce(typeof req.body.instruction === 'string' && req.body.instruction.trim() && req.body.instruction.length <= 2000, 'Instruction required');
-    return withTier(req, res, 'rewrite', tier => rewrite(req.user.id, { tier, editorType: req.body.editorType, source: req.body.source, options: { instruction: req.body.instruction.trim() } }));
+    return withTier(req, res, 'rewrite', ({ owner, tier, meter }) => rewrite(owner, { tier, meter, editorType: req.body.editorType, source: req.body.source, options: { instruction: req.body.instruction.trim() } }));
 });
 
 router.postAsync('/ai/responsive', passport.loggedIn, passport.csrfProtection, (req, res) => {
     enforce(typeof req.body.instruction === 'string' && req.body.instruction.trim() && req.body.instruction.length <= 2000, 'Instruction required');
     enforce(['emailbuilder', 'grapesjs'].includes(req.body.editorType), 'Responsive adjustments are not available for this editor');
-    return withTier(req, res, 'responsive', tier => responsive(req.user.id, {
+    return withTier(req, res, 'responsive', ({ owner, tier, meter }) => responsive(owner, {
         tier,
+        meter,
         editorType: req.body.editorType,
         source: req.body.source,
         style: typeof req.body.style === 'string' ? req.body.style : '',
@@ -153,8 +263,9 @@ router.postAsync('/ai/generate', passport.loggedIn, passport.csrfProtection, asy
     enforce(typeof req.body.brief === 'string' && req.body.brief.trim() && req.body.brief.length <= 5000, 'Brief required');
     const references = await referenceTexts(req.context, req.body.references);
     const brand = typeof req.body.brand === 'string' ? req.body.brand.slice(0, 2000) : '';
-    return withTier(req, res, 'generate', tier => generate(req.user.id, {
+    return withTier(req, res, 'generate', ({ owner, tier, meter }) => generate(owner, {
         tier,
+        meter,
         editorType: req.body.editorType,
         source: req.body.source,
         options: { brief: req.body.brief.trim(), references, brand }

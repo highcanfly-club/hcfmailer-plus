@@ -62,8 +62,9 @@ function chunk(slots) {
     return chunks;
 }
 
-async function resolveTier(userId, action, requested) {
-    const status = await aiModels.getStatus(userId);
+// `owner` is a user id (their own keys) or null (the shared AI)
+async function resolveTier(owner, action, requested) {
+    const status = await aiModels.getStatus(owner);
     if (!status.enabled) {
         return null;
     }
@@ -73,8 +74,18 @@ async function resolveTier(userId, action, requested) {
     return TIER_PREFERENCE[action].find(t => status.tiers[t]) || null;
 }
 
-async function callModel(userId, tier, system, user) {
-    return await aiModels.withKey(userId, tier, (model, apiKey) => complete(model, apiKey, { system, user }));
+// `meter` collects the tokens consumed by every provider call of a request (several calls for chunks and retries)
+function newMeter() {
+    return { input: 0, output: 0, estimated: false, model: '' };
+}
+
+async function callModel(owner, tier, system, user, meter = newMeter()) {
+    const { text, usage, model } = await aiModels.withKey(owner, tier, async (modelRow, apiKey) => ({ ...(await complete(modelRow, apiKey, { system, user })), model: modelRow.model }));
+    meter.input += usage.input;
+    meter.output += usage.output;
+    meter.estimated = meter.estimated || usage.estimated;
+    meter.model = model;
+    return text;
 }
 
 // Embedded images (data: URIs) can weigh hundreds of KB and mean nothing to the model: they are set aside while the
@@ -89,7 +100,7 @@ function stashDataUris(source) {
     return { stripped, restore };
 }
 
-async function runOnSlots({ userId, action, tier, editorType, source: originalSource, options }) {
+async function runOnSlots({ userId, action, tier, editorType, source: originalSource, options, meter }) {
     if (typeof originalSource !== 'string') {
         throw new Error('Content missing');
     }
@@ -97,11 +108,11 @@ async function runOnSlots({ userId, action, tier, editorType, source: originalSo
     if (source.length > MAX_SOURCE_CHARS) {
         throw new Error(`Content too large (${Math.round(source.length / 1000)} KB of markup, 200 KB maximum)`);
     }
-    const result = await processSlots({ userId, action, tier, editorType, source, options });
+    const result = await processSlots({ userId, action, tier, editorType, source, options, meter });
     return { ...result, source: restore(result.source) };
 }
 
-async function processSlots({ userId, action, tier, editorType, source, options }) {
+async function processSlots({ userId, action, tier, editorType, source, options, meter }) {
     let working = source;
     let parsed = extractSlots(editorType, working);
     let usedSkeleton = false;
@@ -131,7 +142,7 @@ async function processSlots({ userId, action, tier, editorType, source, options 
     for (const batch of batches) {
         const payload = { slots: batch.map(s => ({ id: s.id, kind: s.kind, text: s.masked })) };
         const user = action === 'generate' ? `Brief :\n${options.brief}\n\nSlots du modèle :\n${JSON.stringify(payload)}` : JSON.stringify(payload);
-        const reply = parseJsonReply(await callModel(userId, tier, system, user));
+        const reply = parseJsonReply(await callModel(userId, tier, system, user, meter));
         if (action === 'generate') {
             meta = { subject: typeof reply.subject === 'string' ? reply.subject.slice(0, 200) : null, preheader: typeof reply.preheader === 'string' ? reply.preheader.slice(0, 300) : null };
         }
@@ -160,20 +171,20 @@ Contraintes impératives :
 - Change le moins possible : seulement ce qui répond à la demande.
 - Réponds uniquement avec un objet JSON {"css":"...","summary":"une phrase qui décrit les changements"}, sans bloc de code.`;
 
-async function responsive(userId, { tier, editorType, source: originalSource, style, instruction }) {
+async function responsive(userId, { tier, editorType, source: originalSource, style, instruction, meter }) {
     if (!['emailbuilder', 'grapesjs'].includes(editorType)) {
         throw new Error('Responsive adjustments are only available in Email Builder and GrapesJS');
     }
     const { stripped, restore } = stashDataUris(originalSource);
     const built = buildResponsive(editorType, stripped, style);
     const request = `Demande : ${instruction}\n\nStructure de l'email :\n${built.digest}`;
-    let reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, request));
+    let reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, request, meter));
     let reason = '';
     let safe = sanitizeCss(reply.css, built.ids, r => { reason = r; });
     if (!safe) {
         // One more try, telling the model what was wrong with its answer
         const retry = `${request}\n\nTa réponse précédente a été refusée : ${reason}. Rappel : sélecteurs autorisés uniquement [data-ai-r="ID"] avec un ID présent dans le HTML ci-dessus, une .classe présente dans le HTML, ou h1/h2/h3 pour les titres natifs.\nTa réponse précédente : ${String(reply.css).slice(0, 800)}`;
-        reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, retry));
+        reply = parseJsonReply(await callModel(userId, tier, RESPONSIVE_SYSTEM, retry, meter));
         safe = sanitizeCss(reply.css, built.ids, r => { reason = r; });
     }
     if (!safe) {
@@ -188,4 +199,4 @@ const correct = (userId, args) => runOnSlots({ userId, action: 'correct', ...arg
 const rewrite = (userId, args) => runOnSlots({ userId, action: 'rewrite', ...args });
 const generate = (userId, args) => runOnSlots({ userId, action: 'generate', ...args });
 
-export { correct, rewrite, generate, responsive, resolveTier, parseJsonReply, callModel };
+export { correct, rewrite, generate, responsive, resolveTier, parseJsonReply, callModel, newMeter };

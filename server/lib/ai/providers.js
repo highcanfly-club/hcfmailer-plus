@@ -1,4 +1,5 @@
-// One thin adapter per protocol. All of them expose complete(model, apiKey, { system, user }) -> text.
+// One thin adapter per protocol. All of them expose complete(model, apiKey, { system, user }) -> { text, usage }
+// where usage = { input, output, estimated } in tokens, as reported by the provider (estimated when it reports nothing).
 // "mistral" and "openai" share the chat-completions format (OpenRouter, Ollama, vLLM... speak it too).
 import { postJson } from './http.js';
 
@@ -18,6 +19,12 @@ const DEFAULT_BASE_URLS = {
     gemini: 'https://generativelanguage.googleapis.com/v1beta',
     cohere: 'https://api.cohere.com/v2',
     mistral: 'https://api.mistral.ai/v1'
+};
+
+const estimateTokens = text => Math.ceil(String(text || '').length / 4);
+const usageOf = (input, output, prompt, text) => {
+    const hasUsage = Number.isFinite(input) && Number.isFinite(output) && (input > 0 || output > 0);
+    return hasUsage ? { input, output, estimated: false } : { input: estimateTokens(prompt.system) + estimateTokens(prompt.user), output: estimateTokens(text), estimated: true };
 };
 
 const join = (base, path) => base.replace(/\/+$/, '') + path;
@@ -57,7 +64,7 @@ const adapters = {
         const json = await call(join(model.base_url, '/chat/completions'), { headers: { Authorization: `Bearer ${apiKey}` }, body }, 'openai');
         const text = json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content;
         if (typeof text !== 'string') throw new ProviderError('openai: no content in response', { retryable: true });
-        return text;
+        return { text, usage: usageOf(json.usage && json.usage.prompt_tokens, json.usage && json.usage.completion_tokens, { system, user }, text) };
     },
 
     async anthropic(model, apiKey, { system, user }) {
@@ -66,7 +73,7 @@ const adapters = {
         const json = await call(join(model.base_url, '/messages'), { headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }, body }, 'anthropic');
         const text = (json.content || []).filter(p => p.type === 'text').map(p => p.text).join('');
         if (!text) throw new ProviderError('anthropic: no text in response', { retryable: true });
-        return text;
+        return { text, usage: usageOf(json.usage && json.usage.input_tokens, json.usage && json.usage.output_tokens, { system, user }, text) };
     },
 
     async gemini(model, apiKey, { system, user }) {
@@ -78,7 +85,8 @@ const adapters = {
         const parts = json.candidates && json.candidates[0] && json.candidates[0].content && json.candidates[0].content.parts;
         const text = (parts || []).map(p => p.text || '').join('');
         if (!text) throw new ProviderError('gemini: no text in response', { retryable: true });
-        return text;
+        const meta = json.usageMetadata || {};
+        return { text, usage: usageOf(meta.promptTokenCount, (meta.candidatesTokenCount || 0) + (meta.thoughtsTokenCount || 0), { system, user }, text) };
     },
 
     async cohere(model, apiKey, { system, user }) {
@@ -88,7 +96,8 @@ const adapters = {
         const json = await call(join(model.base_url, '/chat'), { headers: { Authorization: `Bearer ${apiKey}` }, body }, 'cohere');
         const text = ((json.message && json.message.content) || []).filter(p => p.type === 'text').map(p => p.text).join('');
         if (!text) throw new ProviderError('cohere: no text in response', { retryable: true });
-        return text;
+        const tokens = (json.usage && (json.usage.tokens || json.usage.billed_units)) || {};
+        return { text, usage: usageOf(tokens.input_tokens, tokens.output_tokens, { system, user }, text) };
     }
 };
 adapters.mistral = adapters.openai;

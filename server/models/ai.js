@@ -1,4 +1,5 @@
-// Per-user AI settings. Keys are stored encrypted and only ever leave this module as plain text towards providers.
+// AI settings of an owner: a user id (BYOK) or null (the administrator's shared AI, billed to the users).
+// Keys are stored encrypted and only ever leave this module as plain text towards providers.
 import knex from '../lib/knex.js';
 import { enforce } from '../lib/helpers.js';
 import interoperableErrors from '../../shared/interoperable-errors.js';
@@ -10,6 +11,8 @@ import { ProviderError } from '../lib/ai/providers.js';
 const TIERS = ['basic', 'medium', 'high'];
 const KEY_MODES = ['failover', 'roundrobin'];
 const COOLDOWN_SECONDS = { keyProblem: 3600, rateLimited: 60, transient: 30 };
+
+const byOwner = (query, owner, column = 'ai_models.user') => (owner === null ? query.whereNull(column) : query.where(column, owner));
 
 function publicModel(row, keys) {
     return {
@@ -25,8 +28,8 @@ function publicModel(row, keys) {
     };
 }
 
-async function getSettings(userId) {
-    const models = await knex('ai_models').where('user', userId);
+async function getSettings(owner) {
+    const models = await byOwner(knex('ai_models'), owner);
     const keys = models.length ? await knex('ai_keys').whereIn('model', models.map(m => m.id)).orderBy('position').orderBy('id') : [];
     const result = {};
     for (const tier of TIERS) {
@@ -37,11 +40,11 @@ async function getSettings(userId) {
 }
 
 // What the editors need to know: AI is offered only when at least one model has at least one key
-async function getStatus(userId) {
+async function getStatus(owner) {
     if (!isConfigured()) {
         return { enabled: false, tiers: {} };
     }
-    const rows = await knex('ai_models').join('ai_keys', 'ai_keys.model', 'ai_models.id').where('ai_models.user', userId).distinct('ai_models.tier');
+    const rows = await byOwner(knex('ai_models').join('ai_keys', 'ai_keys.model', 'ai_models.id'), owner).distinct('ai_models.tier');
     const tiers = {};
     rows.forEach(r => { tiers[r.tier] = true; });
     return { enabled: rows.length > 0, tiers };
@@ -60,7 +63,7 @@ function validateModelInput(data) {
     }
 }
 
-async function saveModel(userId, tier, data) {
+async function saveModel(owner, tier, data) {
     enforce(TIERS.includes(tier), 'Invalid tier');
     validateModelInput(data);
     const row = {
@@ -71,22 +74,22 @@ async function saveModel(userId, tier, data) {
         temperature: data.temperature === '' || data.temperature === undefined ? null : data.temperature,
         max_tokens: data.maxTokens === '' || data.maxTokens === undefined ? null : data.maxTokens
     };
-    const existing = await knex('ai_models').where({ user: userId, tier }).first();
+    const existing = await byOwner(knex('ai_models'), owner).where('tier', tier).first();
     if (existing) {
         await knex('ai_models').where('id', existing.id).update(row);
         return existing.id;
     }
-    const [id] = await knex('ai_models').insert({ user: userId, tier, ...row });
+    const [id] = await knex('ai_models').insert({ user: owner, tier, ...row });
     return id;
 }
 
-async function removeModel(userId, tier) {
-    await knex('ai_models').where({ user: userId, tier }).del(); // keys are removed by the foreign key cascade
+async function removeModel(owner, tier) {
+    await byOwner(knex('ai_models'), owner).where('tier', tier).del(); // keys are removed by the foreign key cascade
 }
 
-async function addKey(userId, tier, label, apiKey) {
+async function addKey(owner, tier, label, apiKey) {
     enforce(typeof apiKey === 'string' && apiKey.trim().length >= 8 && apiKey.length <= 1000, 'Invalid API key');
-    const model = await knex('ai_models').where({ user: userId, tier }).first();
+    const model = await byOwner(knex('ai_models'), owner).where('tier', tier).first();
     if (!model) {
         throw new interoperableErrors.NotFoundError();
     }
@@ -102,8 +105,8 @@ async function addKey(userId, tier, label, apiKey) {
     return id;
 }
 
-async function removeKey(userId, keyId) {
-    const key = await knex('ai_keys').join('ai_models', 'ai_models.id', 'ai_keys.model').where({ 'ai_keys.id': keyId, 'ai_models.user': userId }).first('ai_keys.id');
+async function removeKey(owner, keyId) {
+    const key = await byOwner(knex('ai_keys').join('ai_models', 'ai_models.id', 'ai_keys.model').where('ai_keys.id', keyId), owner).first('ai_keys.id');
     if (!key) {
         throw new interoperableErrors.NotFoundError();
     }
@@ -140,8 +143,8 @@ async function markFailure(keyId, err) {
 }
 
 // Runs fn(model, plainKey) with the configured key strategy. Only errors flagged as retryable move on to the next key.
-async function withKey(userId, tier, fn) {
-    const model = await knex('ai_models').where({ user: userId, tier }).first();
+async function withKey(owner, tier, fn) {
+    const model = await byOwner(knex('ai_models'), owner).where('tier', tier).first();
     if (!model) {
         throw new interoperableErrors.NotFoundError();
     }
